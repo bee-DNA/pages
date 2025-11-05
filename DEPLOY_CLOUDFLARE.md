@@ -42,9 +42,9 @@ Root directory: (留空，或填入 / )
 
 在 **Environment variables** 區域添加：
 
-| Variable name    | Value                              | Type       |
-|------------------|------------------------------------|------------|
-| `VITE_API_URL`   | `https://api.yourdomain.com`       | Plain text |
+| Variable name  | Value                        | Type       |
+| -------------- | ---------------------------- | ---------- |
+| `VITE_API_URL` | `https://api.yourdomain.com` | Plain text |
 
 **⚠️ 重要**: 將 `api.yourdomain.com` 替換成您實際的 Cloudflare Tunnel 域名
 
@@ -132,6 +132,7 @@ https://bee-metagenomics.pages.dev
 ## ✅ 部署後測試
 
 ### 1. 訪問前端
+
 ```
 https://bee-metagenomics.pages.dev
 ```
@@ -142,19 +143,19 @@ https://bee-metagenomics.pages.dev
 
 ```javascript
 // 測試健康檢查
-fetch('https://api.yourdomain.com/health')
-  .then(r => r.json())
-  .then(console.log)
+fetch("https://api.yourdomain.com/health")
+  .then((r) => r.json())
+  .then(console.log);
 
 // 測試樣本列表
-fetch('https://api.yourdomain.com/api/samples')
-  .then(r => r.json())
-  .then(console.log)
+fetch("https://api.yourdomain.com/api/samples")
+  .then((r) => r.json())
+  .then(console.log);
 
 // 測試氣象資料
-fetch('https://api.yourdomain.com/api/weather/example-ncue')
-  .then(r => r.json())
-  .then(console.log)
+fetch("https://api.yourdomain.com/api/weather/example-ncue")
+  .then((r) => r.json())
+  .then(console.log);
 ```
 
 ### 3. 檢查環境變數
@@ -162,7 +163,7 @@ fetch('https://api.yourdomain.com/api/weather/example-ncue')
 在前端代碼中添加：
 
 ```javascript
-console.log('API URL:', import.meta.env.VITE_API_URL)
+console.log("API URL:", import.meta.env.VITE_API_URL);
 ```
 
 ---
@@ -204,7 +205,8 @@ CORS_ORIGINS=https://bee-metagenomics.pages.dev,https://pages.bee-dna.com
 
 ### Q3: 環境變數未生效
 
-**解決**: 
+**解決**:
+
 1. 確認變數名稱有 `VITE_` 前綴
 2. 修改後需要重新部署
 3. 清除瀏覽器快取
@@ -224,6 +226,7 @@ CORS_ORIGINS=https://bee-metagenomics.pages.dev,https://pages.bee-dna.com
 ### Cloudflare Analytics
 
 在 Pages 專案中查看：
+
 - 訪問量
 - 建置歷史
 - 錯誤日誌
@@ -240,6 +243,7 @@ CORS_ORIGINS=https://bee-metagenomics.pages.dev,https://pages.bee-dna.com
 ### 1. Access Control（可選）
 
 限制訪問：
+
 1. 進入 **Settings** > **Access Policy**
 2. 設定密碼保護或 Cloudflare Access
 
@@ -270,14 +274,14 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          'react-vendor': ['react', 'react-dom'],
-          'mui-vendor': ['@mui/material'],
-          'map-vendor': ['mapbox-gl'],
-        }
-      }
-    }
-  }
-})
+          "react-vendor": ["react", "react-dom"],
+          "mui-vendor": ["@mui/material"],
+          "map-vendor": ["mapbox-gl"],
+        },
+      },
+    },
+  },
+});
 ```
 
 ### 3. 圖片優化
