@@ -5,6 +5,7 @@ import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import TimeController from "../components/TimeController";
 import LayerControl from "../components/LayerControl";
+import { api } from "../services/api";
 
 // Mapbox Access Token
 mapboxgl.accessToken =

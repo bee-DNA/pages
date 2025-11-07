@@ -19,50 +19,67 @@ import DownloadSvg from "../assets/download.svg";
 import CheckSvg from "../assets/check.svg";
 import DnaSvg from "../assets/dna.svg";
 
-const ResistanceTable = () => {
+const ResistanceTable = ({ samples = [], loading: externalLoading }) => {
   const { t, i18n } = useTranslation();
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // 載入 CSV 數據
+  // 使用傳入的 samples 或載入 CSV 數據
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        const response = await fetch("/query-data/resistance-data.csv");
-        if (!response.ok) {
-          throw new Error("Failed to load data");
-        }
-        const text = await response.text();
-        const lines = text.trim().split("\n");
+    if (samples && samples.length > 0) {
+      // 使用 API 數據
+      const formattedData = samples.map(sample => ({
+        sample_id: sample.sample_id,
+        country: sample.country,
+        location: sample.location,
+        lat: sample.lat,
+        lng: sample.lng,
+        collection_date: sample.collection_date,
+        species: sample.species || '',
+        notes: sample.notes || '',
+      }));
+      setData(formattedData);
+      setLoading(false);
+    } else {
+      // 載入 CSV（備用）
+      loadCSVData();
+    }
+  }, [samples]);
 
-        if (lines.length <= 1) {
-          setData([]);
-          setLoading(false);
-          return;
-        }
-
-        const headers = lines[0].split(",");
-        const parsedData = lines.slice(1).map((line) => {
-          const values = line.split(",");
-          const row = {};
-          headers.forEach((header, index) => {
-            row[header] = values[index] || "";
-          });
-          return row;
-        });
-
-        setData(parsedData);
-        setLoading(false);
-      } catch (err) {
-        console.error("Error loading data:", err);
-        setError(err.message);
-        setLoading(false);
+  const loadCSVData = async () => {
+    try {
+      const response = await fetch("/query-data/resistance-data.csv");
+      if (!response.ok) {
+        throw new Error("Failed to load data");
       }
-    };
+      const text = await response.text();
+      const lines = text.trim().split("\n");
 
-    loadData();
-  }, []);
+      if (lines.length <= 1) {
+        setData([]);
+        setLoading(false);
+        return;
+      }
+
+      const headers = lines[0].split(",");
+      const parsedData = lines.slice(1).map((line) => {
+        const values = line.split(",");
+        const row = {};
+        headers.forEach((header, index) => {
+          row[header] = values[index] || "";
+        });
+        return row;
+      });
+
+      setData(parsedData);
+      setLoading(false);
+    } catch (err) {
+      console.error("Error loading data:", err);
+      setError(err.message);
+      setLoading(false);
+    }
+  };
 
   // 抗生素分類和名稱
   const antibioticGroups = [
