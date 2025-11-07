@@ -29,15 +29,15 @@ const ResistanceTable = ({ samples = [], loading: externalLoading }) => {
   useEffect(() => {
     if (samples && samples.length > 0) {
       // 使用 API 數據
-      const formattedData = samples.map(sample => ({
+      const formattedData = samples.map((sample) => ({
         sample_id: sample.sample_id,
         country: sample.country,
         location: sample.location,
         lat: sample.lat,
         lng: sample.lng,
         collection_date: sample.collection_date,
-        species: sample.species || '',
-        notes: sample.notes || '',
+        species: sample.species || "",
+        notes: sample.notes || "",
       }));
       setData(formattedData);
       setLoading(false);

@@ -16,11 +16,11 @@ const Home = () => {
     try {
       const health = await api.healthCheck();
       const samplesData = await api.getSamples(1, 5);
-      setApiStatus('connected');
+      setApiStatus("connected");
       setSamples(samplesData.samples || []);
     } catch (error) {
-      console.error('API connection failed:', error);
-      setApiStatus('error');
+      console.error("API connection failed:", error);
+      setApiStatus("error");
     }
   };
 
@@ -57,12 +57,12 @@ const Home = () => {
         </Typography>
 
         {/* API 狀態顯示 */}
-        {apiStatus === 'connected' && (
+        {apiStatus === "connected" && (
           <Alert severity="success" sx={{ mb: 2 }}>
             Backend API Connected • {samples.length} samples loaded
           </Alert>
         )}
-        {apiStatus === 'error' && (
+        {apiStatus === "error" && (
           <Alert severity="error" sx={{ mb: 2 }}>
             Backend API Connection Failed
           </Alert>

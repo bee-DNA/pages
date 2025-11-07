@@ -1,37 +1,62 @@
 import { useEffect, useRef, useState } from "react";
 import { Container, Box, Typography } from "@mui/material";
-import { useTranslation } from "react-i18next";
+import LayersIcon from "@mui/icons-material/Layers";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import TimeController from "../components/TimeController";
 import LayerControl from "../components/LayerControl";
 import { api } from "../services/api";
+import mapIcon from "../assets/map.svg";
 
 // Mapbox Access Token
 mapboxgl.accessToken =
   "pk.eyJ1IjoiYmVlLWRuYSIsImEiOiJjbWZ5MTlhOTkwZnF3MmxvbjkwN2RtM2Z4In0.yFiY2MNpWqaDINuLaz1e0w";
 
 const Map = () => {
-  const { t, i18n } = useTranslation();
   const mapContainer = useRef(null);
   const map = useRef(null);
-  const [lng] = useState(120.5377); // 彰化師範大學經度
-  const [lat] = useState(24.0513); // 彰化師範大學緯度
-  const [zoom] = useState(2); // 全球視圖
-  const [mapStyle, setMapStyle] = useState("streets"); // streets | satellite
-  const layersRef = useRef(null); // 保存當前圖層狀態
-  const addWeatherLayersRef = useRef(null); // 保存 addWeatherLayers 函數引用
+  const [lng] = useState(120.5377);
+  const [lat] = useState(24.0513);
+  const [zoom] = useState(2);
+  const [mapStyle, setMapStyle] = useState("streets");
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [expanded, setExpanded] = useState(false); // For layer control
+  const layersRef = useRef(null);
+  const addWeatherLayersRef = useRef(null);
+  const layerPanelRef = useRef(null); // For click outside detection
 
-  // 添加所有氣象圖層的函數
+  // Auto-close layer panel when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        expanded &&
+        layerPanelRef.current &&
+        !layerPanelRef.current.contains(event.target) &&
+        !event.target.closest("[data-layer-toggle]")
+      ) {
+        setExpanded(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [expanded]);
+
+  // Add all weather layers
   const addWeatherLayers = () => {
     if (!map.current) {
-      console.log("❌ map.current 不存在");
+      console.log("map.current does not exist");
       return;
     }
 
-    // 等待地圖樣式完全載入
+    // Wait for map style to fully load
     if (!map.current.isStyleLoaded()) {
-      console.log("⏳ 等待地圖樣式載入...");
+      console.log("Waiting for map style to load...");
       map.current.once("styledata", () => {
         if (addWeatherLayersRef.current) {
           addWeatherLayersRef.current();
@@ -40,9 +65,9 @@ const Map = () => {
       return;
     }
 
-    console.log("🔄 開始添加氣象圖層...");
+    console.log("Starting to add weather layers...");
 
-    // 檢查並移除舊圖層
+    // Remove old layers
     const layerIds = [
       "sst-layer",
       "lst-layer",
@@ -57,7 +82,7 @@ const Map = () => {
       }
     });
 
-    // 檢查並移除舊資料源
+    // Remove old sources
     const sourceIds = [
       "openweather-temp",
       "openweather-precipitation",
@@ -72,7 +97,7 @@ const Map = () => {
       }
     });
 
-    // 溫度圖層 - 超高飽和度
+    // Temperature layer - high saturation
     try {
       map.current.addSource("openweather-temp", {
         type: "raster",
@@ -94,15 +119,15 @@ const Map = () => {
           "raster-saturation": 1.0, // 最大飽和度 (最大值為1)
         },
         layout: {
-          visibility: "visible", // 默認顯示
+          visibility: "none",
         },
       });
-      console.log("✅ 溫度圖層已添加 (visible)");
+      console.log("Temperature layer added (disabled by default)");
     } catch (error) {
-      console.error("❌ 溫度圖層添加失敗:", error);
+      console.error("Failed to add temperature layer:", error);
     }
 
-    // 降水圖層 - 超高飽和度藍色
+    // Precipitation layer - high saturation blue
     try {
       map.current.addSource("openweather-precipitation", {
         type: "raster",
@@ -124,15 +149,15 @@ const Map = () => {
           "raster-saturation": 1.0, // 最大飽和度 (最大值為1)
         },
         layout: {
-          visibility: "visible", // 默認顯示
+          visibility: "none",
         },
       });
-      console.log("✅ 降水圖層已添加 (visible)");
+      console.log("Precipitation layer added (disabled by default)");
     } catch (error) {
-      console.error("❌ 降水圖層添加失敗:", error);
+      console.error("Failed to add precipitation layer:", error);
     }
 
-    // 風速圖層
+    // Wind layer
     try {
       map.current.addSource("openweather-wind", {
         type: "raster",
@@ -157,14 +182,14 @@ const Map = () => {
           visibility: layersRef.current?.wind?.enabled ? "visible" : "none",
         },
       });
-      console.log("✅ 風速圖層已添加");
+      console.log("Wind layer added");
     } catch (error) {
-      console.error("❌ 風速圖層添加失敗:", error);
+      console.error("Failed to add wind layer:", error);
     }
 
-    // 創建風向箭頭 - 使用自定義 SVG 箭頭
+    // Create wind arrows - custom SVG arrows
     try {
-      // 創建箭頭 SVG 圖像
+      // Create arrow SVG image
       const arrowSvg = `
         <svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
           <path d="M10 2 L14 10 L10 8 L6 10 Z" fill="#00FFFF" stroke="#FFFFFF" stroke-width="1"/>
@@ -175,11 +200,11 @@ const Map = () => {
       arrowImage.onload = () => {
         if (map.current && !map.current.hasImage("wind-arrow")) {
           map.current.addImage("wind-arrow", arrowImage);
-          console.log("✅ 箭頭圖標已載入");
+          console.log("Arrow icon loaded");
 
-          // 創建風向箭頭數據
+          // Create wind arrow data
           const windArrows = [];
-          const gridSize = 5; // 減少密度以提升性能和可見度
+          const gridSize = 5;
 
           for (let lng = -180; lng < 180; lng += gridSize) {
             for (let lat = -85; lat < 85; lat += gridSize) {
@@ -207,12 +232,12 @@ const Map = () => {
             },
           });
 
-          // 風向箭頭符號圖層
+          // Wind arrow symbol layer
           map.current.addLayer({
             id: "wind-arrow-layer",
             type: "symbol",
             source: "wind-arrows",
-            minzoom: 3, // 縮放等級3以上才顯示,避免過於密集
+            minzoom: 3,
             layout: {
               "icon-image": "wind-arrow",
               "icon-size": 1.0,
@@ -226,15 +251,15 @@ const Map = () => {
               "icon-opacity": 0.8,
             },
           });
-          console.log("✅ 風向箭頭圖層已添加");
+          console.log("Wind arrow layer added");
         }
       };
       arrowImage.src = "data:image/svg+xml;base64," + btoa(arrowSvg);
     } catch (error) {
-      console.error("❌ 風向箭頭圖層添加失敗:", error);
+      console.error("Failed to add wind arrow layer:", error);
     }
 
-    // 雲層圖層
+    // Cloud layer
     try {
       map.current.addSource("openweather-clouds", {
         type: "raster",
@@ -251,19 +276,19 @@ const Map = () => {
         paint: {
           "raster-opacity": 0.7,
           "raster-brightness-min": 0.3,
-          "raster-brightness-max": 1.0, // 最大值為1
+          "raster-brightness-max": 1.0,
           "raster-contrast": 0.4,
         },
         layout: {
           visibility: layersRef.current?.waves?.enabled ? "visible" : "none",
         },
       });
-      console.log("✅ 雲層圖層已添加");
+      console.log("Cloud layer added");
     } catch (error) {
-      console.error("❌ 雲層圖層添加失敗:", error);
+      console.error("Failed to add cloud layer:", error);
     }
 
-    // 氣壓圖層
+    // Pressure layer
     try {
       map.current.addSource("openweather-pressure", {
         type: "raster",
@@ -280,7 +305,7 @@ const Map = () => {
         paint: {
           "raster-opacity": 0.7,
           "raster-contrast": 0.8,
-          "raster-saturation": 1.0, // 最大飽和度
+          "raster-saturation": 1.0,
         },
         layout: {
           visibility: layersRef.current?.chlorophyll?.enabled
@@ -288,35 +313,139 @@ const Map = () => {
             : "none",
         },
       });
-      console.log("✅ 氣壓圖層已添加");
+      console.log("Pressure layer added");
     } catch (error) {
-      console.error("❌ 氣壓圖層添加失敗:", error);
+      console.error("Failed to add pressure layer:", error);
     }
 
-    console.log("✅ 所有氣象圖層載入完成!");
+    console.log("All weather layers loaded!");
+
+    // Apply pending layer changes if any
+    if (layersRef.current) {
+      console.log(
+        "Applying layer state after layers loaded:",
+        layersRef.current
+      );
+      // Use multiple checks with increasing delays to ensure layers are ready
+      const applyLayerState = (attempt = 1) => {
+        const maxAttempts = 5;
+
+        setTimeout(() => {
+          const layerMapping = {
+            sst: "sst-layer",
+            lst: "lst-layer",
+            wind: ["wind-layer", "wind-arrow-layer"],
+            waves: "waves-layer",
+            chlorophyll: "chlorophyll-layer",
+          };
+
+          let allLayersReady = true;
+
+          Object.keys(layerMapping).forEach((key) => {
+            const layerIds = Array.isArray(layerMapping[key])
+              ? layerMapping[key]
+              : [layerMapping[key]];
+
+            layerIds.forEach((layerId) => {
+              if (!map.current.getLayer(layerId)) {
+                allLayersReady = false;
+                console.log(
+                  `Layer ${layerId} not ready yet (attempt ${attempt})`
+                );
+              } else if (layersRef.current[key]) {
+                const visibility = layersRef.current[key].enabled
+                  ? "visible"
+                  : "none";
+                const opacity = layersRef.current[key].opacity / 100;
+
+                try {
+                  map.current.setLayoutProperty(
+                    layerId,
+                    "visibility",
+                    visibility
+                  );
+
+                  // Set opacity based on layer type
+                  const layerType = map.current.getLayer(layerId).type;
+                  if (layerType === "raster") {
+                    map.current.setPaintProperty(
+                      layerId,
+                      "raster-opacity",
+                      opacity
+                    );
+                  } else if (layerType === "symbol") {
+                    map.current.setPaintProperty(
+                      layerId,
+                      "icon-opacity",
+                      opacity
+                    );
+                  }
+
+                  console.log(
+                    `Applied ${layerId}: visibility=${visibility}, opacity=${opacity}`
+                  );
+                } catch (error) {
+                  console.error(`Error applying state to ${layerId}:`, error);
+                  allLayersReady = false;
+                }
+              }
+            });
+          });
+
+          // If not all layers ready and we haven't exceeded max attempts, try again
+          if (!allLayersReady && attempt < maxAttempts) {
+            console.log(
+              `Retrying layer state application (attempt ${
+                attempt + 1
+              }/${maxAttempts})`
+            );
+            applyLayerState(attempt + 1);
+          } else if (allLayersReady) {
+            console.log("All layer states applied successfully");
+          } else {
+            console.warn(
+              "Max attempts reached, some layers may not be configured"
+            );
+          }
+        }, attempt * 100); // Increase delay with each attempt
+      };
+
+      applyLayerState();
+    }
   };
 
-  // 保存函數引用
+  // Save function reference
   addWeatherLayersRef.current = addWeatherLayers;
 
-  // 監聽語言切換,更新地圖標籤
+  // 監聽地圖樣式切換 (只在初始化後才執行)
   useEffect(() => {
-    if (map.current && map.current.isStyleLoaded()) {
-      const currentStyle =
-        mapStyle === "satellite"
-          ? "mapbox://styles/mapbox/satellite-streets-v12"
-          : "mapbox://styles/mapbox/streets-v12";
+    if (!map.current || !isInitialized) return;
 
-      map.current.setStyle(currentStyle, { diff: false });
+    const currentStyle =
+      mapStyle === "satellite"
+        ? "mapbox://styles/mapbox/satellite-streets-v12"
+        : "mapbox://styles/mapbox/streets-v12";
 
-      map.current.once("styledata", () => {
-        console.log("🔄 樣式切換完成,重新載入圖層");
-        // 重新添加氣象圖層
+    console.log(`Switching to ${mapStyle} style...`);
+
+    // Remove existing event listeners to prevent duplicates
+    map.current.off("style.load");
+
+    map.current.setStyle(currentStyle);
+
+    // Wait for style to fully load - using idle event for better reliability
+    const onStyleLoad = () => {
+      console.log(`${mapStyle} style loaded, waiting for idle state...`);
+
+      map.current.once("idle", () => {
+        console.log("Map is idle, re-adding layers...");
+
+        // Re-add weather layers
         if (addWeatherLayersRef.current) {
           addWeatherLayersRef.current();
         }
 
-        // 重新添加標記
+        // Re-add marker
         new mapboxgl.Marker({
           color: "#FF6B6B",
           scale: 1.2,
@@ -326,29 +455,48 @@ const Map = () => {
             new mapboxgl.Popup({ offset: 25 }).setHTML(
               `<div style="padding: 10px;">
               <h3 style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600;">
-                ${i18n.language === "zh" ? "彰化師範大學" : "NCUE"}
+                NCUE
               </h3>
               <p style="margin: 4px 0; font-size: 12px; color: #666;">
-                <strong>${
-                  i18n.language === "zh" ? "經度" : "Longitude"
-                }:</strong> 120.5377°E
+                <strong>Longitude:</strong> 120.5377°E
               </p>
               <p style="margin: 4px 0; font-size: 12px; color: #666;">
-                <strong>${
-                  i18n.language === "zh" ? "緯度" : "Latitude"
-                }:</strong> 24.0513°N
+                <strong>Latitude:</strong> 24.0513°N
+              </p>
+              <p style="margin: 8px 0 0 0; font-size: 11px; color: #999;">
+                Demo Sampling Point
+              </p>
+              <p style="margin: 4px 0 0 0; font-size: 11px; color: #1976d2;">
+                🌡️ Temperature layers enabled
               </p>
             </div>`
             )
           )
           .addTo(map.current);
       });
-    }
-  }, [i18n.language, mapStyle]);
+    };
+
+    map.current.once("style.load", onStyleLoad);
+  }, [mapStyle, isInitialized]);
 
   // 處理圖層變更
   const handleLayerChange = (layers) => {
-    if (!map.current || !map.current.isStyleLoaded()) return;
+    console.log("handleLayerChange called with:", layers);
+
+    if (!map.current) {
+      console.log("Map not initialized");
+      return;
+    }
+
+    if (!map.current.isStyleLoaded()) {
+      console.log("Map style not loaded, will retry when loaded");
+      // Wait for style to load, then retry
+      map.current.once("idle", () => {
+        console.log("Map became idle, retrying layer change");
+        handleLayerChange(layers);
+      });
+      return;
+    }
 
     // 保存圖層狀態
     layersRef.current = layers;
@@ -369,13 +517,20 @@ const Map = () => {
         : [layerMapping[key]];
 
       layerIds.forEach((layerId) => {
-        if (map.current.getLayer(layerId) && layers[key]) {
+        const layerExists = map.current.getLayer(layerId);
+        console.log(
+          `Layer ${layerId} exists:`,
+          !!layerExists,
+          "Config:",
+          layers[key]
+        );
+
+        if (layerExists && layers[key]) {
+          const visibility = layers[key].enabled ? "visible" : "none";
+          console.log(`Setting ${layerId} visibility to ${visibility}`);
+
           // 設置可見性
-          map.current.setLayoutProperty(
-            layerId,
-            "visibility",
-            layers[key].enabled ? "visible" : "none"
-          );
+          map.current.setLayoutProperty(layerId, "visibility", visibility);
 
           // 設置透明度 (僅對 raster 圖層)
           if (map.current.getLayer(layerId).type === "raster") {
@@ -394,15 +549,17 @@ const Map = () => {
               layers[key].opacity / 100
             );
           }
+        } else if (!layerExists) {
+          console.log(`Layer ${layerId} does not exist on map yet`);
         }
       });
     });
 
-    console.log("✅ 圖層狀態已更新:", layers);
+    console.log("Layer status updated:", layers);
   };
 
   useEffect(() => {
-    if (map.current) return; // 避免重複初始化
+    if (map.current) return; // Avoid duplicate initialization
 
     // 初始化地圖 - 使用亮色底圖
     const initialStyle = "mapbox://styles/mapbox/streets-v12";
@@ -413,8 +570,7 @@ const Map = () => {
       center: [lng, lat],
       zoom: zoom,
       minZoom: 1.5,
-      locale:
-        i18n.language === "zh" ? { language: "zh-Hans" } : { language: "en" },
+      locale: { language: "zh-Hans" },
     });
 
     // 添加導航控制器
@@ -429,56 +585,67 @@ const Map = () => {
       "bottom-left"
     );
 
-    // 地圖載入完成後添加圖層和標記
+    // Add layers and markers when map is loaded
     map.current.on("load", () => {
-      console.log("🗺️ 地圖載入完成");
-      // 添加氣象圖層
-      if (addWeatherLayersRef.current) {
-        addWeatherLayersRef.current();
-      }
+      console.log("🗺️ Map loaded, waiting for idle...");
 
-      // 彰化師範大學標記點
-      const marker = new mapboxgl.Marker({
-        color: "#FF6B6B",
-        scale: 1.2,
-      })
-        .setLngLat([120.5377, 24.0513])
-        .setPopup(
-          new mapboxgl.Popup({ offset: 25 }).setHTML(
-            `<div style="padding: 10px;">
-              <h3 style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600;">
-                ${i18n.language === "zh" ? "彰化師範大學" : "NCUE"}
-              </h3>
-              <p style="margin: 4px 0; font-size: 12px; color: #666;">
-                <strong>${
-                  i18n.language === "zh" ? "經度" : "Longitude"
-                }:</strong> 120.5377°E
-              </p>
-              <p style="margin: 4px 0; font-size: 12px; color: #666;">
-                <strong>${
-                  i18n.language === "zh" ? "緯度" : "Latitude"
-                }:</strong> 24.0513°N
-              </p>
-              <p style="margin: 8px 0 0 0; font-size: 11px; color: #999;">
-                ${i18n.language === "zh" ? "示範採樣點" : "Demo Sampling Point"}
-              </p>
-              <p style="margin: 4px 0 0 0; font-size: 11px; color: #1976d2;">
-                🌡️ ${
-                  i18n.language === "zh"
-                    ? "溫度圖層已啟用"
-                    : "Temperature layers enabled"
-                }
-              </p>
-            </div>`
-          )
-        )
-        .addTo(map.current);
+      // Wait for map to be fully idle before adding layers
+      map.current.once("idle", () => {
+        console.log("Map is idle, checking style load status...");
+        console.log("Style loaded?", map.current.isStyleLoaded());
 
-      // 自動打開 popup
-      marker.togglePopup();
+        // Force wait a bit more for style to be fully ready
+        setTimeout(() => {
+          console.log("Adding initial layers now...");
+          console.log(
+            "Style loaded after timeout?",
+            map.current.isStyleLoaded()
+          );
+
+          // Add weather layers (all disabled by default)
+          // Layer state will be automatically applied inside addWeatherLayers()
+          addWeatherLayers();
+
+          // NCUE Marker
+          const marker = new mapboxgl.Marker({
+            color: "#FF6B6B",
+            scale: 1.2,
+          })
+            .setLngLat([120.5377, 24.0513])
+            .setPopup(
+              new mapboxgl.Popup({ offset: 25 }).setHTML(
+                `<div style="padding: 10px;">
+                  <h3 style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600;">
+                    NCUE
+                  </h3>
+                  <p style="margin: 4px 0; font-size: 12px; color: #666;">
+                    <strong>Longitude:</strong> 120.5377°E
+                  </p>
+                  <p style="margin: 4px 0; font-size: 12px; color: #666;">
+                    <strong>Latitude:</strong> 24.0513°N
+                  </p>
+                  <p style="margin: 8px 0 0 0; font-size: 11px; color: #999;">
+                    Demo Sampling Point
+                  </p>
+                  <p style="margin: 4px 0 0 0; font-size: 11px; color: #1976d2;">
+                    🌡️ Temperature layers enabled
+                  </p>
+                </div>`
+              )
+            )
+            .addTo(map.current);
+
+          // Auto open popup
+          marker.togglePopup();
+
+          // Mark as initialized
+          setIsInitialized(true);
+          console.log("Initial setup complete!");
+        }, 500);
+      });
     });
 
-    // 清理函數
+    // Cleanup function
     return () => {
       if (map.current) {
         map.current.remove();
@@ -490,26 +657,181 @@ const Map = () => {
   return (
     <Container maxWidth={false} disableGutters sx={{ py: 4, px: 3 }}>
       <Box sx={{ width: "100%" }}>
-        {/* 頁面標題 */}
-        <Box sx={{ mb: 3 }}>
-          <Typography
-            variant="h4"
+        {/* Modern Control Bar */}
+        <Box
+          sx={{
+            mb: 3,
+            backgroundColor: "white",
+            borderRadius: "12px",
+            padding: "16px 20px",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 2,
+          }}
+        >
+          {/* Left: Title */}
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+            <img
+              src={mapIcon}
+              alt="Map"
+              style={{ width: "28px", height: "28px" }}
+            />
+            <Box>
+              <Typography
+                variant="h5"
+                sx={{
+                  fontWeight: 700,
+                  color: "#1976d2",
+                  lineHeight: 1.2,
+                }}
+              >
+                Map
+              </Typography>
+              <Typography
+                variant="caption"
+                sx={{ color: "#999", fontSize: "11px" }}
+              >
+                Ocean & Meteorological Data
+              </Typography>
+            </Box>
+          </Box>
+
+          {/* Center: Time Display */}
+          <Box
             sx={{
-              fontWeight: 700,
-              color: "#1976d2",
-              mb: 1,
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+              px: 2,
+              py: 1,
+              backgroundColor: "#f5f5f5",
+              borderRadius: "8px",
             }}
           >
-            🗺️ {t("nav.map")}
-          </Typography>
-          <Typography variant="body2" sx={{ color: "#666" }}>
-            {i18n.language === "zh"
-              ? "全球海洋與氣象數據可視化"
-              : "Global Ocean & Meteorological Data Visualization"}
-          </Typography>
+            <AccessTimeIcon sx={{ fontSize: 18, color: "#666" }} />
+            <Box>
+              <Typography
+                variant="caption"
+                sx={{ fontSize: "10px", color: "#999" }}
+              >
+                Today's Data
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{ fontSize: "12px", fontWeight: 600, color: "#333" }}
+              >
+                {new Date().toLocaleString("zh-TW", {
+                  year: "numeric",
+                  month: "2-digit",
+                  day: "2-digit",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: false,
+                })}
+              </Typography>
+            </Box>
+          </Box>
+
+          {/* Right: Map Style Toggle & Layer Control */}
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            {/* Map Style Toggle Switch */}
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                backgroundColor: "#f0f0f0",
+                borderRadius: "20px",
+                padding: "3px",
+                position: "relative",
+              }}
+            >
+              <Box
+                onClick={() => setMapStyle("streets")}
+                sx={{
+                  position: "relative",
+                  zIndex: 1,
+                  padding: "6px 14px",
+                  borderRadius: "17px",
+                  cursor: "pointer",
+                  fontSize: "12px",
+                  fontWeight: 600,
+                  color: mapStyle === "streets" ? "white" : "#666",
+                  transition: "color 0.2s",
+                  userSelect: "none",
+                }}
+              >
+                🗺️ Street
+              </Box>
+              <Box
+                onClick={() => setMapStyle("satellite")}
+                sx={{
+                  position: "relative",
+                  zIndex: 1,
+                  padding: "6px 14px",
+                  borderRadius: "17px",
+                  cursor: "pointer",
+                  fontSize: "12px",
+                  fontWeight: 600,
+                  color: mapStyle === "satellite" ? "white" : "#666",
+                  transition: "color 0.2s",
+                  userSelect: "none",
+                }}
+              >
+                🛰️ Satellite
+              </Box>
+              {/* Sliding background */}
+              <Box
+                sx={{
+                  position: "absolute",
+                  top: "3px",
+                  left: mapStyle === "streets" ? "3px" : "50%",
+                  width: "calc(50% - 3px)",
+                  height: "calc(100% - 6px)",
+                  backgroundColor: "#1976d2",
+                  borderRadius: "17px",
+                  transition: "left 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                  zIndex: 0,
+                }}
+              />
+            </Box>
+
+            {/* Layer Control Button */}
+            <Box
+              data-layer-toggle
+              onClick={() => setExpanded(!expanded)}
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 1,
+                px: 2,
+                py: 1,
+                backgroundColor: expanded ? "#1976d2" : "#f5f5f5",
+                color: expanded ? "white" : "#666",
+                borderRadius: "8px",
+                cursor: "pointer",
+                transition: "all 0.2s",
+                userSelect: "none",
+                "&:hover": {
+                  backgroundColor: expanded ? "#1565c0" : "#e0e0e0",
+                },
+              }}
+            >
+              <LayersIcon sx={{ fontSize: 18 }} />
+              <Typography sx={{ fontSize: "12px", fontWeight: 600 }}>
+                Layers
+              </Typography>
+              {expanded ? (
+                <ChevronLeftIcon sx={{ fontSize: 18 }} />
+              ) : (
+                <ChevronRightIcon sx={{ fontSize: 18 }} />
+              )}
+            </Box>
+          </Box>
         </Box>
 
-        {/* 地圖容器與控制組件 */}
+        {/* Map Container & Controls */}
         <Box sx={{ position: "relative", width: "100%" }}>
           {/* 地圖 */}
           <Box
@@ -524,214 +846,75 @@ const Map = () => {
             }}
           />
 
-          {/* 時間控制器（右上角） */}
-          <TimeController projectId="BEE001" />
-
-          {/* 圖層控制器（右側） */}
-          <LayerControl onLayerChange={handleLayerChange} />
-
-          {/* 地圖樣式切換按鈕（右下角） */}
-          <Box
-            sx={{
-              position: "absolute",
-              bottom: 20,
-              right: 20,
-              zIndex: 1000,
-            }}
-          >
+          {/* Integrated Layer Control Panel (Right Side) */}
+          {expanded && (
             <Box
+              ref={layerPanelRef}
               sx={{
-                backgroundColor: "rgba(255, 255, 255, 0.95)",
+                position: "absolute",
+                top: 0,
+                right: 0,
+                width: "320px",
+                maxHeight: "100%",
+                backgroundColor: "white",
                 borderRadius: "8px",
-                boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+                boxShadow: "0 4px 16px rgba(0,0,0,0.15)",
                 overflow: "hidden",
-                border: "1px solid #ddd",
+                zIndex: 1000,
+                animation: "slideIn 0.3s ease-out",
+                "@keyframes slideIn": {
+                  from: {
+                    opacity: 0,
+                    transform: "translateX(20px)",
+                  },
+                  to: {
+                    opacity: 1,
+                    transform: "translateX(0)",
+                  },
+                },
               }}
             >
-              <Box
-                onClick={() => setMapStyle("streets")}
-                sx={{
-                  padding: "10px 16px",
-                  cursor: "pointer",
-                  backgroundColor:
-                    mapStyle === "streets" ? "#1976d2" : "transparent",
-                  color: mapStyle === "streets" ? "white" : "#333",
-                  fontWeight: mapStyle === "streets" ? 600 : 400,
-                  fontSize: "13px",
-                  transition: "all 0.2s",
-                  borderBottom: "1px solid #eee",
-                  "&:hover": {
-                    backgroundColor:
-                      mapStyle === "streets" ? "#1565c0" : "#f5f5f5",
-                  },
-                }}
-              >
-                🗺️ {i18n.language === "zh" ? "街道地圖" : "Street Map"}
-              </Box>
-              <Box
-                onClick={() => setMapStyle("satellite")}
-                sx={{
-                  padding: "10px 16px",
-                  cursor: "pointer",
-                  backgroundColor:
-                    mapStyle === "satellite" ? "#1976d2" : "transparent",
-                  color: mapStyle === "satellite" ? "white" : "#333",
-                  fontWeight: mapStyle === "satellite" ? 600 : 400,
-                  fontSize: "13px",
-                  transition: "all 0.2s",
-                  "&:hover": {
-                    backgroundColor:
-                      mapStyle === "satellite" ? "#1565c0" : "#f5f5f5",
-                  },
-                }}
-              >
-                🛰️ {i18n.language === "zh" ? "衛星地圖" : "Satellite"}
-              </Box>
+              <LayerControl onLayerChange={handleLayerChange} />
             </Box>
-          </Box>
+          )}
 
-          {/* 圖層狀態指示器 (左下角) */}
+          {/* Temperature Legend (Top Left) */}
           <Box
             sx={{
               position: "absolute",
-              bottom: 50,
+              top: 10,
               left: 10,
-              backgroundColor: "rgba(0, 0, 0, 0.85)",
-              color: "white",
-              padding: "12px 16px",
-              borderRadius: "8px",
-              fontSize: "12px",
+              backgroundColor: "rgba(255, 255, 255, 0.9)",
+              padding: "8px 12px",
+              borderRadius: "6px",
+              fontSize: "10px",
               zIndex: 1000,
-              boxShadow: "0 4px 12px rgba(0,0,0,0.4)",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
             }}
           >
-            <div
-              style={{
-                fontWeight: "700",
-                marginBottom: "8px",
-                fontSize: "13px",
-                color: "#fff",
-              }}
-            >
-              {i18n.language === "zh" ? "🌐 即時氣象" : "🌐 Live Weather"}
-            </div>
-            <div
-              style={{ fontSize: "11px", marginBottom: "3px", color: "#fff" }}
-            >
-              🌡️ {i18n.language === "zh" ? "溫度分布" : "Temperature"} · 🌧️{" "}
-              {i18n.language === "zh" ? "降水強度" : "Precipitation"}
-            </div>
-            <div
-              style={{ fontSize: "11px", marginBottom: "3px", color: "#fff" }}
-            >
-              💨{" "}
-              {i18n.language === "zh"
-                ? "風速風向 (含亮青色箭頭)"
-                : "Wind + Cyan Arrows"}{" "}
-              · ☁️ {i18n.language === "zh" ? "雲層覆蓋" : "Clouds"}
-            </div>
-            <div
-              style={{ fontSize: "11px", marginBottom: "8px", color: "#fff" }}
-            >
-              📊 {i18n.language === "zh" ? "氣壓系統" : "Pressure"}
-            </div>
-
-            {/* 溫度色階 */}
+            {/* Temperature Scale */}
             <div
               style={{
                 background:
                   "linear-gradient(to right, #0000FF, #00FFFF, #00FF00, #FFFF00, #FF0000)",
-                height: "8px",
-                borderRadius: "4px",
-                marginBottom: "4px",
+                height: "6px",
+                width: "100px",
+                borderRadius: "3px",
+                marginBottom: "3px",
               }}
             ></div>
             <div
               style={{
                 display: "flex",
                 justifyContent: "space-between",
-                fontSize: "9px",
-                opacity: 0.8,
+                fontSize: "8px",
+                color: "#666",
               }}
             >
-              <span>{i18n.language === "zh" ? "冷" : "Cold"}</span>
-              <span>{i18n.language === "zh" ? "溫度" : "Temp"}</span>
-              <span>{i18n.language === "zh" ? "熱" : "Hot"}</span>
-            </div>
-
-            <div
-              style={{
-                marginTop: "8px",
-                fontSize: "10px",
-                opacity: 0.7,
-                fontStyle: "italic",
-              }}
-            >
-              {i18n.language === "zh"
-                ? "※ 放大海洋區域觀察"
-                : "※ Zoom to ocean areas"}
+              <span>Cold</span>
+              <span>Hot</span>
             </div>
           </Box>
-        </Box>
-
-        {/* 說明文字 */}
-        <Box
-          sx={{
-            mt: 2,
-            display: "flex",
-            gap: 2,
-            flexWrap: "wrap",
-            alignItems: "center",
-          }}
-        >
-          <Typography variant="body2" sx={{ color: "#555", fontSize: "13px" }}>
-            📍 {i18n.language === "zh" ? "示範標記：" : "Demo Marker: "}
-            {i18n.language === "zh"
-              ? "彰化師範大學進德校區"
-              : "NCUE Jinde Campus"}
-          </Typography>
-          <Typography variant="body2" sx={{ color: "#555", fontSize: "13px" }}>
-            �️{" "}
-            {i18n.language === "zh"
-              ? "溫度圖層：SST (海表) + LST (陸表)"
-              : "Temperature: SST (Sea) + LST (Land)"}
-          </Typography>
-          <Typography variant="body2" sx={{ color: "#555", fontSize: "13px" }}>
-            🛰️{" "}
-            {i18n.language === "zh"
-              ? "數據來源：OpenWeatherMap 即時數據"
-              : "Data: OpenWeatherMap Real-time"}
-          </Typography>
-          <Typography variant="body2" sx={{ color: "#555", fontSize: "13px" }}>
-            🎨{" "}
-            {i18n.language === "zh"
-              ? "設計：超高飽和度色彩 + 亮色底圖"
-              : "Design: Ultra-vibrant colors + Bright map"}
-          </Typography>
-          <Typography variant="body2" sx={{ color: "#555", fontSize: "13px" }}>
-            💨{" "}
-            {i18n.language === "zh"
-              ? "風場：開啟風速圖層查看亮青色箭頭 (zoom 2+)"
-              : "Wind: Enable to see cyan arrows (zoom 2+)"}
-          </Typography>
-          <Typography
-            variant="body2"
-            sx={{ color: "#1976d2", fontSize: "13px", fontWeight: 600 }}
-          >
-            🌍{" "}
-            {i18n.language === "zh"
-              ? "地圖標籤支援中英文切換"
-              : "Map labels support CN/EN toggle"}
-          </Typography>
-          <Typography
-            variant="body2"
-            sx={{ color: "#2e7d32", fontSize: "13px", fontWeight: 600 }}
-          >
-            🛰️{" "}
-            {i18n.language === "zh"
-              ? "右下角可切換衛星/街道地圖"
-              : "Toggle Satellite/Street view (bottom-right)"}
-          </Typography>
         </Box>
       </Box>
     </Container>
