@@ -1,11 +1,5 @@
 import { useState } from "react";
-import {
-  Box,
-  Typography,
-  Switch,
-  Slider,
-  Divider,
-} from "@mui/material";
+import { Box, Typography, Switch, Slider, Divider } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import LayersIcon from "@mui/icons-material/Layers";
 

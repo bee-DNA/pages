@@ -32,7 +32,7 @@ const Query = () => {
           title="Query"
           subtitle="Antibiotic Resistance Data Analysis"
         />
-        
+
         <Box
           sx={{
             backgroundColor: "white",
