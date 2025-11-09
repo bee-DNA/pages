@@ -1,4 +1,4 @@
-const API_URL = import.meta.env.VITE_API_URL || "https://md2pdf.dpdns.org/bee";
+const API_URL = import.meta.env.VITE_API_URL || "https://bee.md2pdf.dpdns.org";
 
 export const api = {
   // 樣本 API
