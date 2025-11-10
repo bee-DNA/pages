@@ -768,11 +768,11 @@ const Map = () => {
     // 保存圖層狀態
     layersRef.current = layers;
 
-    // 圖層ID映射
+    // 圖層ID映射（根據模式不同，wind可能有或沒有箭頭層）
     const layerMapping = {
       sst: "sst-layer", // 溫度
       lst: "lst-layer", // 降水
-      wind: ["wind-layer", "wind-arrow-layer"], // 風速 + 風向箭頭
+      wind: dataMode === "historical" ? "wind-layer" : ["wind-layer", "wind-arrow-layer"], // 歷史資料只有風速，即時資料有風速+箭頭
       waves: "waves-layer", // 雲層
       chlorophyll: "chlorophyll-layer", // 氣壓
     };
