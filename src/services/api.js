@@ -1,6 +1,9 @@
 const API_URL = import.meta.env.VITE_API_URL || "https://md2pdf.dpdns.org/bee";
 
 export const api = {
+  // API 基礎 URL
+  API_URL,
+
   // 樣本 API
   async getSamples(page = 1, pageSize = 20) {
     const response = await fetch(

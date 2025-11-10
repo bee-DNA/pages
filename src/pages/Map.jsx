@@ -758,7 +758,7 @@ const Map = () => {
     }
 
     console.log("DataMode changed to:", dataMode);
-    
+
     // 切換圖層
     if (addWeatherLayersRef.current) {
       addWeatherLayersRef.current();
@@ -863,7 +863,7 @@ const Map = () => {
 
         layerIds.forEach((layerId) => {
           const layerExists = map.current.getLayer(layerId);
-          
+
           if (layerExists && layers[key]) {
             const visibility = layers[key].enabled ? "visible" : "none";
             console.log(`Setting ${layerId} visibility to ${visibility}`);
@@ -1359,10 +1359,13 @@ const Map = () => {
                   lineHeight: 1.2,
                 }}
               >
-                {dataMode === "live" 
-                  ? (i18n.language === "zh" ? "即時資料" : "Live Data")
-                  : (i18n.language === "zh" ? "歷史資料" : "Historical Data")
-                }
+                {dataMode === "live"
+                  ? i18n.language === "zh"
+                    ? "即時資料"
+                    : "Live Data"
+                  : i18n.language === "zh"
+                  ? "歷史資料"
+                  : "Historical Data"}
               </Typography>
               <Typography
                 sx={{
@@ -1372,23 +1375,28 @@ const Map = () => {
                   lineHeight: 1.3,
                 }}
               >
-                {dataMode === "live" 
-                  ? new Date().toLocaleString(i18n.language === "zh" ? "zh-TW" : "en-US", {
-                      month: "short",
-                      day: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })
-                  : timestamp 
-                    ? timestamp.toLocaleString(i18n.language === "zh" ? "zh-TW" : "en-US", {
+                {dataMode === "live"
+                  ? new Date().toLocaleString(
+                      i18n.language === "zh" ? "zh-TW" : "en-US",
+                      {
+                        month: "short",
+                        day: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      }
+                    )
+                  : timestamp
+                  ? timestamp.toLocaleString(
+                      i18n.language === "zh" ? "zh-TW" : "en-US",
+                      {
                         year: "numeric",
                         month: "short",
                         day: "numeric",
                         hour: "2-digit",
                         minute: "2-digit",
-                      })
-                    : "—"
-                }
+                      }
+                    )
+                  : "—"}
               </Typography>
             </Box>
           </Box>

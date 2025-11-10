@@ -78,7 +78,8 @@ const DataModeSelector = ({ currentMode, onModeChange }) => {
 };
 
 DataModeSelector.propTypes = {
-  currentMode: PropTypes.oneOf(["live", "historical", "search", "date"]).isRequired,
+  currentMode: PropTypes.oneOf(["live", "historical", "search", "date"])
+    .isRequired,
   onModeChange: PropTypes.func.isRequired,
 };
 

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import api from "../services/api";
+import { api } from "../services/api";
 
 /**
  * 時間軸動畫 Hook
