@@ -23,10 +23,7 @@ const DatePickerDialog = ({ open, onClose, onDateSelect }) => {
   const [selectedDate, setSelectedDate] = useState(null);
 
   // 有資料的日期
-  const availableDates = [
-    dayjs("2024-11-01"),
-    dayjs("2024-11-02"),
-  ];
+  const availableDates = [dayjs("2024-11-01"), dayjs("2024-11-02")];
 
   // 檢查日期是否可用
   const shouldDisableDate = (date) => {
@@ -58,7 +55,10 @@ const DatePickerDialog = ({ open, onClose, onDateSelect }) => {
 
       <DialogContent>
         <Box sx={{ pt: 2 }}>
-          <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="zh-tw">
+          <LocalizationProvider
+            dateAdapter={AdapterDayjs}
+            adapterLocale="zh-tw"
+          >
             <DatePicker
               label="選擇日期"
               value={selectedDate}

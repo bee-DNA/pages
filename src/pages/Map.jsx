@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState } from "react";
-import { Container, Box, Typography } from "@mui/material";
+import { Container, Box, Typography, IconButton } from "@mui/material";
 import LayersIcon from "@mui/icons-material/Layers";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import LanguageIcon from "@mui/icons-material/Language";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
+import { useTranslation } from "react-i18next";
 import TimeController from "../components/TimeController";
 import LayerControl from "../components/LayerControl";
 import DataModeSelector from "../components/DataModeSelector";
@@ -21,6 +23,7 @@ mapboxgl.accessToken =
   "pk.eyJ1IjoiYmVlLWRuYSIsImEiOiJjbWZ5MTlhOTkwZnF3MmxvbjkwN2RtM2Z4In0.yFiY2MNpWqaDINuLaz1e0w";
 
 const Map = () => {
+  const { t, i18n } = useTranslation();
   const mapContainer = useRef(null);
   const map = useRef(null);
   const [lng] = useState(120.5377);
@@ -36,6 +39,12 @@ const Map = () => {
   const layersRef = useRef(null);
   const addWeatherLayersRef = useRef(null);
   const layerPanelRef = useRef(null); // For click outside detection
+
+  // 語言切換
+  const toggleLanguage = () => {
+    const newLang = i18n.language === "en" ? "zh" : "en";
+    i18n.changeLanguage(newLang);
+  };
 
   // 圖層狀態管理
   const [layerStates, setLayerStates] = useState({
@@ -1022,13 +1031,13 @@ const Map = () => {
                   lineHeight: 1.2,
                 }}
               >
-                Map
+                {t("map.title")}
               </Typography>
               <Typography
                 variant="caption"
                 sx={{ color: "#999", fontSize: "11px" }}
               >
-                Ocean & Meteorological Data
+                {t("map.subtitle")}
               </Typography>
             </Box>
           </Box>
@@ -1051,14 +1060,14 @@ const Map = () => {
                 variant="caption"
                 sx={{ fontSize: "10px", color: "#999" }}
               >
-                {dataMode === "live" ? "Today's Data" : "Historical Data"}
+                {dataMode === "live" ? t("map.todayData") : t("map.historicalData")}
               </Typography>
               <Typography
                 variant="body2"
                 sx={{ fontSize: "12px", fontWeight: 600, color: "#333" }}
               >
                 {dataMode === "live"
-                  ? new Date().toLocaleString("zh-TW", {
+                  ? new Date().toLocaleString(i18n.language === "zh" ? "zh-TW" : "en-US", {
                       year: "numeric",
                       month: "2-digit",
                       day: "2-digit",
@@ -1067,12 +1076,12 @@ const Map = () => {
                       hour12: false,
                     })
                   : selectedDate
-                  ? new Date(selectedDate).toLocaleDateString("zh-TW", {
+                  ? new Date(selectedDate).toLocaleDateString(i18n.language === "zh" ? "zh-TW" : "en-US", {
                       year: "numeric",
                       month: "2-digit",
                       day: "2-digit",
                     })
-                  : "No Date Selected"}
+                  : t("map.noDateSelected")}
               </Typography>
             </Box>
           </Box>
@@ -1085,6 +1094,20 @@ const Map = () => {
 
           {/* Right: Map Style Toggle & Layer Control */}
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            {/* Language Toggle Button */}
+            <IconButton
+              onClick={toggleLanguage}
+              sx={{
+                backgroundColor: "#f5f5f5",
+                "&:hover": { backgroundColor: "#e0e0e0" },
+                width: 36,
+                height: 36,
+              }}
+              title={i18n.language === "en" ? "切換至中文" : "Switch to English"}
+            >
+              <LanguageIcon sx={{ fontSize: 18, color: "#666" }} />
+            </IconButton>
+
             {/* Map Style Toggle Switch */}
             <Box
               sx={{
@@ -1111,7 +1134,7 @@ const Map = () => {
                   userSelect: "none",
                 }}
               >
-                🗺️ Street
+                🗺️ {t("map.mapStyle.street")}
               </Box>
               <Box
                 onClick={() => setMapStyle("satellite")}
@@ -1128,7 +1151,7 @@ const Map = () => {
                   userSelect: "none",
                 }}
               >
-                🛰️ Satellite
+                🛰️ {t("map.mapStyle.satellite")}
               </Box>
               {/* Sliding background */}
               <Box
@@ -1169,7 +1192,7 @@ const Map = () => {
             >
               <LayersIcon sx={{ fontSize: 18 }} />
               <Typography sx={{ fontSize: "12px", fontWeight: 600 }}>
-                Layers
+                {t("map.layers")}
               </Typography>
               {expanded ? (
                 <ChevronLeftIcon sx={{ fontSize: 18 }} />
@@ -1263,8 +1286,8 @@ const Map = () => {
                 color: "#666",
               }}
             >
-              <span>Cold</span>
-              <span>Hot</span>
+              <span>{t("map.legend.cold")}</span>
+              <span>{t("map.legend.hot")}</span>
             </div>
           </Box>
         </Box>

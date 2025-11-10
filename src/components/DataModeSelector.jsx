@@ -1,15 +1,18 @@
 import { Box } from "@mui/material";
 import PropTypes from "prop-types";
+import { useTranslation } from "react-i18next";
 
 /**
  * 資料模式選擇器
  * 提供三個按鈕：即時、搜尋、日期
  */
 const DataModeSelector = ({ currentMode, onModeChange }) => {
+  const { t } = useTranslation();
+
   const modes = [
-    { id: "live", label: "即時" },
-    { id: "search", label: "搜尋" },
-    { id: "date", label: "日期" },
+    { id: "live", label: t("map.dataMode.live") },
+    { id: "search", label: t("map.dataMode.search") },
+    { id: "date", label: t("map.dataMode.date") },
   ];
 
   return (
