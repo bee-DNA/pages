@@ -74,7 +74,8 @@ export const api = {
   },
 
   // 圖磚 URL 生成器
-  getTileUrl(layer) {
-    return `${API_URL}/tiles/${layer}/{z}/{x}/{y}.png`;
+  getTileUrl(layer, frame = 0) {
+    // frame 從 0 開始，對應到 MBTiles 中的 timestamp_0, timestamp_1, ...
+    return `${API_URL}/tiles/${layer}/timestamp_${frame}/{z}/{x}/{y}.png`;
   },
 };

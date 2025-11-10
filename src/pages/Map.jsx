@@ -548,13 +548,13 @@ const Map = () => {
 
   // 添加歷史圖層（MBTiles）
   const addHistoricalLayers = () => {
-    console.log("Adding historical MBTiles layers...");
+    console.log("Adding historical MBTiles layers with frame:", currentFrame);
 
     try {
       // Temperature (MBTiles)
       map.current.addSource("mbtiles-temp", {
         type: "raster",
-        tiles: [api.getTileUrl("temperature")],
+        tiles: [api.getTileUrl("temperature", currentFrame)],
         tileSize: 256,
       });
 
@@ -578,7 +578,7 @@ const Map = () => {
       // Precipitation (MBTiles)
       map.current.addSource("mbtiles-precipitation", {
         type: "raster",
-        tiles: [api.getTileUrl("precipitation")],
+        tiles: [api.getTileUrl("precipitation", currentFrame)],
         tileSize: 256,
       });
 
@@ -602,7 +602,7 @@ const Map = () => {
       // Wind (MBTiles)
       map.current.addSource("mbtiles-wind", {
         type: "raster",
-        tiles: [api.getTileUrl("wind")],
+        tiles: [api.getTileUrl("wind", currentFrame)],
         tileSize: 256,
       });
 
@@ -626,7 +626,7 @@ const Map = () => {
       // Clouds (MBTiles)
       map.current.addSource("mbtiles-clouds", {
         type: "raster",
-        tiles: [api.getTileUrl("clouds")],
+        tiles: [api.getTileUrl("clouds", currentFrame)],
         tileSize: 256,
       });
 
@@ -650,7 +650,7 @@ const Map = () => {
       // Pressure (MBTiles)
       map.current.addSource("mbtiles-pressure", {
         type: "raster",
-        tiles: [api.getTileUrl("pressure")],
+        tiles: [api.getTileUrl("pressure", currentFrame)],
         tileSize: 256,
       });
 
@@ -680,6 +680,33 @@ const Map = () => {
 
   // Save function reference
   addWeatherLayersRef.current = addWeatherLayers;
+
+  // 監聽 currentFrame 變化，在歷史模式下更新圖層
+  useEffect(() => {
+    if (!map.current || !map.current.isStyleLoaded() || dataMode !== "historical") {
+      return;
+    }
+
+    console.log("CurrentFrame changed to:", currentFrame, "Updating tile sources...");
+
+    // 更新所有 MBTiles 圖層的 tiles URL
+    const layers = [
+      { source: "mbtiles-temp", layer: "temperature" },
+      { source: "mbtiles-precipitation", layer: "precipitation" },
+      { source: "mbtiles-wind", layer: "wind" },
+      { source: "mbtiles-clouds", layer: "clouds" },
+      { source: "mbtiles-pressure", layer: "pressure" },
+    ];
+
+    layers.forEach(({ source, layer }) => {
+      const sourceObj = map.current.getSource(source);
+      if (sourceObj) {
+        // 更新 source 的 tiles URL
+        sourceObj.setTiles([api.getTileUrl(layer, currentFrame)]);
+        console.log(`Updated ${source} to frame ${currentFrame}`);
+      }
+    });
+  }, [currentFrame, dataMode]);
 
   // 監聽地圖樣式切換 (只在初始化後才執行)
   useEffect(() => {
