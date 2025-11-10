@@ -46,6 +46,7 @@ const resources = {
         noDateSelected: "No Date Selected",
         dataMode: {
           live: "Live",
+          historical: "Historical",
           search: "Search",
           date: "Date",
         },
@@ -124,6 +125,7 @@ const resources = {
         noDateSelected: "未選擇日期",
         dataMode: {
           live: "即時",
+          historical: "歷史",
           search: "搜尋",
           date: "日期",
         },

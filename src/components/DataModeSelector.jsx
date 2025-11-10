@@ -4,13 +4,14 @@ import { useTranslation } from "react-i18next";
 
 /**
  * 資料模式選擇器
- * 提供三個按鈕：即時、搜尋、日期
+ * 提供四個按鈕:即時、歷史、搜尋、日期
  */
 const DataModeSelector = ({ currentMode, onModeChange }) => {
   const { t } = useTranslation();
 
   const modes = [
     { id: "live", label: t("map.dataMode.live") },
+    { id: "historical", label: t("map.dataMode.historical") },
     { id: "search", label: t("map.dataMode.search") },
     { id: "date", label: t("map.dataMode.date") },
   ];
@@ -59,10 +60,12 @@ const DataModeSelector = ({ currentMode, onModeChange }) => {
           left:
             currentMode === "live"
               ? "3px"
+              : currentMode === "historical"
+              ? "25%"
               : currentMode === "search"
-              ? "33.33%"
-              : "66.66%",
-          width: "calc(33.33% - 2px)",
+              ? "50%"
+              : "75%",
+          width: "calc(25% - 2px)",
           height: "calc(100% - 6px)",
           backgroundColor: "#1976d2",
           borderRadius: "17px",
@@ -75,7 +78,7 @@ const DataModeSelector = ({ currentMode, onModeChange }) => {
 };
 
 DataModeSelector.propTypes = {
-  currentMode: PropTypes.oneOf(["live", "search", "date"]).isRequired,
+  currentMode: PropTypes.oneOf(["live", "historical", "search", "date"]).isRequired,
   onModeChange: PropTypes.func.isRequired,
 };
 

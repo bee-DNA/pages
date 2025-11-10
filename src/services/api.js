@@ -77,6 +77,9 @@ export const api = {
   getTileUrl(layer, frame = 0) {
     // frame 從 0 開始，對應到 MBTiles 中的 timestamp_0, timestamp_1, ...
     // 使用新的路由格式: /tiles/:layer/t/:timestamp/:z/:x/:y.png
-    return `${API_URL}/tiles/${layer}/t/timestamp_${String(frame).padStart(3, '0')}/{z}/{x}/{y}.png`;
+    return `${API_URL}/tiles/${layer}/t/timestamp_${String(frame).padStart(
+      3,
+      "0"
+    )}/{z}/{x}/{y}.png`;
   },
 };
