@@ -8,6 +8,11 @@ import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import TimeController from "../components/TimeController";
 import LayerControl from "../components/LayerControl";
+import DataModeSelector from "../components/DataModeSelector";
+import SampleSearchDialog from "../components/SampleSearchDialog";
+import DatePickerDialog from "../components/DatePickerDialog";
+import TimelineControls from "../components/TimelineControls";
+import useTimelineAnimation from "../hooks/useTimelineAnimation";
 import { api } from "../services/api";
 import mapIcon from "../assets/map.svg";
 
@@ -22,11 +27,83 @@ const Map = () => {
   const [lat] = useState(24.0513);
   const [zoom] = useState(2);
   const [mapStyle, setMapStyle] = useState("streets");
+  const [dataMode, setDataMode] = useState("live"); // 資料模式：live, search, date
+  const [selectedDate, setSelectedDate] = useState(null); // 選中的日期
+  const [searchDialogOpen, setSearchDialogOpen] = useState(false);
+  const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   const [expanded, setExpanded] = useState(false); // For layer control
   const layersRef = useRef(null);
   const addWeatherLayersRef = useRef(null);
   const layerPanelRef = useRef(null); // For click outside detection
+
+  // 時間軸動畫控制（僅在歷史資料模式使用）
+  const {
+    currentFrame,
+    totalFrames,
+    isPlaying,
+    timestamp,
+    play,
+    pause,
+    stop,
+    nextFrame,
+    previousFrame,
+    goToFrame,
+  } = useTimelineAnimation({
+    totalFrames: 16, // 2天 × 8時間點
+    duration: 5000, // 5秒完整循環
+    autoPlay: false,
+    loop: true,
+  });
+
+  // 處理模式切換
+  const handleModeChange = (mode) => {
+    if (mode === "search") {
+      setSearchDialogOpen(true);
+    } else if (mode === "date") {
+      setDatePickerOpen(true);
+    } else if (mode === "live") {
+      setDataMode("live");
+      setSelectedDate(null);
+      stop(); // 停止動畫
+      // 切換回即時資料
+      if (addWeatherLayersRef.current) {
+        addWeatherLayersRef.current();
+      }
+    }
+  };
+
+  // 處理樣本搜尋
+  const handleSampleSearch = (date) => {
+    setSelectedDate(date);
+    setDataMode("historical");
+    setSearchDialogOpen(false);
+    // 載入該日期的歷史資料
+    loadHistoricalData(date);
+  };
+
+  // 處理日期選擇
+  const handleDateSelect = (date) => {
+    setSelectedDate(date);
+    setDataMode("historical");
+    setDatePickerOpen(false);
+    // 載入該日期的歷史資料
+    loadHistoricalData(date);
+  };
+
+  // 載入歷史資料
+  const loadHistoricalData = (date) => {
+    console.log("Loading historical data for:", date);
+    // 根據日期計算起始幀
+    const dayIndex = date === "2024-11-01" ? 0 : 1;
+    const startFrame = dayIndex * 8;
+    goToFrame(startFrame);
+    
+    // 更新地圖圖層為 MBTiles
+    if (addWeatherLayersRef.current) {
+      addWeatherLayersRef.current();
+    }
+  };
 
   // Auto-close layer panel when clicking outside
   useEffect(() => {
@@ -65,7 +142,7 @@ const Map = () => {
       return;
     }
 
-    console.log("Starting to add weather layers...");
+    console.log("Starting to add weather layers...", "Mode:", dataMode);
 
     // Remove old layers
     const layerIds = [
@@ -90,6 +167,11 @@ const Map = () => {
       "wind-arrows",
       "openweather-clouds",
       "openweather-pressure",
+      "mbtiles-temp",
+      "mbtiles-precipitation",
+      "mbtiles-wind",
+      "mbtiles-clouds",
+      "mbtiles-pressure",
     ];
     sourceIds.forEach((id) => {
       if (map.current.getSource(id)) {
@@ -97,6 +179,22 @@ const Map = () => {
       }
     });
 
+    // 根據模式選擇資料源
+    const isHistorical = dataMode === "historical";
+    
+    if (isHistorical) {
+      // 使用 MBTiles 歷史資料
+      console.log("Loading historical MBTiles data...");
+      addHistoricalLayers();
+    } else {
+      // 使用即時 OpenWeather 資料
+      console.log("Loading live OpenWeather data...");
+      addLiveLayers();
+    }
+  };
+
+  // 添加即時圖層（OpenWeather）
+  const addLiveLayers = () => {
     // Temperature layer - high saturation
     try {
       map.current.addSource("openweather-temp", {
@@ -412,6 +510,133 @@ const Map = () => {
 
       applyLayerState();
     }
+  };
+
+  // 添加歷史圖層（MBTiles）
+  const addHistoricalLayers = () => {
+    console.log("Adding historical MBTiles layers...");
+    
+    try {
+      // Temperature (MBTiles)
+      map.current.addSource("mbtiles-temp", {
+        type: "raster",
+        tiles: [api.getTileUrl("temperature")],
+        tileSize: 256,
+      });
+
+      map.current.addLayer({
+        id: "sst-layer",
+        type: "raster",
+        source: "mbtiles-temp",
+        paint: {
+          "raster-opacity": 0.8,
+        },
+        layout: {
+          visibility: "none",
+        },
+      });
+      console.log("MBTiles temperature layer added");
+    } catch (error) {
+      console.error("Failed to add MBTiles temperature layer:", error);
+    }
+
+    try {
+      // Precipitation (MBTiles)
+      map.current.addSource("mbtiles-precipitation", {
+        type: "raster",
+        tiles: [api.getTileUrl("precipitation")],
+        tileSize: 256,
+      });
+
+      map.current.addLayer({
+        id: "lst-layer",
+        type: "raster",
+        source: "mbtiles-precipitation",
+        paint: {
+          "raster-opacity": 0.75,
+        },
+        layout: {
+          visibility: "none",
+        },
+      });
+      console.log("MBTiles precipitation layer added");
+    } catch (error) {
+      console.error("Failed to add MBTiles precipitation layer:", error);
+    }
+
+    try {
+      // Wind (MBTiles)
+      map.current.addSource("mbtiles-wind", {
+        type: "raster",
+        tiles: [api.getTileUrl("wind")],
+        tileSize: 256,
+      });
+
+      map.current.addLayer({
+        id: "wind-layer",
+        type: "raster",
+        source: "mbtiles-wind",
+        paint: {
+          "raster-opacity": 0.85,
+        },
+        layout: {
+          visibility: layersRef.current?.wind?.enabled ? "visible" : "none",
+        },
+      });
+      console.log("MBTiles wind layer added");
+    } catch (error) {
+      console.error("Failed to add MBTiles wind layer:", error);
+    }
+
+    try {
+      // Clouds (MBTiles)
+      map.current.addSource("mbtiles-clouds", {
+        type: "raster",
+        tiles: [api.getTileUrl("clouds")],
+        tileSize: 256,
+      });
+
+      map.current.addLayer({
+        id: "waves-layer",
+        type: "raster",
+        source: "mbtiles-clouds",
+        paint: {
+          "raster-opacity": 0.6,
+        },
+        layout: {
+          visibility: "none",
+        },
+      });
+      console.log("MBTiles clouds layer added");
+    } catch (error) {
+      console.error("Failed to add MBTiles clouds layer:", error);
+    }
+
+    try {
+      // Pressure (MBTiles)
+      map.current.addSource("mbtiles-pressure", {
+        type: "raster",
+        tiles: [api.getTileUrl("pressure")],
+        tileSize: 256,
+      });
+
+      map.current.addLayer({
+        id: "chlorophyll-layer",
+        type: "raster",
+        source: "mbtiles-pressure",
+        paint: {
+          "raster-opacity": 0.7,
+        },
+        layout: {
+          visibility: "none",
+        },
+      });
+      console.log("MBTiles pressure layer added");
+    } catch (error) {
+      console.error("Failed to add MBTiles pressure layer:", error);
+    }
+
+    console.log("All MBTiles layers loaded!");
   };
 
   // Save function reference
@@ -734,6 +959,12 @@ const Map = () => {
             </Box>
           </Box>
 
+          {/* Data Mode Selector: 即時 | 搜尋 | 日期 */}
+          <DataModeSelector
+            currentMode={dataMode}
+            onModeChange={handleModeChange}
+          />
+
           {/* Right: Map Style Toggle & Layer Control */}
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
             {/* Map Style Toggle Switch */}
@@ -916,6 +1147,36 @@ const Map = () => {
             </div>
           </Box>
         </Box>
+
+        {/* Timeline Controls (僅在歷史資料模式顯示) */}
+        {dataMode === "historical" && (
+          <TimelineControls
+            currentFrame={currentFrame}
+            totalFrames={totalFrames}
+            isPlaying={isPlaying}
+            timestamp={timestamp}
+            onPlay={play}
+            onPause={pause}
+            onStop={stop}
+            onNext={nextFrame}
+            onPrevious={previousFrame}
+            onFrameChange={goToFrame}
+          />
+        )}
+
+        {/* Sample Search Dialog */}
+        <SampleSearchDialog
+          open={searchDialogOpen}
+          onClose={() => setSearchDialogOpen(false)}
+          onSearch={handleSampleSearch}
+        />
+
+        {/* Date Picker Dialog */}
+        <DatePickerDialog
+          open={datePickerOpen}
+          onClose={() => setDatePickerOpen(false)}
+          onDateSelect={handleDateSelect}
+        />
       </Box>
     </Container>
   );

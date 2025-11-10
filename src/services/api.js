@@ -53,4 +53,28 @@ export const api = {
     if (!response.ok) throw new Error("Health check failed");
     return response.json();
   },
+
+  // MBTiles 圖磚服務
+  async getTileLayers() {
+    const response = await fetch(`${API_URL}/tiles`);
+    if (!response.ok) throw new Error("Failed to fetch tile layers");
+    return response.json();
+  },
+
+  async getTileMetadata(layer) {
+    const response = await fetch(`${API_URL}/tiles/${layer}/metadata`);
+    if (!response.ok) throw new Error(`Failed to fetch metadata for ${layer}`);
+    return response.json();
+  },
+
+  async getTileJSON(layer) {
+    const response = await fetch(`${API_URL}/tiles/${layer}/tilejson`);
+    if (!response.ok) throw new Error(`Failed to fetch TileJSON for ${layer}`);
+    return response.json();
+  },
+
+  // 圖磚 URL 生成器
+  getTileUrl(layer) {
+    return `${API_URL}/tiles/${layer}/{z}/{x}/{y}.png`;
+  },
 };
