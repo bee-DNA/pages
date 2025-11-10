@@ -81,7 +81,7 @@ const Map = () => {
     previousFrame,
     goToFrame,
   } = useTimelineAnimation({
-    totalFrames: 48, // 2天 × 24小時 (2023-01-01 + 2024-05-05)
+    totalFrames: 48, // 2天 × 24小時 (2024-11-01 + 2024-11-02)
     duration: 5000, // 5秒完整循環
     autoPlay: false,
     loop: true,
@@ -144,8 +144,9 @@ const Map = () => {
   const loadHistoricalData = (date) => {
     console.log("Loading historical data for:", date);
     // 根據日期計算起始幀
+    // 2024-11-01: 0-23 幀, 2024-11-02: 24-47 幀
     const dayIndex = date === "2024-11-01" ? 0 : 1;
-    const startFrame = dayIndex * 8;
+    const startFrame = dayIndex * 24;
     goToFrame(startFrame);
 
     // 更新地圖圖層為 MBTiles
@@ -749,6 +750,20 @@ const Map = () => {
       }
     });
   }, [currentFrame, dataMode]);
+
+  // 監聽 dataMode 變化,自動切換圖層
+  useEffect(() => {
+    if (!map.current || !map.current.isStyleLoaded() || !isInitialized) {
+      return;
+    }
+
+    console.log("DataMode changed to:", dataMode);
+    
+    // 切換圖層
+    if (addWeatherLayersRef.current) {
+      addWeatherLayersRef.current();
+    }
+  }, [dataMode, isInitialized]);
 
   // 監聽地圖樣式切換 (只在初始化後才執行)
   useEffect(() => {
