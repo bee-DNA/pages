@@ -1,13 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-import { Container, Box, Typography, IconButton, Slider } from "@mui/material";
+import { Container, Box, Typography } from "@mui/material";
 import LayersIcon from "@mui/icons-material/Layers";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
-import PlayArrowIcon from "@mui/icons-material/PlayArrow";
-import PauseIcon from "@mui/icons-material/Pause";
-import SkipPreviousIcon from "@mui/icons-material/SkipPrevious";
-import SkipNextIcon from "@mui/icons-material/SkipNext";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { useTranslation } from "react-i18next";
@@ -95,8 +91,10 @@ const Map = () => {
   const handleModeChange = (mode) => {
     if (mode === "search") {
       setSearchDialogOpen(true);
+      // 不立即切換 dataMode,等用戶選擇後再切換
     } else if (mode === "date") {
       setDatePickerOpen(true);
+      // 不立即切換 dataMode,等用戶選擇後再切換
     } else if (mode === "historical") {
       // 直接切換到歷史模式,使用預設資料
       setDataMode("historical");
@@ -125,6 +123,9 @@ const Map = () => {
     setSearchDialogOpen(false);
     // 載入該日期的歷史資料
     loadHistoricalData(date);
+    // 自動播放
+    goToFrame(0);
+    play();
   };
 
   // 處理日期選擇
@@ -134,6 +135,9 @@ const Map = () => {
     setDatePickerOpen(false);
     // 載入該日期的歷史資料
     loadHistoricalData(date);
+    // 自動播放
+    goToFrame(0);
+    play();
   };
 
   // 載入歷史資料
@@ -1376,118 +1380,6 @@ const Map = () => {
               </Typography>
             </Box>
           </Box>
-
-          {/* Playback Controls (僅在歷史模式顯示) */}
-          {dataMode === "historical" && (
-            <Box
-              sx={{
-                position: "absolute",
-                bottom: 20,
-                left: "50%",
-                transform: "translateX(-50%)",
-                backgroundColor: "rgba(255, 255, 255, 0.95)",
-                padding: "12px 20px",
-                borderRadius: "12px",
-                zIndex: 1000,
-                boxShadow: "0 4px 16px rgba(0,0,0,0.25)",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: 1.5,
-                minWidth: "400px",
-              }}
-            >
-              {/* 播放控制按鈕 */}
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <IconButton
-                  size="small"
-                  onClick={previousFrame}
-                  sx={{
-                    backgroundColor: "#f5f5f5",
-                    "&:hover": { backgroundColor: "#e0e0e0" },
-                  }}
-                >
-                  <SkipPreviousIcon />
-                </IconButton>
-                <IconButton
-                  onClick={isPlaying ? pause : play}
-                  sx={{
-                    backgroundColor: "#1976d2",
-                    color: "white",
-                    "&:hover": { backgroundColor: "#1565c0" },
-                    width: 48,
-                    height: 48,
-                  }}
-                >
-                  {isPlaying ? <PauseIcon /> : <PlayArrowIcon />}
-                </IconButton>
-                <IconButton
-                  size="small"
-                  onClick={nextFrame}
-                  sx={{
-                    backgroundColor: "#f5f5f5",
-                    "&:hover": { backgroundColor: "#e0e0e0" },
-                  }}
-                >
-                  <SkipNextIcon />
-                </IconButton>
-              </Box>
-
-              {/* 時間軸滑桿 */}
-              <Box sx={{ width: "100%", px: 2 }}>
-                <Slider
-                  value={currentFrame}
-                  min={0}
-                  max={totalFrames - 1}
-                  onChange={(e, value) => goToFrame(value)}
-                  valueLabelDisplay="auto"
-                  valueLabelFormat={(value) => {
-                    const baseTime =
-                      value < 24
-                        ? new Date("2023-01-01T00:00:00+08:00")
-                        : new Date("2024-05-05T00:00:00+08:00");
-                    const hoursOffset = value < 24 ? value : value - 24;
-                    const frameTime = new Date(
-                      baseTime.getTime() + hoursOffset * 60 * 60 * 1000
-                    );
-                    return frameTime.toLocaleString(i18n.language === "zh" ? "zh-TW" : "en-US", {
-                      month: "short",
-                      day: "numeric",
-                      hour: "2-digit",
-                    });
-                  }}
-                  sx={{
-                    color: "#1976d2",
-                    "& .MuiSlider-thumb": {
-                      width: 16,
-                      height: 16,
-                    },
-                  }}
-                />
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    mt: 0.5,
-                  }}
-                >
-                  <Typography sx={{ fontSize: "10px", color: "#666" }}>
-                    Frame {currentFrame + 1} / {totalFrames}
-                  </Typography>
-                  <Typography sx={{ fontSize: "10px", color: "#666" }}>
-                    {timestamp
-                      ? timestamp.toLocaleString(i18n.language === "zh" ? "zh-TW" : "en-US", {
-                          month: "short",
-                          day: "numeric",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })
-                      : "—"}
-                  </Typography>
-                </Box>
-              </Box>
-            </Box>
-          )}
         </Box>
 
         {/* Timeline Controls (僅在歷史資料模式顯示) */}
