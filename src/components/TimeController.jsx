@@ -60,7 +60,9 @@ const TimeController = ({ projectId = "BEE001" }) => {
               variant="body2"
               sx={{ fontWeight: 600, fontSize: "13px" }}
             >
-              {i18n.language === "zh" ? "今日數據" : "Today's Data"}
+              {i18n.language === "zh"
+                ? "即時資料 / 今日數據"
+                : "Live Data / Today's Data"}
             </Typography>
             <Typography
               variant="caption"
