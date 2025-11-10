@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import api from "../services/api";
 
 /**
  * 時間軸動畫 Hook
  * 用於控制氣象圖層的時間序列動畫
+ * 自動從後端 API 讀取可用日期範圍
  *
  * @param {Object} options
  * @param {number} options.totalFrames - 總幀數（預設48：2天×24小時）
@@ -20,10 +22,78 @@ export const useTimelineAnimation = ({
   const [currentFrame, setCurrentFrame] = useState(0);
   const [isPlaying, setIsPlaying] = useState(autoPlay);
   const [timestamp, setTimestamp] = useState(null);
+  const [datesMetadata, setDatesMetadata] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const animationRef = useRef(null);
   const startTimeRef = useRef(null);
   const frameTimeRef = useRef(duration / totalFrames);
+
+  // 從 API 讀取日期 metadata
+  useEffect(() => {
+    const fetchDatesMetadata = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetch(`${api.API_URL}/tiles/meta/dates`);
+        
+        if (response.ok) {
+          const data = await response.json();
+          setDatesMetadata(data);
+          console.log("[useTimelineAnimation] 已載入日期 metadata:", data);
+        } else {
+          // 如果 API 失敗,使用預設值(向後兼容)
+          console.warn("[useTimelineAnimation] 無法載入日期 metadata,使用預設值");
+          setDatesMetadata({
+            dates: [
+              {
+                date: "2023-01-01",
+                frameStart: 0,
+                frameEnd: 23,
+                hours: 24,
+                timezone: "UTC+8"
+              },
+              {
+                date: "2024-05-05",
+                frameStart: 24,
+                frameEnd: 47,
+                hours: 24,
+                timezone: "UTC+8"
+              }
+            ],
+            totalFrames: 48,
+            hoursPerDay: 24
+          });
+        }
+      } catch (error) {
+        console.error("[useTimelineAnimation] 載入日期 metadata 失敗:", error);
+        // 使用預設值
+        setDatesMetadata({
+          dates: [
+            {
+              date: "2023-01-01",
+              frameStart: 0,
+              frameEnd: 23,
+              hours: 24,
+              timezone: "UTC+8"
+            },
+            {
+              date: "2024-05-05",
+              frameStart: 24,
+              frameEnd: 47,
+              hours: 24,
+              timezone: "UTC+8"
+            }
+          ],
+          totalFrames: 48,
+          hoursPerDay: 24
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchDatesMetadata();
+  }, []);
 
   // 計算每幀時間
   useEffect(() => {
@@ -81,19 +151,36 @@ export const useTimelineAnimation = ({
     };
   }, [isPlaying, animate]);
 
-  // 生成時間戳記(基於配置的日期,每1小時一個點)
+  // 生成時間戳記(基於從 API 讀取的日期)
   useEffect(() => {
-    // Frame 0-23: 2023-01-01, Frame 24-47: 2024-05-05
-    const baseTime =
-      currentFrame < 24
-        ? new Date("2023-01-01T00:00:00+08:00")
-        : new Date("2024-05-05T00:00:00+08:00");
-    const hoursOffset = currentFrame < 24 ? currentFrame : currentFrame - 24;
-    const frameTime = new Date(
-      baseTime.getTime() + hoursOffset * 60 * 60 * 1000
+    if (!datesMetadata) return;
+
+    // 找到當前 frame 對應的日期
+    const dateInfo = datesMetadata.dates.find(
+      (d) => currentFrame >= d.frameStart && currentFrame <= d.frameEnd
     );
-    setTimestamp(frameTime);
-  }, [currentFrame]);
+
+    if (dateInfo) {
+      // 計算該日期內的小時偏移
+      const hoursOffset = currentFrame - dateInfo.frameStart;
+      const baseTime = new Date(dateInfo.date + "T00:00:00+08:00");
+      const frameTime = new Date(
+        baseTime.getTime() + hoursOffset * 60 * 60 * 1000
+      );
+      setTimestamp(frameTime);
+    } else {
+      // Fallback: 使用舊邏輯
+      const baseTime =
+        currentFrame < 24
+          ? new Date("2023-01-01T00:00:00+08:00")
+          : new Date("2024-05-05T00:00:00+08:00");
+      const hoursOffset = currentFrame < 24 ? currentFrame : currentFrame - 24;
+      const frameTime = new Date(
+        baseTime.getTime() + hoursOffset * 60 * 60 * 1000
+      );
+      setTimestamp(frameTime);
+    }
+  }, [currentFrame, datesMetadata]);
 
   // 控制函數
   const play = useCallback(() => {
@@ -143,6 +230,8 @@ export const useTimelineAnimation = ({
     totalFrames,
     isPlaying,
     timestamp,
+    datesMetadata,
+    isLoading,
     progress: currentFrame / (totalFrames - 1),
 
     // 控制方法
