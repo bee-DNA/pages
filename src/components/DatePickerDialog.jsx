@@ -17,10 +17,11 @@ import PropTypes from "prop-types";
 
 /**
  * 日期選擇器對話框
- * 只允許選擇有資料的日期（2024-11-01, 2024-11-02）
+ * 只允許選擇有資料的日期(2024-11-01, 2024-11-02)
  */
 const DatePickerDialog = ({ open, onClose, onDateSelect }) => {
-  const [selectedDate, setSelectedDate] = useState(null);
+  // 預設選擇第一個可用日期
+  const [selectedDate, setSelectedDate] = useState(dayjs("2024-11-01"));
 
   // 有資料的日期
   const availableDates = [dayjs("2024-11-01"), dayjs("2024-11-02")];
@@ -40,7 +41,7 @@ const DatePickerDialog = ({ open, onClose, onDateSelect }) => {
   };
 
   const handleClose = () => {
-    setSelectedDate(null);
+    // 不重置選擇的日期,保持在 2024-11-01
     onClose();
   };
 
@@ -66,12 +67,13 @@ const DatePickerDialog = ({ open, onClose, onDateSelect }) => {
               shouldDisableDate={shouldDisableDate}
               views={["year", "month", "day"]}
               openTo="day"
+              defaultCalendarMonth={dayjs("2024-11-01")}
               minDate={dayjs("2024-11-01")}
               maxDate={dayjs("2024-11-02")}
               slotProps={{
                 textField: {
                   fullWidth: true,
-                  helperText: "僅顯示有氣象資料的日期",
+                  helperText: "僅顯示有氣象資料的日期 (2024-11-01, 2024-11-02)",
                 },
               }}
             />

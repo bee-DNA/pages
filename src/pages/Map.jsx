@@ -82,7 +82,7 @@ const Map = () => {
     goToFrame,
   } = useTimelineAnimation({
     totalFrames: 48, // 2天 × 24小時 (2024-11-01 + 2024-11-02)
-    duration: 5000, // 5秒完整循環
+    duration: 48000, // 48秒完整循環 (每幀1秒)
     autoPlay: false,
     loop: true,
   });
