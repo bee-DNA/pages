@@ -1,43 +1,9 @@
-import { useState } from "react";
 import { Box, Typography, Switch, Slider, Divider } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import LayersIcon from "@mui/icons-material/Layers";
 
-const LayerControl = ({ onLayerChange }) => {
+const LayerControl = ({ layers, onLayerChange }) => {
   const { i18n } = useTranslation();
-  const [layers, setLayers] = useState({
-    sst: {
-      enabled: false,
-      opacity: 70,
-      name: "全球溫度",
-      nameEn: "Temperature",
-    },
-    lst: {
-      enabled: false,
-      opacity: 60,
-      name: "降水分布",
-      nameEn: "Precipitation",
-    },
-    ocean_current: {
-      enabled: false,
-      opacity: 80,
-      name: "洋流",
-      nameEn: "Ocean Current",
-    },
-    wind: {
-      enabled: false,
-      opacity: 70,
-      name: "風速風向",
-      nameEn: "Wind Speed",
-    },
-    waves: { enabled: false, opacity: 60, name: "雲層", nameEn: "Clouds" },
-    chlorophyll: {
-      enabled: false,
-      opacity: 70,
-      name: "氣壓",
-      nameEn: "Pressure",
-    },
-  });
 
   const handleToggle = (layerId) => {
     const newLayers = {
@@ -47,7 +13,6 @@ const LayerControl = ({ onLayerChange }) => {
         enabled: !layers[layerId].enabled,
       },
     };
-    setLayers(newLayers);
     if (onLayerChange) onLayerChange(newLayers);
   };
 
@@ -59,7 +24,6 @@ const LayerControl = ({ onLayerChange }) => {
         opacity: value,
       },
     };
-    setLayers(newLayers);
     if (onLayerChange) onLayerChange(newLayers);
   };
 

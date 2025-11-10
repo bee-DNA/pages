@@ -37,6 +37,41 @@ const Map = () => {
   const addWeatherLayersRef = useRef(null);
   const layerPanelRef = useRef(null); // For click outside detection
 
+  // 圖層狀態管理
+  const [layerStates, setLayerStates] = useState({
+    sst: {
+      enabled: false,
+      opacity: 70,
+      name: "全球溫度",
+      nameEn: "Temperature",
+    },
+    lst: {
+      enabled: false,
+      opacity: 60,
+      name: "降水分布",
+      nameEn: "Precipitation",
+    },
+    ocean_current: {
+      enabled: false,
+      opacity: 80,
+      name: "洋流",
+      nameEn: "Ocean Current",
+    },
+    wind: {
+      enabled: false,
+      opacity: 70,
+      name: "風速風向",
+      nameEn: "Wind Speed",
+    },
+    waves: { enabled: false, opacity: 60, name: "雲層", nameEn: "Clouds" },
+    chlorophyll: {
+      enabled: false,
+      opacity: 70,
+      name: "氣壓",
+      nameEn: "Pressure",
+    },
+  });
+
   // 時間軸動畫控制（僅在歷史資料模式使用）
   const {
     currentFrame,
@@ -418,6 +453,11 @@ const Map = () => {
 
     console.log("All weather layers loaded!");
 
+    // 同步圖層狀態到 UI
+    setTimeout(() => {
+      syncLayerStates();
+    }, 500);
+
     // Apply pending layer changes if any
     if (layersRef.current) {
       console.log(
@@ -637,6 +677,11 @@ const Map = () => {
     }
 
     console.log("All MBTiles layers loaded!");
+    
+    // 同步圖層狀態到 UI
+    setTimeout(() => {
+      syncLayerStates();
+    }, 500);
   };
 
   // Save function reference
@@ -707,6 +752,9 @@ const Map = () => {
   // 處理圖層變更
   const handleLayerChange = (layers) => {
     console.log("handleLayerChange called with:", layers);
+
+    // 更新 state
+    setLayerStates(layers);
 
     if (!map.current) {
       console.log("Map not initialized");
@@ -781,6 +829,47 @@ const Map = () => {
     });
 
     console.log("Layer status updated:", layers);
+  };
+
+  // 同步地圖圖層實際狀態到 state
+  const syncLayerStates = () => {
+    if (!map.current || !map.current.isStyleLoaded()) {
+      return;
+    }
+
+    const layerMapping = {
+      sst: "sst-layer",
+      lst: "lst-layer",
+      wind: "wind-layer",
+      waves: "waves-layer",
+      chlorophyll: "chlorophyll-layer",
+    };
+
+    const updatedStates = { ...layerStates };
+    let hasChanges = false;
+
+    Object.keys(layerMapping).forEach((key) => {
+      const layerId = layerMapping[key];
+      const layer = map.current.getLayer(layerId);
+      
+      if (layer) {
+        const visibility = map.current.getLayoutProperty(layerId, "visibility");
+        const isVisible = visibility === "visible";
+        
+        if (updatedStates[key].enabled !== isVisible) {
+          updatedStates[key] = {
+            ...updatedStates[key],
+            enabled: isVisible,
+          };
+          hasChanges = true;
+        }
+      }
+    });
+
+    if (hasChanges) {
+      setLayerStates(updatedStates);
+      console.log("Layer states synchronized from map:", updatedStates);
+    }
   };
 
   useEffect(() => {
@@ -941,20 +1030,29 @@ const Map = () => {
                 variant="caption"
                 sx={{ fontSize: "10px", color: "#999" }}
               >
-                Today's Data
+                {dataMode === "live" ? "Today's Data" : "Historical Data"}
               </Typography>
               <Typography
                 variant="body2"
                 sx={{ fontSize: "12px", fontWeight: 600, color: "#333" }}
               >
-                {new Date().toLocaleString("zh-TW", {
-                  year: "numeric",
-                  month: "2-digit",
-                  day: "2-digit",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  hour12: false,
-                })}
+                {dataMode === "live" 
+                  ? new Date().toLocaleString("zh-TW", {
+                      year: "numeric",
+                      month: "2-digit",
+                      day: "2-digit",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      hour12: false,
+                    })
+                  : selectedDate 
+                    ? new Date(selectedDate).toLocaleDateString("zh-TW", {
+                        year: "numeric",
+                        month: "2-digit",
+                        day: "2-digit",
+                      })
+                    : "No Date Selected"
+                }
               </Typography>
             </Box>
           </Box>
@@ -1105,7 +1203,10 @@ const Map = () => {
                 },
               }}
             >
-              <LayerControl onLayerChange={handleLayerChange} />
+              <LayerControl 
+                layers={layerStates}
+                onLayerChange={handleLayerChange} 
+              />
             </Box>
           )}
 
