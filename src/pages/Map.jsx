@@ -11,7 +11,7 @@ import LayerControl from "../components/LayerControl";
 import DataModeSelector from "../components/DataModeSelector";
 import SampleSearchDialog from "../components/SampleSearchDialog";
 import DatePickerDialog from "../components/DatePickerDialog";
-import TimelineControls from "../components/TimelineControls";
+// import TimelineControls from "../components/TimelineControls";
 import useTimelineAnimation from "../hooks/useTimelineAnimation";
 import { api } from "../services/api";
 import mapIcon from "../assets/map.svg";
@@ -1250,7 +1250,7 @@ const Map = () => {
         </Box>
 
         {/* Timeline Controls (僅在歷史資料模式顯示) */}
-        {dataMode === "historical" && (
+        {/* {dataMode === "historical" && (
           <TimelineControls
             currentFrame={currentFrame}
             totalFrames={totalFrames}
@@ -1263,7 +1263,7 @@ const Map = () => {
             onPrevious={previousFrame}
             onFrameChange={goToFrame}
           />
-        )}
+        )} */}
 
         {/* Sample Search Dialog */}
         <SampleSearchDialog
