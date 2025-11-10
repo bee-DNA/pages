@@ -82,7 +82,7 @@ const Map = () => {
     goToFrame,
   } = useTimelineAnimation({
     totalFrames: 48, // 2天 × 24小時 (2024-11-01 + 2024-11-02)
-    duration: 48000, // 48秒完整循環 (每幀1秒)
+    duration: 5000, // 5秒完整循環
     autoPlay: false,
     loop: true,
   });
@@ -833,83 +833,80 @@ const Map = () => {
 
     // 更新 state
     setLayerStates(layers);
+    // 保存圖層狀態到 ref
+    layersRef.current = layers;
 
     if (!map.current) {
       console.log("Map not initialized");
       return;
     }
 
-    if (!map.current.isStyleLoaded()) {
-      console.log("Map style not loaded, will retry when loaded");
-      // Wait for style to load, then retry
-      map.current.once("idle", () => {
-        console.log("Map became idle, retrying layer change");
-        handleLayerChange(layers);
+    // 定義更新圖層的函數
+    const updateLayers = () => {
+      // 圖層ID映射
+      const layerMapping = {
+        sst: "sst-layer", // 溫度
+        lst: "lst-layer", // 降水
+        wind:
+          dataMode === "historical"
+            ? "wind-layer"
+            : ["wind-layer", "wind-arrow-layer"], // 歷史資料只有風速,即時資料有風速+箭頭
+        waves: "waves-layer", // 雲層
+        chlorophyll: "chlorophyll-layer", // 氣壓
+      };
+
+      // 遍歷所有圖層並更新
+      Object.keys(layerMapping).forEach((key) => {
+        const layerIds = Array.isArray(layerMapping[key])
+          ? layerMapping[key]
+          : [layerMapping[key]];
+
+        layerIds.forEach((layerId) => {
+          const layerExists = map.current.getLayer(layerId);
+          
+          if (layerExists && layers[key]) {
+            const visibility = layers[key].enabled ? "visible" : "none";
+            console.log(`Setting ${layerId} visibility to ${visibility}`);
+
+            try {
+              // 設置可見性
+              map.current.setLayoutProperty(layerId, "visibility", visibility);
+
+              // 設置透明度 (僅對 raster 圖層)
+              if (map.current.getLayer(layerId).type === "raster") {
+                map.current.setPaintProperty(
+                  layerId,
+                  "raster-opacity",
+                  layers[key].opacity / 100
+                );
+              }
+
+              // 設置箭頭透明度 (symbol 圖層)
+              if (map.current.getLayer(layerId).type === "symbol") {
+                map.current.setPaintProperty(
+                  layerId,
+                  "icon-opacity",
+                  layers[key].opacity / 100
+                );
+              }
+            } catch (error) {
+              console.error(`Error updating layer ${layerId}:`, error);
+            }
+          }
+        });
       });
-      return;
-    }
 
-    // 保存圖層狀態
-    layersRef.current = layers;
-
-    // 圖層ID映射（根據模式不同，wind可能有或沒有箭頭層）
-    const layerMapping = {
-      sst: "sst-layer", // 溫度
-      lst: "lst-layer", // 降水
-      wind:
-        dataMode === "historical"
-          ? "wind-layer"
-          : ["wind-layer", "wind-arrow-layer"], // 歷史資料只有風速，即時資料有風速+箭頭
-      waves: "waves-layer", // 雲層
-      chlorophyll: "chlorophyll-layer", // 氣壓
+      console.log("Layer status updated:", layers);
     };
 
-    // 遍歷所有圖層並更新
-    Object.keys(layerMapping).forEach((key) => {
-      const layerIds = Array.isArray(layerMapping[key])
-        ? layerMapping[key]
-        : [layerMapping[key]];
-
-      layerIds.forEach((layerId) => {
-        const layerExists = map.current.getLayer(layerId);
-        console.log(
-          `Layer ${layerId} exists:`,
-          !!layerExists,
-          "Config:",
-          layers[key]
-        );
-
-        if (layerExists && layers[key]) {
-          const visibility = layers[key].enabled ? "visible" : "none";
-          console.log(`Setting ${layerId} visibility to ${visibility}`);
-
-          // 設置可見性
-          map.current.setLayoutProperty(layerId, "visibility", visibility);
-
-          // 設置透明度 (僅對 raster 圖層)
-          if (map.current.getLayer(layerId).type === "raster") {
-            map.current.setPaintProperty(
-              layerId,
-              "raster-opacity",
-              layers[key].opacity / 100
-            );
-          }
-
-          // 設置箭頭透明度 (symbol 圖層)
-          if (map.current.getLayer(layerId).type === "symbol") {
-            map.current.setPaintProperty(
-              layerId,
-              "icon-opacity",
-              layers[key].opacity / 100
-            );
-          }
-        } else if (!layerExists) {
-          console.log(`Layer ${layerId} does not exist on map yet`);
-        }
-      });
-    });
-
-    console.log("Layer status updated:", layers);
+    // 立即嘗試更新
+    if (map.current.isStyleLoaded()) {
+      updateLayers();
+    } else {
+      // 如果樣式還在加載,等待加載完成後更新
+      console.log("Map style not loaded yet, waiting...");
+      map.current.once("idle", updateLayers);
+    }
   };
 
   // 同步地圖圖層實際狀態到 state
