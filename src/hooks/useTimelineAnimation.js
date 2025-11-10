@@ -5,14 +5,14 @@ import { useState, useEffect, useRef, useCallback } from "react";
  * 用於控制氣象圖層的時間序列動畫
  *
  * @param {Object} options
- * @param {number} options.totalFrames - 總幀數（預設16：2天×8時間點）
+ * @param {number} options.totalFrames - 總幀數（預設48：2天×24小時）
  * @param {number} options.duration - 動畫總時長（毫秒，預設5000）
  * @param {boolean} options.autoPlay - 是否自動播放（預設false）
  * @param {boolean} options.loop - 是否循環播放（預設true）
  * @returns {Object} 動畫控制物件
  */
 export const useTimelineAnimation = ({
-  totalFrames = 16,
+  totalFrames = 48,
   duration = 5000,
   autoPlay = false,
   loop = true,
@@ -81,10 +81,13 @@ export const useTimelineAnimation = ({
     };
   }, [isPlaying, animate]);
 
-  // 生成時間戳記（基於2024-11-01 00:00:00，每3小時一個點）
+  // 生成時間戳記（基於配置的日期，每1小時一個點）
   useEffect(() => {
-    const baseTime = new Date("2024-11-01T00:00:00+08:00");
-    const hoursOffset = currentFrame * 3; // 每3小時一個時間點
+    // Frame 0-23: 2023-01-01, Frame 24-47: 2024-05-05
+    const baseTime = currentFrame < 24 
+      ? new Date("2023-01-01T00:00:00+08:00")
+      : new Date("2024-05-05T00:00:00+08:00");
+    const hoursOffset = currentFrame < 24 ? currentFrame : currentFrame - 24;
     const frameTime = new Date(
       baseTime.getTime() + hoursOffset * 60 * 60 * 1000
     );

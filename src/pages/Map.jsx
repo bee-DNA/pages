@@ -81,7 +81,7 @@ const Map = () => {
     previousFrame,
     goToFrame,
   } = useTimelineAnimation({
-    totalFrames: 16, // 2天 × 8時間點
+    totalFrames: 48, // 2天 × 24小時 (2023-01-01 + 2024-05-05)
     duration: 5000, // 5秒完整循環
     autoPlay: false,
     loop: true,
@@ -688,7 +688,9 @@ const Map = () => {
     // 初始化 layersRef（如果還沒設置）
     if (!layersRef.current) {
       layersRef.current = layerStates;
-      console.log("Initialized layersRef with current layerStates (historical mode)");
+      console.log(
+        "Initialized layersRef with current layerStates (historical mode)"
+      );
     }
   };
 
@@ -697,11 +699,19 @@ const Map = () => {
 
   // 監聽 currentFrame 變化，在歷史模式下更新圖層
   useEffect(() => {
-    if (!map.current || !map.current.isStyleLoaded() || dataMode !== "historical") {
+    if (
+      !map.current ||
+      !map.current.isStyleLoaded() ||
+      dataMode !== "historical"
+    ) {
       return;
     }
 
-    console.log("CurrentFrame changed to:", currentFrame, "Updating tile sources...");
+    console.log(
+      "CurrentFrame changed to:",
+      currentFrame,
+      "Updating tile sources..."
+    );
 
     // 更新所有 MBTiles 圖層的 tiles URL
     const layers = [
@@ -813,7 +823,10 @@ const Map = () => {
     const layerMapping = {
       sst: "sst-layer", // 溫度
       lst: "lst-layer", // 降水
-      wind: dataMode === "historical" ? "wind-layer" : ["wind-layer", "wind-arrow-layer"], // 歷史資料只有風速，即時資料有風速+箭頭
+      wind:
+        dataMode === "historical"
+          ? "wind-layer"
+          : ["wind-layer", "wind-arrow-layer"], // 歷史資料只有風速，即時資料有風速+箭頭
       waves: "waves-layer", // 雲層
       chlorophyll: "chlorophyll-layer", // 氣壓
     };
@@ -1065,27 +1078,35 @@ const Map = () => {
                 variant="caption"
                 sx={{ fontSize: "10px", color: "#999" }}
               >
-                {dataMode === "live" ? t("map.todayData") : t("map.historicalData")}
+                {dataMode === "live"
+                  ? t("map.todayData")
+                  : t("map.historicalData")}
               </Typography>
               <Typography
                 variant="body2"
                 sx={{ fontSize: "12px", fontWeight: 600, color: "#333" }}
               >
                 {dataMode === "live"
-                  ? new Date().toLocaleString(i18n.language === "zh" ? "zh-TW" : "en-US", {
-                      year: "numeric",
-                      month: "2-digit",
-                      day: "2-digit",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                      hour12: false,
-                    })
+                  ? new Date().toLocaleString(
+                      i18n.language === "zh" ? "zh-TW" : "en-US",
+                      {
+                        year: "numeric",
+                        month: "2-digit",
+                        day: "2-digit",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hour12: false,
+                      }
+                    )
                   : selectedDate
-                  ? new Date(selectedDate).toLocaleDateString(i18n.language === "zh" ? "zh-TW" : "en-US", {
-                      year: "numeric",
-                      month: "2-digit",
-                      day: "2-digit",
-                    })
+                  ? new Date(selectedDate).toLocaleDateString(
+                      i18n.language === "zh" ? "zh-TW" : "en-US",
+                      {
+                        year: "numeric",
+                        month: "2-digit",
+                        day: "2-digit",
+                      }
+                    )
                   : t("map.noDateSelected")}
               </Typography>
             </Box>
