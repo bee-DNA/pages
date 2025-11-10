@@ -590,10 +590,10 @@ const Map = () => {
         type: "raster",
         source: "mbtiles-temp",
         paint: {
-          "raster-opacity": 0.8,
+          "raster-opacity": (layerStates.sst?.opacity || 70) / 100,
         },
         layout: {
-          visibility: "none",
+          visibility: layerStates.sst?.enabled ? "visible" : "none",
         },
       });
       console.log("MBTiles temperature layer added");
@@ -614,10 +614,10 @@ const Map = () => {
         type: "raster",
         source: "mbtiles-precipitation",
         paint: {
-          "raster-opacity": 0.75,
+          "raster-opacity": (layerStates.lst?.opacity || 60) / 100,
         },
         layout: {
-          visibility: "none",
+          visibility: layerStates.lst?.enabled ? "visible" : "none",
         },
       });
       console.log("MBTiles precipitation layer added");
@@ -638,10 +638,10 @@ const Map = () => {
         type: "raster",
         source: "mbtiles-wind",
         paint: {
-          "raster-opacity": 0.85,
+          "raster-opacity": (layerStates.wind?.opacity || 70) / 100,
         },
         layout: {
-          visibility: layersRef.current?.wind?.enabled ? "visible" : "none",
+          visibility: layerStates.wind?.enabled ? "visible" : "none",
         },
       });
       console.log("MBTiles wind layer added");
@@ -662,10 +662,10 @@ const Map = () => {
         type: "raster",
         source: "mbtiles-clouds",
         paint: {
-          "raster-opacity": 0.6,
+          "raster-opacity": (layerStates.waves?.opacity || 60) / 100,
         },
         layout: {
-          visibility: "none",
+          visibility: layerStates.waves?.enabled ? "visible" : "none",
         },
       });
       console.log("MBTiles clouds layer added");
@@ -686,10 +686,10 @@ const Map = () => {
         type: "raster",
         source: "mbtiles-pressure",
         paint: {
-          "raster-opacity": 0.7,
+          "raster-opacity": (layerStates.chlorophyll?.opacity || 70) / 100,
         },
         layout: {
-          visibility: "none",
+          visibility: layerStates.chlorophyll?.enabled ? "visible" : "none",
         },
       });
       console.log("MBTiles pressure layer added");
