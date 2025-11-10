@@ -454,6 +454,12 @@ const Map = () => {
       syncLayerStates();
     }, 500);
 
+    // 初始化 layersRef（如果還沒設置）
+    if (!layersRef.current) {
+      layersRef.current = layerStates;
+      console.log("Initialized layersRef with current layerStates");
+    }
+
     // Apply pending layer changes if any
     if (layersRef.current) {
       console.log(
@@ -678,6 +684,12 @@ const Map = () => {
     setTimeout(() => {
       syncLayerStates();
     }, 500);
+
+    // 初始化 layersRef（如果還沒設置）
+    if (!layersRef.current) {
+      layersRef.current = layerStates;
+      console.log("Initialized layersRef with current layerStates (historical mode)");
+    }
   };
 
   // Save function reference
