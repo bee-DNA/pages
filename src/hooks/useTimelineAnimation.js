@@ -84,9 +84,10 @@ export const useTimelineAnimation = ({
   // 生成時間戳記（基於配置的日期，每1小時一個點）
   useEffect(() => {
     // Frame 0-23: 2023-01-01, Frame 24-47: 2024-05-05
-    const baseTime = currentFrame < 24 
-      ? new Date("2023-01-01T00:00:00+08:00")
-      : new Date("2024-05-05T00:00:00+08:00");
+    const baseTime =
+      currentFrame < 24
+        ? new Date("2023-01-01T00:00:00+08:00")
+        : new Date("2024-05-05T00:00:00+08:00");
     const hoursOffset = currentFrame < 24 ? currentFrame : currentFrame - 24;
     const frameTime = new Date(
       baseTime.getTime() + hoursOffset * 60 * 60 * 1000

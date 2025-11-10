@@ -62,13 +62,13 @@ export const api = {
   },
 
   async getTileMetadata(layer) {
-    const response = await fetch(`${API_URL}/tiles/${layer}/metadata`);
+    const response = await fetch(`${API_URL}/tiles/${layer}/meta/info`);
     if (!response.ok) throw new Error(`Failed to fetch metadata for ${layer}`);
     return response.json();
   },
 
   async getTileJSON(layer) {
-    const response = await fetch(`${API_URL}/tiles/${layer}/tilejson`);
+    const response = await fetch(`${API_URL}/tiles/${layer}/meta/tilejson`);
     if (!response.ok) throw new Error(`Failed to fetch TileJSON for ${layer}`);
     return response.json();
   },
@@ -76,6 +76,7 @@ export const api = {
   // 圖磚 URL 生成器
   getTileUrl(layer, frame = 0) {
     // frame 從 0 開始，對應到 MBTiles 中的 timestamp_0, timestamp_1, ...
-    return `${API_URL}/tiles/${layer}/timestamp_${frame}/{z}/{x}/{y}.png`;
+    // 使用新的路由格式: /tiles/:layer/t/:timestamp/:z/:x/:y.png
+    return `${API_URL}/tiles/${layer}/t/timestamp_${String(frame).padStart(3, '0')}/{z}/{x}/{y}.png`;
   },
 };
