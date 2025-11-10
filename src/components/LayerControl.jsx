@@ -102,8 +102,6 @@ const LayerControl = ({ layers, onLayerChange }) => {
         <Divider sx={{ my: 1 }} />
         <LayerItem id="lst" icon="🏔️" />
         <Divider sx={{ my: 1 }} />
-        <LayerItem id="ocean_current" icon="🌀" />
-        <Divider sx={{ my: 1 }} />
         <LayerItem id="wind" icon="💨" />
         <Divider sx={{ my: 1 }} />
         <LayerItem id="waves" icon="☁️" />
