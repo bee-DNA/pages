@@ -1,10 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-import { Container, Box, Typography, IconButton } from "@mui/material";
+import { Container, Box, Typography } from "@mui/material";
 import LayersIcon from "@mui/icons-material/Layers";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
-import LanguageIcon from "@mui/icons-material/Language";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { useTranslation } from "react-i18next";
@@ -39,12 +38,6 @@ const Map = () => {
   const layersRef = useRef(null);
   const addWeatherLayersRef = useRef(null);
   const layerPanelRef = useRef(null); // For click outside detection
-
-  // 語言切換
-  const toggleLanguage = () => {
-    const newLang = i18n.language === "en" ? "zh" : "en";
-    i18n.changeLanguage(newLang);
-  };
 
   // 圖層狀態管理
   const [layerStates, setLayerStates] = useState({
@@ -1094,20 +1087,6 @@ const Map = () => {
 
           {/* Right: Map Style Toggle & Layer Control */}
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            {/* Language Toggle Button */}
-            <IconButton
-              onClick={toggleLanguage}
-              sx={{
-                backgroundColor: "#f5f5f5",
-                "&:hover": { backgroundColor: "#e0e0e0" },
-                width: 36,
-                height: 36,
-              }}
-              title={i18n.language === "en" ? "切換至中文" : "Switch to English"}
-            >
-              <LanguageIcon sx={{ fontSize: 18, color: "#666" }} />
-            </IconButton>
-
             {/* Map Style Toggle Switch */}
             <Box
               sx={{
