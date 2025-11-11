@@ -384,74 +384,85 @@ const Map = () => {
       console.error("Failed to add wind layer:", error);
     }
 
-    // Create wind arrows - custom SVG arrows
+    // Create wind arrows - use Canvas to generate PNG image
     try {
-      // Create arrow SVG image
-      const arrowSvg = `<svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 2 L14 10 L10 8 L6 10 Z" fill="#00FFFF" stroke="#FFFFFF" stroke-width="1"/></svg>`;
+      // Create canvas and draw arrow
+      const size = 20;
+      const canvas = document.createElement('canvas');
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext('2d');
 
-      const arrowImage = new Image(20, 20);
-      arrowImage.onerror = (e) => {
-        console.error("Failed to load arrow image:", e);
-      };
-      arrowImage.onload = () => {
-        if (map.current && !map.current.hasImage("wind-arrow")) {
-          map.current.addImage("wind-arrow", arrowImage);
-          console.log("Arrow icon loaded");
+      // Draw arrow pointing up
+      ctx.fillStyle = '#00FFFF';
+      ctx.strokeStyle = '#FFFFFF';
+      ctx.lineWidth = 1;
+      
+      ctx.beginPath();
+      ctx.moveTo(size / 2, 2);           // Top point
+      ctx.lineTo(size * 0.7, size / 2);  // Right point
+      ctx.lineTo(size / 2, size * 0.4);  // Middle indent
+      ctx.lineTo(size * 0.3, size / 2);  // Left point
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
 
-          // Create wind arrow data
-          const windArrows = [];
-          const gridSize = 5;
+      // Add arrow to map
+      if (map.current && !map.current.hasImage("wind-arrow")) {
+        map.current.addImage("wind-arrow", canvas);
+        console.log("Arrow icon loaded from canvas");
 
-          for (let lng = -180; lng < 180; lng += gridSize) {
-            for (let lat = -85; lat < 85; lat += gridSize) {
-              const rotation =
-                Math.atan2(lat - 24, lng - 120) * (180 / Math.PI);
-              windArrows.push({
-                type: "Feature",
-                geometry: {
-                  type: "Point",
-                  coordinates: [lng, lat],
-                },
-                properties: {
-                  rotation: rotation,
-                  speed: 5 + Math.random() * 10,
-                },
-              });
-            }
+        // Create wind arrow data
+        const windArrows = [];
+        const gridSize = 5;
+
+        for (let lng = -180; lng < 180; lng += gridSize) {
+          for (let lat = -85; lat < 85; lat += gridSize) {
+            const rotation =
+              Math.atan2(lat - 24, lng - 120) * (180 / Math.PI);
+            windArrows.push({
+              type: "Feature",
+              geometry: {
+                type: "Point",
+                coordinates: [lng, lat],
+              },
+              properties: {
+                rotation: rotation,
+                speed: 5 + Math.random() * 10,
+              },
+            });
           }
-
-          map.current.addSource("wind-arrows", {
-            type: "geojson",
-            data: {
-              type: "FeatureCollection",
-              features: windArrows,
-            },
-          });
-
-          // Wind arrow symbol layer
-          map.current.addLayer({
-            id: "wind-arrow-layer",
-            type: "symbol",
-            source: "wind-arrows",
-            minzoom: 3,
-            layout: {
-              "icon-image": "wind-arrow",
-              "icon-size": 1.0,
-              "icon-rotate": ["get", "rotation"],
-              "icon-rotation-alignment": "map",
-              "icon-allow-overlap": true,
-              "icon-ignore-placement": true,
-              visibility: layersRef.current?.wind?.enabled ? "visible" : "none",
-            },
-            paint: {
-              "icon-opacity": 0.8,
-            },
-          });
-          console.log("Wind arrow layer added");
         }
-      };
-      // Use encodeURIComponent instead of btoa to avoid encoding issues
-      arrowImage.src = "data:image/svg+xml," + encodeURIComponent(arrowSvg);
+
+        map.current.addSource("wind-arrows", {
+          type: "geojson",
+          data: {
+            type: "FeatureCollection",
+            features: windArrows,
+          },
+        });
+
+        // Wind arrow symbol layer
+        map.current.addLayer({
+          id: "wind-arrow-layer",
+          type: "symbol",
+          source: "wind-arrows",
+          minzoom: 3,
+          layout: {
+            "icon-image": "wind-arrow",
+            "icon-size": 1.0,
+            "icon-rotate": ["get", "rotation"],
+            "icon-rotation-alignment": "map",
+            "icon-allow-overlap": true,
+            "icon-ignore-placement": true,
+            visibility: layersRef.current?.wind?.enabled ? "visible" : "none",
+          },
+          paint: {
+            "icon-opacity": 0.8,
+          },
+        });
+        console.log("Wind arrow layer added");
+      }
     } catch (error) {
       console.error("Failed to add wind arrow layer:", error);
     }
