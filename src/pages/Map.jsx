@@ -248,7 +248,6 @@ const Map = () => {
       "sst-layer",
       "lst-layer",
       "wind-layer",
-      "wind-arrow-layer",
       "waves-layer",
       "chlorophyll-layer",
     ];
@@ -263,7 +262,6 @@ const Map = () => {
       "openweather-temp",
       "openweather-precipitation",
       "openweather-wind",
-      "wind-arrows",
       "openweather-clouds",
       "openweather-pressure",
       "mbtiles-temp",
@@ -354,7 +352,7 @@ const Map = () => {
       console.error("Failed to add precipitation layer:", error);
     }
 
-    // Wind layer
+    // Wind layer (raster only, no arrows for now)
     try {
       map.current.addSource("openweather-wind", {
         type: "raster",
@@ -371,107 +369,17 @@ const Map = () => {
         paint: {
           "raster-opacity": 0.85,
           "raster-brightness-min": 0.1,
-          "raster-brightness-max": 1.0, // 最大值為1
+          "raster-brightness-max": 1.0,
           "raster-contrast": 0.8,
-          "raster-saturation": 1.0, // 最大飽和度
+          "raster-saturation": 1.0,
         },
         layout: {
           visibility: layersRef.current?.wind?.enabled ? "visible" : "none",
         },
       });
-      console.log("Wind layer added");
+      console.log("Wind layer added (raster only)");
     } catch (error) {
       console.error("Failed to add wind layer:", error);
-    }
-
-    // Create wind arrows - use Canvas to generate ImageData
-    try {
-      // Create canvas and draw arrow
-      const size = 20;
-      const canvas = document.createElement('canvas');
-      canvas.width = size;
-      canvas.height = size;
-      const ctx = canvas.getContext('2d');
-
-      // Draw arrow pointing up
-      ctx.fillStyle = '#00FFFF';
-      ctx.strokeStyle = '#FFFFFF';
-      ctx.lineWidth = 1;
-      
-      ctx.beginPath();
-      ctx.moveTo(size / 2, 2);           // Top point
-      ctx.lineTo(size * 0.7, size / 2);  // Right point
-      ctx.lineTo(size / 2, size * 0.4);  // Middle indent
-      ctx.lineTo(size * 0.3, size / 2);  // Left point
-      ctx.closePath();
-      ctx.fill();
-      ctx.stroke();
-
-      // Get ImageData from canvas
-      const imageData = ctx.getImageData(0, 0, size, size);
-
-      // Add arrow to map using the correct format
-      if (map.current && !map.current.hasImage("wind-arrow")) {
-        map.current.addImage("wind-arrow", {
-          width: size,
-          height: size,
-          data: imageData.data
-        });
-        console.log("Arrow icon loaded from ImageData");
-
-        // Create wind arrow data
-        const windArrows = [];
-        const gridSize = 5;
-
-        for (let lng = -180; lng < 180; lng += gridSize) {
-          for (let lat = -85; lat < 85; lat += gridSize) {
-            const rotation =
-              Math.atan2(lat - 24, lng - 120) * (180 / Math.PI);
-            windArrows.push({
-              type: "Feature",
-              geometry: {
-                type: "Point",
-                coordinates: [lng, lat],
-              },
-              properties: {
-                rotation: rotation,
-                speed: 5 + Math.random() * 10,
-              },
-            });
-          }
-        }
-
-        map.current.addSource("wind-arrows", {
-          type: "geojson",
-          data: {
-            type: "FeatureCollection",
-            features: windArrows,
-          },
-        });
-
-        // Wind arrow symbol layer
-        map.current.addLayer({
-          id: "wind-arrow-layer",
-          type: "symbol",
-          source: "wind-arrows",
-          minzoom: 3,
-          layout: {
-            "icon-image": "wind-arrow",
-            "icon-size": 1.0,
-            "icon-rotate": ["get", "rotation"],
-            "icon-rotation-alignment": "map",
-            "icon-allow-overlap": true,
-            "icon-ignore-placement": true,
-            visibility: layersRef.current?.wind?.enabled ? "visible" : "none",
-          },
-          paint: {
-            "icon-opacity": 0.8,
-          },
-        });
-        console.log("Wind arrow layer added");
-      }
-    } catch (error) {
-      console.error("Failed to add wind arrow layer:", error);
     }
 
     // Cloud layer
@@ -560,7 +468,7 @@ const Map = () => {
           const layerMapping = {
             sst: "sst-layer",
             lst: "lst-layer",
-            wind: ["wind-layer", "wind-arrow-layer"],
+            wind: "wind-layer",
             waves: "waves-layer",
             chlorophyll: "chlorophyll-layer",
           };
@@ -914,10 +822,7 @@ const Map = () => {
       const layerMapping = {
         sst: "sst-layer", // 溫度
         lst: "lst-layer", // 降水
-        wind:
-          dataMode === "historical"
-            ? "wind-layer"
-            : ["wind-layer", "wind-arrow-layer"], // 歷史資料只有風速,即時資料有風速+箭頭
+        wind: "wind-layer", // 風速
         waves: "waves-layer", // 雲層
         chlorophyll: "chlorophyll-layer", // 氣壓
       };
