@@ -384,7 +384,7 @@ const Map = () => {
       console.error("Failed to add wind layer:", error);
     }
 
-    // Create wind arrows - use Canvas to generate PNG image
+    // Create wind arrows - use Canvas to generate ImageData
     try {
       // Create canvas and draw arrow
       const size = 20;
@@ -407,10 +407,17 @@ const Map = () => {
       ctx.fill();
       ctx.stroke();
 
-      // Add arrow to map
+      // Get ImageData from canvas
+      const imageData = ctx.getImageData(0, 0, size, size);
+
+      // Add arrow to map using the correct format
       if (map.current && !map.current.hasImage("wind-arrow")) {
-        map.current.addImage("wind-arrow", canvas);
-        console.log("Arrow icon loaded from canvas");
+        map.current.addImage("wind-arrow", {
+          width: size,
+          height: size,
+          data: imageData.data
+        });
+        console.log("Arrow icon loaded from ImageData");
 
         // Create wind arrow data
         const windArrows = [];
