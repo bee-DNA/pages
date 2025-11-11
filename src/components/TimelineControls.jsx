@@ -37,16 +37,19 @@ const TimelineControls = ({
     if (!dateRange || !dateRange.start) {
       return { start: "載入中...", end: "載入中..." };
     }
-    
+
     // 假設每天24小時
     const hoursPerDay = 24;
     const totalDays = Math.ceil(totalFrames / hoursPerDay);
-    
+
     return {
       start: `${dateRange.start} 00:00`,
-      end: totalDays > 1 
-        ? `${dateRange.end || dateRange.start} ${(totalFrames % hoursPerDay) - 1}:00`
-        : `${dateRange.start} ${totalFrames - 1}:00`,
+      end:
+        totalDays > 1
+          ? `${dateRange.end || dateRange.start} ${
+              (totalFrames % hoursPerDay) - 1
+            }:00`
+          : `${dateRange.start} ${totalFrames - 1}:00`,
     };
   };
 

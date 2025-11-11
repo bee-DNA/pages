@@ -29,7 +29,7 @@ const SampleSearchDialog = ({ open, onClose, onSearch }) => {
   useEffect(() => {
     const fetchSamples = async () => {
       if (!open) return;
-      
+
       setLoading(true);
       try {
         const data = await api.getSamples(1, 100); // 獲取前100個樣本
@@ -55,11 +55,20 @@ const SampleSearchDialog = ({ open, onClose, onSearch }) => {
     }
 
     // 在樣本列表中查找
-    const sample = samples.find(s => s.sample_id.toUpperCase() === normalizedId);
-    
+    const sample = samples.find(
+      (s) => s.sample_id.toUpperCase() === normalizedId
+    );
+
     if (!sample) {
-      const availableIds = samples.slice(0, 5).map(s => s.sample_id).join(", ");
-      setError(`找不到樣本 ${normalizedId}${availableIds ? `，可用樣本：${availableIds}...` : ""}`);
+      const availableIds = samples
+        .slice(0, 5)
+        .map((s) => s.sample_id)
+        .join(", ");
+      setError(
+        `找不到樣本 ${normalizedId}${
+          availableIds ? `，可用樣本：${availableIds}...` : ""
+        }`
+      );
       return;
     }
 
@@ -128,12 +137,21 @@ const SampleSearchDialog = ({ open, onClose, onSearch }) => {
                   可用樣本範例：
                 </Typography>
                 {samples.slice(0, 5).map((sample) => (
-                  <Typography key={sample.sample_id} variant="body2" color="text.secondary">
-                    • {sample.sample_id} → {sample.collection_date} ({sample.location})
+                  <Typography
+                    key={sample.sample_id}
+                    variant="body2"
+                    color="text.secondary"
+                  >
+                    • {sample.sample_id} → {sample.collection_date} (
+                    {sample.location})
                   </Typography>
                 ))}
                 {samples.length > 5 && (
-                  <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: "block" }}>
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    sx={{ mt: 1, display: "block" }}
+                  >
                     ... 及其他 {samples.length - 5} 個樣本
                   </Typography>
                 )}

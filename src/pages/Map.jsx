@@ -38,7 +38,7 @@ const Map = () => {
   const layersRef = useRef(null);
   const addWeatherLayersRef = useRef(null);
   const layerPanelRef = useRef(null); // For click outside detection
-  
+
   // 後端配置
   const [backendConfig, setBackendConfig] = useState(null);
   const [availableDates, setAvailableDates] = useState([]);
@@ -79,19 +79,19 @@ const Map = () => {
       try {
         const config = await api.getConfig();
         setBackendConfig(config);
-        
+
         // 提取可用日期
         const dates = config.features?.date_ranges || [];
         setAvailableDates(dates);
-        
+
         // 提取時間戳數量
         const count = config.features?.timestamp_count || 48;
         setTimestampCount(count);
-        
+
         console.log("Backend config loaded:", {
           dates,
           timestampCount: count,
-          layers: config.layers
+          layers: config.layers,
         });
       } catch (error) {
         console.error("Failed to fetch backend config:", error);
@@ -179,21 +179,23 @@ const Map = () => {
   // 載入歷史資料
   const loadHistoricalData = (date) => {
     console.log("Loading historical data for:", date);
-    
+
     // 動態計算日期對應的起始幀
     const dateIndex = availableDates.indexOf(date);
-    
+
     if (dateIndex === -1) {
       console.warn("Selected date not found in available dates:", date);
       goToFrame(0);
       return;
     }
-    
+
     // 假設每天 24 小時
     const hoursPerDay = 24;
     const startFrame = dateIndex * hoursPerDay;
-    
-    console.log(`Date ${date} -> Index ${dateIndex} -> Start frame ${startFrame}`);
+
+    console.log(
+      `Date ${date} -> Index ${dateIndex} -> Start frame ${startFrame}`
+    );
     goToFrame(startFrame);
 
     // 更新地圖圖層為 MBTiles

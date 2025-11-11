@@ -32,23 +32,23 @@ const DatePickerDialog = ({ open, onClose, onDateSelect }) => {
   useEffect(() => {
     const fetchConfig = async () => {
       if (!open) return;
-      
+
       setLoading(true);
       setError(null);
-      
+
       try {
         const config = await api.getConfig();
         const dates = config.features?.date_ranges || [];
-        
+
         if (dates.length === 0) {
           setError("後端沒有可用的日期資料");
           return;
         }
-        
+
         // 轉換為 dayjs 物件
-        const dayjsDates = dates.map(d => dayjs(d));
+        const dayjsDates = dates.map((d) => dayjs(d));
         setAvailableDates(dayjsDates);
-        
+
         // 設定預設選擇第一個日期
         if (!selectedDate) {
           setSelectedDate(dayjsDates[0]);
@@ -84,7 +84,10 @@ const DatePickerDialog = ({ open, onClose, onDateSelect }) => {
 
   // 計算日期範圍
   const minDate = availableDates.length > 0 ? availableDates[0] : null;
-  const maxDate = availableDates.length > 0 ? availableDates[availableDates.length - 1] : null;
+  const maxDate =
+    availableDates.length > 0
+      ? availableDates[availableDates.length - 1]
+      : null;
   const defaultMonth = availableDates.length > 0 ? availableDates[0] : dayjs();
 
   return (
@@ -125,9 +128,12 @@ const DatePickerDialog = ({ open, onClose, onDateSelect }) => {
                 slotProps={{
                   textField: {
                     fullWidth: true,
-                    helperText: availableDates.length > 0 
-                      ? `可用日期: ${availableDates.map(d => d.format("YYYY-MM-DD")).join(", ")}`
-                      : "無可用日期",
+                    helperText:
+                      availableDates.length > 0
+                        ? `可用日期: ${availableDates
+                            .map((d) => d.format("YYYY-MM-DD"))
+                            .join(", ")}`
+                        : "無可用日期",
                   },
                 }}
               />
