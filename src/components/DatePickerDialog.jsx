@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -6,6 +6,8 @@ import {
   DialogActions,
   Button,
   Box,
+  CircularProgress,
+  Alert,
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -14,17 +16,53 @@ import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import dayjs from "dayjs";
 import "dayjs/locale/zh-tw";
 import PropTypes from "prop-types";
+import { api } from "../services/api";
 
 /**
  * 日期選擇器對話框
- * 只允許選擇有資料的日期(2024-11-01, 2024-11-02)
+ * 從後端 API 動態獲取可用日期
  */
 const DatePickerDialog = ({ open, onClose, onDateSelect }) => {
-  // 預設選擇第一個可用日期
-  const [selectedDate, setSelectedDate] = useState(dayjs("2024-11-01"));
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [availableDates, setAvailableDates] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  // 有資料的日期
-  const availableDates = [dayjs("2024-11-01"), dayjs("2024-11-02")];
+  // 從後端獲取配置
+  useEffect(() => {
+    const fetchConfig = async () => {
+      if (!open) return;
+      
+      setLoading(true);
+      setError(null);
+      
+      try {
+        const config = await api.getConfig();
+        const dates = config.features?.date_ranges || [];
+        
+        if (dates.length === 0) {
+          setError("後端沒有可用的日期資料");
+          return;
+        }
+        
+        // 轉換為 dayjs 物件
+        const dayjsDates = dates.map(d => dayjs(d));
+        setAvailableDates(dayjsDates);
+        
+        // 設定預設選擇第一個日期
+        if (!selectedDate) {
+          setSelectedDate(dayjsDates[0]);
+        }
+      } catch (err) {
+        console.error("Failed to fetch config:", err);
+        setError("無法載入可用日期");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchConfig();
+  }, [open]);
 
   // 檢查日期是否可用
   const shouldDisableDate = (date) => {
@@ -41,9 +79,13 @@ const DatePickerDialog = ({ open, onClose, onDateSelect }) => {
   };
 
   const handleClose = () => {
-    // 不重置選擇的日期,保持在 2024-11-01
     onClose();
   };
+
+  // 計算日期範圍
+  const minDate = availableDates.length > 0 ? availableDates[0] : null;
+  const maxDate = availableDates.length > 0 ? availableDates[availableDates.length - 1] : null;
+  const defaultMonth = availableDates.length > 0 ? availableDates[0] : dayjs();
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="xs" fullWidth>
@@ -55,30 +97,43 @@ const DatePickerDialog = ({ open, onClose, onDateSelect }) => {
       </DialogTitle>
 
       <DialogContent>
-        <Box sx={{ pt: 2 }}>
-          <LocalizationProvider
-            dateAdapter={AdapterDayjs}
-            adapterLocale="zh-tw"
-          >
-            <DatePicker
-              label="選擇日期"
-              value={selectedDate}
-              onChange={(newValue) => setSelectedDate(newValue)}
-              shouldDisableDate={shouldDisableDate}
-              views={["year", "month", "day"]}
-              openTo="day"
-              defaultCalendarMonth={dayjs("2024-11-01")}
-              minDate={dayjs("2024-11-01")}
-              maxDate={dayjs("2024-11-02")}
-              slotProps={{
-                textField: {
-                  fullWidth: true,
-                  helperText: "僅顯示有氣象資料的日期 (2024-11-01, 2024-11-02)",
-                },
-              }}
-            />
-          </LocalizationProvider>
-        </Box>
+        {loading ? (
+          <Box sx={{ display: "flex", justifyContent: "center", py: 3 }}>
+            <CircularProgress />
+          </Box>
+        ) : error ? (
+          <Alert severity="error" sx={{ mt: 2 }}>
+            {error}
+          </Alert>
+        ) : (
+          <Box sx={{ pt: 2 }}>
+            <LocalizationProvider
+              dateAdapter={AdapterDayjs}
+              adapterLocale="zh-tw"
+            >
+              <DatePicker
+                label="選擇日期"
+                value={selectedDate}
+                onChange={(newValue) => setSelectedDate(newValue)}
+                shouldDisableDate={shouldDisableDate}
+                views={["year", "month", "day"]}
+                openTo="day"
+                defaultCalendarMonth={defaultMonth}
+                minDate={minDate}
+                maxDate={maxDate}
+                disabled={availableDates.length === 0}
+                slotProps={{
+                  textField: {
+                    fullWidth: true,
+                    helperText: availableDates.length > 0 
+                      ? `可用日期: ${availableDates.map(d => d.format("YYYY-MM-DD")).join(", ")}`
+                      : "無可用日期",
+                  },
+                }}
+              />
+            </LocalizationProvider>
+          </Box>
+        )}
       </DialogContent>
 
       <DialogActions>
@@ -86,7 +141,7 @@ const DatePickerDialog = ({ open, onClose, onDateSelect }) => {
         <Button
           onClick={handleConfirm}
           variant="contained"
-          disabled={!selectedDate}
+          disabled={!selectedDate || loading}
         >
           確認
         </Button>

@@ -13,6 +13,7 @@ import SkipPreviousIcon from "@mui/icons-material/SkipPrevious";
 import SkipNextIcon from "@mui/icons-material/SkipNext";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import { formatTimestamp } from "../hooks/useTimelineAnimation";
+import PropTypes from "prop-types";
 
 const TimelineControls = ({
   currentFrame,
@@ -25,10 +26,31 @@ const TimelineControls = ({
   onNext,
   onPrevious,
   onFrameChange,
+  dateRange = null, // 接收日期範圍 { start: "2023-01-01", end: "2024-05-05" }
 }) => {
   const handleSliderChange = (event, newValue) => {
     onFrameChange(newValue);
   };
+
+  // 計算顯示的起始和結束日期時間
+  const getDateTimeRange = () => {
+    if (!dateRange || !dateRange.start) {
+      return { start: "載入中...", end: "載入中..." };
+    }
+    
+    // 假設每天24小時
+    const hoursPerDay = 24;
+    const totalDays = Math.ceil(totalFrames / hoursPerDay);
+    
+    return {
+      start: `${dateRange.start} 00:00`,
+      end: totalDays > 1 
+        ? `${dateRange.end || dateRange.start} ${(totalFrames % hoursPerDay) - 1}:00`
+        : `${dateRange.start} ${totalFrames - 1}:00`,
+    };
+  };
+
+  const { start: startTime, end: endTime } = getDateTimeRange();
 
   return (
     <Paper
@@ -193,10 +215,10 @@ const TimelineControls = ({
       <Box sx={{ mt: 2, pt: 2, borderTop: "1px solid #e0e0e0" }}>
         <Box sx={{ display: "flex", justifyContent: "space-between", mb: 0.5 }}>
           <Typography variant="caption" sx={{ color: "#666", fontSize: 10 }}>
-            2024-11-01 00:00
+            {startTime}
           </Typography>
           <Typography variant="caption" sx={{ color: "#666", fontSize: 10 }}>
-            2024-11-02 21:00
+            {endTime}
           </Typography>
         </Box>
         <Box
@@ -220,6 +242,23 @@ const TimelineControls = ({
       </Box>
     </Paper>
   );
+};
+
+TimelineControls.propTypes = {
+  currentFrame: PropTypes.number.isRequired,
+  totalFrames: PropTypes.number.isRequired,
+  isPlaying: PropTypes.bool.isRequired,
+  timestamp: PropTypes.number,
+  onPlay: PropTypes.func.isRequired,
+  onPause: PropTypes.func.isRequired,
+  onStop: PropTypes.func.isRequired,
+  onNext: PropTypes.func.isRequired,
+  onPrevious: PropTypes.func.isRequired,
+  onFrameChange: PropTypes.func.isRequired,
+  dateRange: PropTypes.shape({
+    start: PropTypes.string,
+    end: PropTypes.string,
+  }),
 };
 
 export default TimelineControls;

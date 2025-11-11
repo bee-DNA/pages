@@ -35,14 +35,16 @@ export const useTimelineAnimation = ({
       try {
         setIsLoading(true);
         const response = await fetch(`${api.API_URL}/tiles/meta/dates`);
-        
+
         if (response.ok) {
           const data = await response.json();
           setDatesMetadata(data);
           console.log("[useTimelineAnimation] 已載入日期 metadata:", data);
         } else {
           // 如果 API 失敗,使用預設值(向後兼容)
-          console.warn("[useTimelineAnimation] 無法載入日期 metadata,使用預設值");
+          console.warn(
+            "[useTimelineAnimation] 無法載入日期 metadata,使用預設值"
+          );
           setDatesMetadata({
             dates: [
               {
@@ -50,18 +52,18 @@ export const useTimelineAnimation = ({
                 frameStart: 0,
                 frameEnd: 23,
                 hours: 24,
-                timezone: "UTC+8"
+                timezone: "UTC+8",
               },
               {
                 date: "2024-05-05",
                 frameStart: 24,
                 frameEnd: 47,
                 hours: 24,
-                timezone: "UTC+8"
-              }
+                timezone: "UTC+8",
+              },
             ],
             totalFrames: 48,
-            hoursPerDay: 24
+            hoursPerDay: 24,
           });
         }
       } catch (error) {
@@ -74,18 +76,18 @@ export const useTimelineAnimation = ({
               frameStart: 0,
               frameEnd: 23,
               hours: 24,
-              timezone: "UTC+8"
+              timezone: "UTC+8",
             },
             {
               date: "2024-05-05",
               frameStart: 24,
               frameEnd: 47,
               hours: 24,
-              timezone: "UTC+8"
-            }
+              timezone: "UTC+8",
+            },
           ],
           totalFrames: 48,
-          hoursPerDay: 24
+          hoursPerDay: 24,
         });
       } finally {
         setIsLoading(false);

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -9,23 +9,42 @@ import {
   Alert,
   Box,
   Typography,
+  CircularProgress,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import PropTypes from "prop-types";
+import { api } from "../services/api";
 
 /**
  * 樣本搜尋對話框
- * 支援樣本 ID 搜尋 (EB0001 → 2024-11-01, EB0002 → 2024-11-02)
+ * 從後端 API 動態獲取樣本資料
  */
 const SampleSearchDialog = ({ open, onClose, onSearch }) => {
   const [sampleId, setSampleId] = useState("");
   const [error, setError] = useState("");
+  const [samples, setSamples] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  // 樣本 ID 到日期的映射
-  const sampleDateMap = {
-    EB0001: "2024-11-01",
-    EB0002: "2024-11-02",
-  };
+  // 從後端獲取樣本列表
+  useEffect(() => {
+    const fetchSamples = async () => {
+      if (!open) return;
+      
+      setLoading(true);
+      try {
+        const data = await api.getSamples(1, 100); // 獲取前100個樣本
+        if (data.samples && data.samples.length > 0) {
+          setSamples(data.samples);
+        }
+      } catch (err) {
+        console.error("Failed to fetch samples:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSamples();
+  }, [open]);
 
   const handleSearch = () => {
     const normalizedId = sampleId.trim().toUpperCase();
@@ -35,9 +54,19 @@ const SampleSearchDialog = ({ open, onClose, onSearch }) => {
       return;
     }
 
-    const date = sampleDateMap[normalizedId];
+    // 在樣本列表中查找
+    const sample = samples.find(s => s.sample_id.toUpperCase() === normalizedId);
+    
+    if (!sample) {
+      const availableIds = samples.slice(0, 5).map(s => s.sample_id).join(", ");
+      setError(`找不到樣本 ${normalizedId}${availableIds ? `，可用樣本：${availableIds}...` : ""}`);
+      return;
+    }
+
+    // 使用樣本的採集日期
+    const date = sample.collection_date;
     if (!date) {
-      setError(`找不到樣本 ${normalizedId}，目前支援：EB0001, EB0002`);
+      setError(`樣本 ${normalizedId} 沒有採集日期資料`);
       return;
     }
 
@@ -69,37 +98,49 @@ const SampleSearchDialog = ({ open, onClose, onSearch }) => {
       </DialogTitle>
 
       <DialogContent>
-        <Box sx={{ pt: 2 }}>
-          <TextField
-            autoFocus
-            fullWidth
-            label="樣本 ID"
-            placeholder="例如：EB0001"
-            value={sampleId}
-            onChange={(e) => setSampleId(e.target.value)}
-            onKeyPress={handleKeyPress}
-            variant="outlined"
-            helperText="輸入樣本編號以查看該日期的氣象資料"
-          />
-
-          {error && (
-            <Alert severity="error" sx={{ mt: 2 }}>
-              {error}
-            </Alert>
-          )}
-
-          <Box sx={{ mt: 3, p: 2, bgcolor: "#f5f5f5", borderRadius: 1 }}>
-            <Typography variant="subtitle2" gutterBottom>
-              可用樣本：
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              • EB0001 → 2024-11-01
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              • EB0002 → 2024-11-02
-            </Typography>
+        {loading ? (
+          <Box sx={{ display: "flex", justifyContent: "center", py: 3 }}>
+            <CircularProgress />
           </Box>
-        </Box>
+        ) : (
+          <Box sx={{ pt: 2 }}>
+            <TextField
+              autoFocus
+              fullWidth
+              label="樣本 ID"
+              placeholder="例如：BEE001"
+              value={sampleId}
+              onChange={(e) => setSampleId(e.target.value)}
+              onKeyPress={handleKeyPress}
+              variant="outlined"
+              helperText="輸入樣本編號以查看該日期的氣象資料"
+            />
+
+            {error && (
+              <Alert severity="error" sx={{ mt: 2 }}>
+                {error}
+              </Alert>
+            )}
+
+            {samples.length > 0 && (
+              <Box sx={{ mt: 3, p: 2, bgcolor: "#f5f5f5", borderRadius: 1 }}>
+                <Typography variant="subtitle2" gutterBottom>
+                  可用樣本範例：
+                </Typography>
+                {samples.slice(0, 5).map((sample) => (
+                  <Typography key={sample.sample_id} variant="body2" color="text.secondary">
+                    • {sample.sample_id} → {sample.collection_date} ({sample.location})
+                  </Typography>
+                ))}
+                {samples.length > 5 && (
+                  <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: "block" }}>
+                    ... 及其他 {samples.length - 5} 個樣本
+                  </Typography>
+                )}
+              </Box>
+            )}
+          </Box>
+        )}
       </DialogContent>
 
       <DialogActions>
@@ -108,6 +149,7 @@ const SampleSearchDialog = ({ open, onClose, onSearch }) => {
           onClick={handleSearch}
           variant="contained"
           startIcon={<SearchIcon />}
+          disabled={loading}
         >
           搜尋
         </Button>

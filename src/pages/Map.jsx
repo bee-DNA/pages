@@ -12,7 +12,7 @@ import LayerControl from "../components/LayerControl";
 import DataModeSelector from "../components/DataModeSelector";
 import SampleSearchDialog from "../components/SampleSearchDialog";
 import DatePickerDialog from "../components/DatePickerDialog";
-// import TimelineControls from "../components/TimelineControls";
+import TimelineControls from "../components/TimelineControls";
 import useTimelineAnimation from "../hooks/useTimelineAnimation";
 import { api } from "../services/api";
 import mapIcon from "../assets/map.svg";
@@ -38,6 +38,11 @@ const Map = () => {
   const layersRef = useRef(null);
   const addWeatherLayersRef = useRef(null);
   const layerPanelRef = useRef(null); // For click outside detection
+  
+  // 後端配置
+  const [backendConfig, setBackendConfig] = useState(null);
+  const [availableDates, setAvailableDates] = useState([]);
+  const [timestampCount, setTimestampCount] = useState(48); // 預設值
 
   // 圖層狀態管理
   const [layerStates, setLayerStates] = useState({
@@ -68,6 +73,37 @@ const Map = () => {
     },
   });
 
+  // 載入後端配置
+  useEffect(() => {
+    const fetchConfig = async () => {
+      try {
+        const config = await api.getConfig();
+        setBackendConfig(config);
+        
+        // 提取可用日期
+        const dates = config.features?.date_ranges || [];
+        setAvailableDates(dates);
+        
+        // 提取時間戳數量
+        const count = config.features?.timestamp_count || 48;
+        setTimestampCount(count);
+        
+        console.log("Backend config loaded:", {
+          dates,
+          timestampCount: count,
+          layers: config.layers
+        });
+      } catch (error) {
+        console.error("Failed to fetch backend config:", error);
+        // 使用預設值
+        setAvailableDates(["2023-01-01", "2024-05-05"]);
+        setTimestampCount(48);
+      }
+    };
+
+    fetchConfig();
+  }, []);
+
   // 時間軸動畫控制（僅在歷史資料模式使用）
   const {
     currentFrame,
@@ -81,7 +117,7 @@ const Map = () => {
     previousFrame,
     goToFrame,
   } = useTimelineAnimation({
-    totalFrames: 48, // 2天 × 24小時 (2024-11-01 + 2024-11-02)
+    totalFrames: timestampCount, // 動態從後端配置獲取
     duration: 5000, // 5秒完整循環
     autoPlay: false,
     loop: true,
@@ -143,10 +179,21 @@ const Map = () => {
   // 載入歷史資料
   const loadHistoricalData = (date) => {
     console.log("Loading historical data for:", date);
-    // 根據日期計算起始幀
-    // 2024-11-01: 0-23 幀, 2024-11-02: 24-47 幀
-    const dayIndex = date === "2024-11-01" ? 0 : 1;
-    const startFrame = dayIndex * 24;
+    
+    // 動態計算日期對應的起始幀
+    const dateIndex = availableDates.indexOf(date);
+    
+    if (dateIndex === -1) {
+      console.warn("Selected date not found in available dates:", date);
+      goToFrame(0);
+      return;
+    }
+    
+    // 假設每天 24 小時
+    const hoursPerDay = 24;
+    const startFrame = dateIndex * hoursPerDay;
+    
+    console.log(`Date ${date} -> Index ${dateIndex} -> Start frame ${startFrame}`);
     goToFrame(startFrame);
 
     // 更新地圖圖層為 MBTiles
@@ -1335,7 +1382,7 @@ const Map = () => {
         </Box>
 
         {/* Timeline Controls (僅在歷史資料模式顯示) */}
-        {/* {dataMode === "historical" && (
+        {dataMode === "historical" && (
           <TimelineControls
             currentFrame={currentFrame}
             totalFrames={totalFrames}
@@ -1347,8 +1394,16 @@ const Map = () => {
             onNext={nextFrame}
             onPrevious={previousFrame}
             onFrameChange={goToFrame}
+            dateRange={
+              availableDates.length > 0
+                ? {
+                    start: availableDates[0],
+                    end: availableDates[availableDates.length - 1],
+                  }
+                : null
+            }
           />
-        )} */}
+        )}
 
         {/* Sample Search Dialog */}
         <SampleSearchDialog

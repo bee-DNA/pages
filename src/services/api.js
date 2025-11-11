@@ -57,6 +57,13 @@ export const api = {
     return response.json();
   },
 
+  // 配置 API - 獲取後端配置（包含可用日期、時間戳數量等）
+  async getConfig() {
+    const response = await fetch(`${API_URL}/config`);
+    if (!response.ok) throw new Error("Failed to fetch config");
+    return response.json();
+  },
+
   // MBTiles 圖磚服務
   async getTileLayers() {
     const response = await fetch(`${API_URL}/tiles`);
