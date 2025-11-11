@@ -387,13 +387,12 @@ const Map = () => {
     // Create wind arrows - custom SVG arrows
     try {
       // Create arrow SVG image
-      const arrowSvg = `
-        <svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-          <path d="M10 2 L14 10 L10 8 L6 10 Z" fill="#00FFFF" stroke="#FFFFFF" stroke-width="1"/>
-        </svg>
-      `;
+      const arrowSvg = `<svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 2 L14 10 L10 8 L6 10 Z" fill="#00FFFF" stroke="#FFFFFF" stroke-width="1"/></svg>`;
 
       const arrowImage = new Image(20, 20);
+      arrowImage.onerror = (e) => {
+        console.error("Failed to load arrow image:", e);
+      };
       arrowImage.onload = () => {
         if (map.current && !map.current.hasImage("wind-arrow")) {
           map.current.addImage("wind-arrow", arrowImage);
@@ -451,7 +450,8 @@ const Map = () => {
           console.log("Wind arrow layer added");
         }
       };
-      arrowImage.src = "data:image/svg+xml;base64," + btoa(arrowSvg);
+      // Use encodeURIComponent instead of btoa to avoid encoding issues
+      arrowImage.src = "data:image/svg+xml," + encodeURIComponent(arrowSvg);
     } catch (error) {
       console.error("Failed to add wind arrow layer:", error);
     }
