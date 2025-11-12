@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Container, Box, Typography } from "@mui/material";
 import LayersIcon from "@mui/icons-material/Layers";
+import MapIcon from "@mui/icons-material/Map";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
@@ -15,7 +16,6 @@ import DatePickerDialog from "../components/DatePickerDialog";
 import TimelineControls from "../components/TimelineControls";
 import useTimelineAnimation from "../hooks/useTimelineAnimation";
 import { api } from "../services/api";
-import mapIcon from "../assets/map.svg";
 
 // Mapbox Access Token
 mapboxgl.accessToken =
@@ -935,7 +935,16 @@ const Map = () => {
       zoom: zoom,
       minZoom: 1.5,
       locale: { language: "zh-Hans" },
+      attributionControl: false, // 先移除預設的版權控制
     });
+
+    // 添加自訂的緊湊版權控制器
+    map.current.addControl(
+      new mapboxgl.AttributionControl({
+        compact: true, // 緊湊模式:只顯示圖示
+      }),
+      "bottom-right"
+    );
 
     // 添加導航控制器 (只顯示縮放按鈕,隱藏指南針)
     map.current.addControl(
@@ -988,6 +997,44 @@ const Map = () => {
       
       .mapboxgl-ctrl-group button:hover .mapboxgl-ctrl-icon {
         opacity: 1 !important;
+      }
+      
+      /* 版權資訊 - 只顯示圖示,點擊展開 */
+      .mapboxgl-ctrl-attrib {
+        font-size: 10px !important;
+        padding: 0 !important;
+        background-color: rgba(255, 255, 255, 0.7) !important;
+        border-radius: 4px !important;
+      }
+      
+      .mapboxgl-ctrl-attrib-button {
+        width: 24px !important;
+        height: 24px !important;
+        background-color: rgba(255, 255, 255, 0.8) !important;
+        border-radius: 4px !important;
+        cursor: pointer !important;
+      }
+      
+      .mapboxgl-ctrl-attrib-button:hover {
+        background-color: rgba(255, 255, 255, 0.95) !important;
+      }
+      
+      /* 預設隱藏展開的內容 */
+      .mapboxgl-ctrl-attrib.mapboxgl-compact {
+        min-height: 24px !important;
+      }
+      
+      .mapboxgl-ctrl-attrib.mapboxgl-compact::after {
+        display: none !important;
+      }
+      
+      .mapboxgl-ctrl-attrib-inner {
+        font-size: 10px !important;
+        padding: 2px 8px !important;
+      }
+      
+      .mapboxgl-ctrl-attrib a {
+        font-size: 10px !important;
       }
     `;
     document.head.appendChild(styleSheet);
@@ -1089,11 +1136,17 @@ const Map = () => {
         >
           {/* Left: Title */}
           <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-            <img
-              src={mapIcon}
-              alt="Map"
-              style={{ width: "28px", height: "28px" }}
-            />
+            <Box
+              sx={{
+                width: "28px",
+                height: "28px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <MapIcon sx={{ fontSize: 28, color: "#1976d2" }} />
+            </Box>
             <Box>
               <Typography
                 variant="h5"
@@ -1202,7 +1255,7 @@ const Map = () => {
                   userSelect: "none",
                 }}
               >
-                🗺️ {t("map.mapStyle.street")}
+                {t("map.mapStyle.street")}
               </Box>
               <Box
                 onClick={() => setMapStyle("satellite")}
@@ -1219,7 +1272,7 @@ const Map = () => {
                   userSelect: "none",
                 }}
               >
-                🛰️ {t("map.mapStyle.satellite")}
+                {t("map.mapStyle.satellite")}
               </Box>
               {/* Sliding background */}
               <Box

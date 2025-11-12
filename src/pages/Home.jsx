@@ -77,8 +77,8 @@ const Home = () => {
           Test API Connection
         </Button>
 
-        {/* 功能卡片 */}
-        <Grid container spacing={3} sx={{ mt: 4, maxWidth: "800px" }}>
+        {/* 功能卡片 - HIDDEN */}
+        <Grid container spacing={3} sx={{ mt: 4, maxWidth: "800px", display: "none" }}>
           <Grid item xs={12} md={6}>
             <Card
               sx={{
