@@ -768,31 +768,66 @@ const Map = () => {
           addWeatherLayersRef.current();
         }
 
-        // Re-add marker
-        new mapboxgl.Marker({
-          color: "#FF6B6B",
-          scale: 1.2,
+        // Re-add custom marker
+        const createCustomMarker = (number, color) => {
+          const el = document.createElement('div');
+          el.className = 'custom-marker';
+          el.style.cssText = `
+            width: 36px;
+            height: 36px;
+            background-color: ${color};
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 16px;
+            border: 3px solid white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            cursor: pointer;
+            transition: box-shadow 0.2s ease, border-width 0.2s ease;
+          `;
+          el.textContent = number;
+          
+          // Hover effect
+          el.addEventListener('mouseenter', () => {
+            el.style.boxShadow = '0 4px 12px rgba(0,0,0,0.4)';
+            el.style.borderWidth = '4px';
+          });
+          el.addEventListener('mouseleave', () => {
+            el.style.boxShadow = '0 2px 8px rgba(0,0,0,0.3)';
+            el.style.borderWidth = '3px';
+          });
+          
+          return el;
+        };
+
+        const markerElement = createCustomMarker('1', '#1976d2');
+        const marker = new mapboxgl.Marker({
+          element: markerElement,
+          anchor: 'center',
         })
           .setLngLat([120.5377, 24.0513])
           .setPopup(
             new mapboxgl.Popup({ offset: 25 }).setHTML(
               `<div style="padding: 10px;">
-              <h3 style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600;">
-                NCUE
-              </h3>
-              <p style="margin: 4px 0; font-size: 12px; color: #666;">
-                <strong>Longitude:</strong> 120.5377°E
-              </p>
-              <p style="margin: 4px 0; font-size: 12px; color: #666;">
-                <strong>Latitude:</strong> 24.0513°N
-              </p>
-              <p style="margin: 8px 0 0 0; font-size: 11px; color: #999;">
-                Demo Sampling Point
-              </p>
-              <p style="margin: 4px 0 0 0; font-size: 11px; color: #1976d2;">
-                🌡️ Temperature layers enabled
-              </p>
-            </div>`
+                <h3 style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600;">
+                  NCUE
+                </h3>
+                <p style="margin: 4px 0; font-size: 12px; color: #666;">
+                  <strong>Longitude:</strong> 120.5377°E
+                </p>
+                <p style="margin: 4px 0; font-size: 12px; color: #666;">
+                  <strong>Latitude:</strong> 24.0513°N
+                </p>
+                <p style="margin: 8px 0 0 0; font-size: 11px; color: #999;">
+                  Demo Sampling Point
+                </p>
+                <p style="margin: 4px 0 0 0; font-size: 11px; color: #1976d2;">
+                  🌡️ Temperature layers enabled
+                </p>
+              </div>`
             )
           )
           .addTo(map.current);
@@ -1082,8 +1117,8 @@ const Map = () => {
 
           // 創建自訂標記元素
           const createCustomMarker = (number, color) => {
-            const el = document.createElement('div');
-            el.className = 'custom-marker';
+            const el = document.createElement("div");
+            el.className = "custom-marker";
             el.style.cssText = `
               width: 36px;
               height: 36px;
@@ -1098,28 +1133,28 @@ const Map = () => {
               border: 3px solid white;
               box-shadow: 0 2px 8px rgba(0,0,0,0.3);
               cursor: pointer;
-              transition: all 0.2s ease;
+              transition: box-shadow 0.2s ease, border-width 0.2s ease;
             `;
             el.textContent = number;
-            
+
             // Hover effect - 使用 box-shadow 和 border 來實現效果
-            el.addEventListener('mouseenter', () => {
-              el.style.boxShadow = '0 4px 12px rgba(0,0,0,0.4)';
-              el.style.borderWidth = '4px';
+            el.addEventListener("mouseenter", () => {
+              el.style.boxShadow = "0 4px 12px rgba(0,0,0,0.4)";
+              el.style.borderWidth = "4px";
             });
-            el.addEventListener('mouseleave', () => {
-              el.style.boxShadow = '0 2px 8px rgba(0,0,0,0.3)';
-              el.style.borderWidth = '3px';
+            el.addEventListener("mouseleave", () => {
+              el.style.boxShadow = "0 2px 8px rgba(0,0,0,0.3)";
+              el.style.borderWidth = "3px";
             });
-            
+
             return el;
           };
 
           // NCUE Marker with custom style
-          const markerElement = createCustomMarker('1', '#1976d2');
+          const markerElement = createCustomMarker("1", "#1976d2");
           const marker = new mapboxgl.Marker({
             element: markerElement,
-            anchor: 'center',
+            anchor: "center",
           })
             .setLngLat([120.5377, 24.0513])
             .setPopup(
@@ -1425,11 +1460,13 @@ const Map = () => {
                     boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
                   }}
                 />
-                <Typography sx={{ fontSize: "11px", color: "#666", fontWeight: 500 }}>
+                <Typography
+                  sx={{ fontSize: "11px", color: "#666", fontWeight: 500 }}
+                >
                   76-100
                 </Typography>
               </Box>
-              
+
               {/* 51-75 */}
               <Box sx={{ display: "flex", alignItems: "center", gap: "8px" }}>
                 <Box
@@ -1443,11 +1480,13 @@ const Map = () => {
                     boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
                   }}
                 />
-                <Typography sx={{ fontSize: "11px", color: "#666", fontWeight: 500 }}>
+                <Typography
+                  sx={{ fontSize: "11px", color: "#666", fontWeight: 500 }}
+                >
                   51-75
                 </Typography>
               </Box>
-              
+
               {/* 26-50 */}
               <Box sx={{ display: "flex", alignItems: "center", gap: "8px" }}>
                 <Box
@@ -1461,11 +1500,13 @@ const Map = () => {
                     boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
                   }}
                 />
-                <Typography sx={{ fontSize: "11px", color: "#666", fontWeight: 500 }}>
+                <Typography
+                  sx={{ fontSize: "11px", color: "#666", fontWeight: 500 }}
+                >
                   26-50
                 </Typography>
               </Box>
-              
+
               {/* 0-25 */}
               <Box sx={{ display: "flex", alignItems: "center", gap: "8px" }}>
                 <Box
@@ -1479,7 +1520,9 @@ const Map = () => {
                     boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
                   }}
                 />
-                <Typography sx={{ fontSize: "11px", color: "#666", fontWeight: 500 }}>
+                <Typography
+                  sx={{ fontSize: "11px", color: "#666", fontWeight: 500 }}
+                >
                   0-25
                 </Typography>
               </Box>

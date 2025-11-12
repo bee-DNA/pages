@@ -1,4 +1,13 @@
-import { Box, Typography, Container, Button, Alert, Card, CardContent, Grid } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Container,
+  Button,
+  Alert,
+  Card,
+  CardContent,
+  Grid,
+} from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -78,7 +87,11 @@ const Home = () => {
         </Button>
 
         {/* 功能卡片 - HIDDEN */}
-        <Grid container spacing={3} sx={{ mt: 4, maxWidth: "800px", display: "none" }}>
+        <Grid
+          container
+          spacing={3}
+          sx={{ mt: 4, maxWidth: "800px", display: "none" }}
+        >
           <Grid item xs={12} md={6}>
             <Card
               sx={{
@@ -97,9 +110,7 @@ const Home = () => {
                   py: 4,
                 }}
               >
-                <SearchIcon
-                  sx={{ fontSize: 48, color: "#1976d2", mb: 2 }}
-                />
+                <SearchIcon sx={{ fontSize: 48, color: "#1976d2", mb: 2 }} />
                 <Typography variant="h5" sx={{ fontWeight: 600, mb: 1 }}>
                   {t("nav.search")}
                 </Typography>
@@ -128,9 +139,7 @@ const Home = () => {
                   py: 4,
                 }}
               >
-                <MapIcon
-                  sx={{ fontSize: 48, color: "#1976d2", mb: 2 }}
-                />
+                <MapIcon sx={{ fontSize: 48, color: "#1976d2", mb: 2 }} />
                 <Typography variant="h5" sx={{ fontWeight: 600, mb: 1 }}>
                   {t("nav.map")}
                 </Typography>
