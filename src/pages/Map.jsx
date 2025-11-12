@@ -817,41 +817,31 @@ const Map = () => {
               maxWidth: "320px",
             }).setHTML(
               `<style>
-                @keyframes fadeIn {
-                  from { opacity: 0; transform: translateY(-10px); }
-                  to { opacity: 1; transform: translateY(0); }
-                }
-                
-                @keyframes pieChart {
-                  0% { stroke-dasharray: 0 100; }
-                  100% { stroke-dasharray: var(--percent) 100; }
-                }
-                
                 .modern-popup {
                   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-                  animation: fadeIn 0.3s ease-out;
-                  padding: 20px;
+                  padding: 16px;
                 }
                 
                 .popup-header {
                   display: flex;
                   align-items: center;
-                  gap: 14px;
-                  margin-bottom: 20px;
+                  gap: 10px;
+                  margin-bottom: 14px;
+                  padding-bottom: 12px;
+                  border-bottom: 1px solid #eee;
                 }
                 
                 .popup-icon {
-                  width: 48px;
-                  height: 48px;
-                  background: linear-gradient(135deg, #1976d2 0%, #42a5f5 100%);
-                  border-radius: 12px;
+                  width: 36px;
+                  height: 36px;
+                  background: #1976d2;
+                  border-radius: 8px;
                   display: flex;
                   align-items: center;
                   justify-content: center;
                   color: white;
-                  font-size: 20px;
+                  font-size: 16px;
                   font-weight: 700;
-                  box-shadow: 0 6px 16px rgba(25, 118, 210, 0.25);
                 }
                 
                 .popup-title {
@@ -860,94 +850,72 @@ const Map = () => {
                 
                 .popup-title h3 {
                   margin: 0;
-                  font-size: 18px;
-                  font-weight: 700;
+                  font-size: 15px;
+                  font-weight: 600;
                   color: #1a1a1a;
-                  line-height: 1.3;
+                  line-height: 1.2;
                 }
                 
                 .popup-title p {
-                  margin: 4px 0 0 0;
-                  font-size: 12px;
+                  margin: 2px 0 0 0;
+                  font-size: 11px;
                   color: #999;
-                  font-weight: 500;
+                  font-weight: 400;
                 }
                 
                 .chart-section {
-                  margin-top: 0;
-                  padding-top: 18px;
-                  border-top: 2px solid #f5f5f5;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
                 }
                 
                 .chart-title {
-                  font-size: 11px;
-                  font-weight: 700;
-                  color: #1a1a1a;
-                  margin-bottom: 12px;
-                  display: flex;
-                  align-items: center;
-                  gap: 6px;
-                  text-transform: uppercase;
-                  letter-spacing: 0.5px;
-                }
-                
-                .chart-title::before {
-                  content: '';
-                  width: 3px;
-                  height: 12px;
-                  background: linear-gradient(135deg, #1976d2 0%, #42a5f5 100%);
-                  border-radius: 2px;
+                  display: none;
                 }
                 
                 .pie-chart-container {
                   display: flex;
-                  align-items: flex-start;
-                  gap: 16px;
+                  flex-direction: column;
+                  align-items: center;
+                  gap: 14px;
+                  width: 100%;
                 }
                 
                 .pie-chart {
                   position: relative;
-                  width: 100px;
-                  height: 100px;
+                  width: 140px;
+                  height: 140px;
                   flex-shrink: 0;
-                  cursor: pointer;
                 }
                 
                 .pie-chart svg {
                   transform: rotate(-90deg);
-                  filter: drop-shadow(0 2px 8px rgba(0,0,0,0.08));
                 }
                 
                 .pie-chart circle {
                   fill: none;
-                  stroke-width: 10;
-                  transition: all 0.3s ease;
+                  stroke-width: 12;
+                  transition: opacity 0.2s ease;
                 }
                 
                 .pie-bg {
-                  stroke: #f5f5f5;
+                  stroke: #f0f0f0;
                 }
                 
                 .pie-slice {
-                  stroke-dasharray: 0 100;
-                  animation: pieChart 1s ease-out forwards;
                   cursor: pointer;
                 }
                 
                 .pie-slice:hover {
-                  filter: brightness(1.1);
-                  stroke-width: 12;
+                  opacity: 0.85;
                 }
                 
                 .pie-slice-1 {
                   stroke: #1976d2;
-                  animation-delay: 0.3s;
                 }
                 
                 .pie-slice-2 {
                   stroke: #ff9800;
-                  animation-delay: 0.5s;
-                }
                 
                 .chart-center {
                   position: absolute;
@@ -956,79 +924,63 @@ const Map = () => {
                   transform: translate(-50%, -50%);
                   text-align: center;
                   pointer-events: none;
-                  transition: all 0.3s ease;
                 }
                 
                 .chart-percent {
-                  font-size: 20px;
+                  font-size: 28px;
                   font-weight: 700;
                   color: #1976d2;
                   line-height: 1;
                 }
                 
                 .chart-label {
-                  font-size: 9px;
+                  font-size: 10px;
                   color: #999;
-                  margin-top: 3px;
+                  margin-top: 4px;
                   font-weight: 500;
-                  text-transform: uppercase;
-                  letter-spacing: 0.3px;
                 }
                 
                 .legend {
-                  flex: 1;
+                  width: 100%;
                   display: flex;
                   flex-direction: column;
-                  gap: 6px;
-                  min-width: 0;
+                  gap: 8px;
                 }
                 
                 .legend-item {
                   display: flex;
                   align-items: center;
-                  gap: 8px;
-                  padding: 6px 8px;
+                  gap: 10px;
+                  padding: 8px 10px;
                   background: #fafafa;
                   border-radius: 6px;
-                  transition: all 0.2s ease;
                   cursor: pointer;
-                  border: 2px solid transparent;
+                  border: 1px solid transparent;
+                  transition: all 0.2s ease;
                 }
                 
                 .legend-item:hover,
                 .legend-item.active {
                   background: #f0f7ff;
                   border-color: #1976d2;
-                  transform: translateX(2px);
                 }
                 
                 .legend-color {
-                  width: 12px;
-                  height: 12px;
+                  width: 14px;
+                  height: 14px;
                   border-radius: 3px;
                   flex-shrink: 0;
-                  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                  transition: all 0.2s ease;
-                }
-                
-                .legend-item:hover .legend-color,
-                .legend-item.active .legend-color {
-                  transform: scale(1.2);
-                  box-shadow: 0 3px 8px rgba(0,0,0,0.2);
                 }
                 
                 .legend-text {
                   flex: 1;
-                  font-size: 11px;
+                  font-size: 12px;
                   color: #1a1a1a;
                   font-weight: 500;
-                  white-space: nowrap;
-                  overflow: hidden;
-                  text-overflow: ellipsis;
                 }
                 
                 .legend-percent {
-                  font-size: 11px;
+                  font-size: 13px;
                   font-weight: 700;
                   color: #1976d2;
                   flex-shrink: 0;
@@ -1504,41 +1456,31 @@ const Map = () => {
                 maxWidth: "320px",
               }).setHTML(
                 `<style>
-                  @keyframes fadeIn {
-                    from { opacity: 0; transform: translateY(-10px); }
-                    to { opacity: 1; transform: translateY(0); }
-                  }
-                  
-                  @keyframes pieChart {
-                    0% { stroke-dasharray: 0 100; }
-                    100% { stroke-dasharray: var(--percent) 100; }
-                  }
-                  
                   .modern-popup {
                     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-                    animation: fadeIn 0.3s ease-out;
-                    padding: 20px;
+                    padding: 16px;
                   }
                   
                   .popup-header {
                     display: flex;
                     align-items: center;
-                    gap: 14px;
-                    margin-bottom: 20px;
+                    gap: 10px;
+                    margin-bottom: 14px;
+                    padding-bottom: 12px;
+                    border-bottom: 1px solid #eee;
                   }
                   
                   .popup-icon {
-                    width: 48px;
-                    height: 48px;
-                    background: linear-gradient(135deg, #1976d2 0%, #42a5f5 100%);
-                    border-radius: 12px;
+                    width: 36px;
+                    height: 36px;
+                    background: #1976d2;
+                    border-radius: 8px;
                     display: flex;
                     align-items: center;
                     justify-content: center;
                     color: white;
-                    font-size: 20px;
+                    font-size: 16px;
                     font-weight: 700;
-                    box-shadow: 0 6px 16px rgba(25, 118, 210, 0.25);
                   }
                   
                   .popup-title {
@@ -1547,93 +1489,72 @@ const Map = () => {
                   
                   .popup-title h3 {
                     margin: 0;
-                    font-size: 18px;
-                    font-weight: 700;
+                    font-size: 15px;
+                    font-weight: 600;
                     color: #1a1a1a;
-                    line-height: 1.3;
+                    line-height: 1.2;
                   }
                   
                   .popup-title p {
-                    margin: 4px 0 0 0;
-                    font-size: 12px;
+                    margin: 2px 0 0 0;
+                    font-size: 11px;
                     color: #999;
-                    font-weight: 500;
+                    font-weight: 400;
                   }
                   
                   .chart-section {
-                    margin-top: 0;
-                    padding-top: 18px;
-                    border-top: 2px solid #f5f5f5;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
                   }
                   
                   .chart-title {
-                    font-size: 11px;
-                    font-weight: 700;
-                    color: #1a1a1a;
-                    margin-bottom: 12px;
-                    display: flex;
-                    align-items: center;
-                    gap: 6px;
-                    text-transform: uppercase;
-                    letter-spacing: 0.5px;
-                  }
-                  
-                  .chart-title::before {
-                    content: '';
-                    width: 3px;
-                    height: 12px;
-                    background: linear-gradient(135deg, #1976d2 0%, #42a5f5 100%);
-                    border-radius: 2px;
+                    display: none;
                   }
                   
                   .pie-chart-container {
                     display: flex;
-                    align-items: flex-start;
-                    gap: 16px;
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 14px;
+                    width: 100%;
                   }
                   
                   .pie-chart {
                     position: relative;
-                    width: 100px;
-                    height: 100px;
+                    width: 140px;
+                    height: 140px;
                     flex-shrink: 0;
-                    cursor: pointer;
                   }
                   
                   .pie-chart svg {
                     transform: rotate(-90deg);
-                    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.08));
                   }
                   
                   .pie-chart circle {
                     fill: none;
-                    stroke-width: 10;
-                    transition: all 0.3s ease;
+                    stroke-width: 12;
+                    transition: opacity 0.2s ease;
                   }
                   
                   .pie-bg {
-                    stroke: #f5f5f5;
+                    stroke: #f0f0f0;
                   }
                   
                   .pie-slice {
-                    stroke-dasharray: 0 100;
-                    animation: pieChart 1s ease-out forwards;
                     cursor: pointer;
                   }
                   
                   .pie-slice:hover {
-                    filter: brightness(1.1);
-                    stroke-width: 12;
+                    opacity: 0.85;
                   }
                   
                   .pie-slice-1 {
                     stroke: #1976d2;
-                    animation-delay: 0.3s;
                   }
                   
                   .pie-slice-2 {
                     stroke: #ff9800;
-                    animation-delay: 0.5s;
                   }
                   
                   .chart-center {
@@ -1643,79 +1564,63 @@ const Map = () => {
                     transform: translate(-50%, -50%);
                     text-align: center;
                     pointer-events: none;
-                    transition: all 0.3s ease;
                   }
                   
                   .chart-percent {
-                    font-size: 20px;
+                    font-size: 28px;
                     font-weight: 700;
                     color: #1976d2;
                     line-height: 1;
                   }
                   
                   .chart-label {
-                    font-size: 9px;
+                    font-size: 10px;
                     color: #999;
-                    margin-top: 3px;
+                    margin-top: 4px;
                     font-weight: 500;
-                    text-transform: uppercase;
-                    letter-spacing: 0.3px;
                   }
                   
                   .legend {
-                    flex: 1;
+                    width: 100%;
                     display: flex;
                     flex-direction: column;
-                    gap: 6px;
-                    min-width: 0;
+                    gap: 8px;
                   }
                   
                   .legend-item {
                     display: flex;
                     align-items: center;
-                    gap: 8px;
-                    padding: 6px 8px;
+                    gap: 10px;
+                    padding: 8px 10px;
                     background: #fafafa;
                     border-radius: 6px;
-                    transition: all 0.2s ease;
                     cursor: pointer;
-                    border: 2px solid transparent;
+                    border: 1px solid transparent;
+                    transition: all 0.2s ease;
                   }
                   
                   .legend-item:hover,
                   .legend-item.active {
                     background: #f0f7ff;
                     border-color: #1976d2;
-                    transform: translateX(2px);
                   }
                   
                   .legend-color {
-                    width: 12px;
-                    height: 12px;
+                    width: 14px;
+                    height: 14px;
                     border-radius: 3px;
                     flex-shrink: 0;
-                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                    transition: all 0.2s ease;
-                  }
-                  
-                  .legend-item:hover .legend-color,
-                  .legend-item.active .legend-color {
-                    transform: scale(1.2);
-                    box-shadow: 0 3px 8px rgba(0,0,0,0.2);
                   }
                   
                   .legend-text {
                     flex: 1;
-                    font-size: 11px;
+                    font-size: 12px;
                     color: #1a1a1a;
                     font-weight: 500;
-                    white-space: nowrap;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
                   }
                   
                   .legend-percent {
-                    font-size: 11px;
+                    font-size: 13px;
                     font-weight: 700;
                     color: #1976d2;
                     flex-shrink: 0;
