@@ -830,29 +830,28 @@ const Map = () => {
                 .modern-popup {
                   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
                   animation: fadeIn 0.3s ease-out;
+                  padding: 20px;
                 }
                 
                 .popup-header {
                   display: flex;
                   align-items: center;
-                  gap: 12px;
-                  margin-bottom: 16px;
-                  padding-bottom: 12px;
-                  border-bottom: 2px solid #f0f0f0;
+                  gap: 14px;
+                  margin-bottom: 20px;
                 }
                 
                 .popup-icon {
-                  width: 40px;
-                  height: 40px;
+                  width: 48px;
+                  height: 48px;
                   background: linear-gradient(135deg, #1976d2 0%, #42a5f5 100%);
-                  border-radius: 10px;
+                  border-radius: 12px;
                   display: flex;
                   align-items: center;
                   justify-content: center;
                   color: white;
-                  font-size: 18px;
+                  font-size: 20px;
                   font-weight: 700;
-                  box-shadow: 0 4px 12px rgba(25, 118, 210, 0.3);
+                  box-shadow: 0 6px 16px rgba(25, 118, 210, 0.25);
                 }
                 
                 .popup-title {
@@ -861,88 +860,75 @@ const Map = () => {
                 
                 .popup-title h3 {
                   margin: 0;
-                  font-size: 16px;
+                  font-size: 18px;
                   font-weight: 700;
                   color: #1a1a1a;
+                  line-height: 1.3;
                 }
                 
                 .popup-title p {
-                  margin: 2px 0 0 0;
-                  font-size: 11px;
+                  margin: 4px 0 0 0;
+                  font-size: 12px;
                   color: #999;
-                }
-                
-                .info-grid {
-                  display: grid;
-                  grid-template-columns: 1fr 1fr;
-                  gap: 10px;
-                  margin-bottom: 16px;
-                }
-                
-                .info-item {
-                  background: #f8f9fa;
-                  padding: 10px;
-                  border-radius: 8px;
-                  border-left: 3px solid #1976d2;
-                }
-                
-                .info-label {
-                  font-size: 10px;
-                  color: #666;
-                  margin-bottom: 4px;
-                  text-transform: uppercase;
-                  letter-spacing: 0.5px;
-                }
-                
-                .info-value {
-                  font-size: 13px;
-                  font-weight: 600;
-                  color: #1a1a1a;
+                  font-weight: 500;
                 }
                 
                 .chart-section {
-                  margin-top: 16px;
-                  padding-top: 16px;
-                  border-top: 2px solid #f0f0f0;
+                  margin-top: 0;
+                  padding-top: 18px;
+                  border-top: 2px solid #f5f5f5;
                 }
                 
                 .chart-title {
-                  font-size: 12px;
-                  font-weight: 600;
-                  color: #333;
-                  margin-bottom: 12px;
+                  font-size: 13px;
+                  font-weight: 700;
+                  color: #1a1a1a;
+                  margin-bottom: 16px;
+                  display: flex;
+                  align-items: center;
+                  gap: 6px;
+                }
+                
+                .chart-title::before {
+                  content: '';
+                  width: 4px;
+                  height: 16px;
+                  background: linear-gradient(135deg, #1976d2 0%, #42a5f5 100%);
+                  border-radius: 2px;
                 }
                 
                 .pie-chart-container {
                   display: flex;
                   align-items: center;
-                  gap: 16px;
+                  gap: 20px;
                 }
                 
                 .pie-chart {
                   position: relative;
-                  width: 80px;
-                  height: 80px;
+                  width: 90px;
+                  height: 90px;
+                  flex-shrink: 0;
                 }
                 
                 .pie-chart svg {
                   transform: rotate(-90deg);
+                  filter: drop-shadow(0 2px 8px rgba(0,0,0,0.08));
                 }
                 
                 .pie-chart circle {
                   fill: none;
-                  stroke-width: 8;
+                  stroke-width: 9;
                 }
                 
                 .pie-bg {
-                  stroke: #f0f0f0;
+                  stroke: #f5f5f5;
                 }
                 
                 .pie-slice-1 {
                   stroke: #1976d2;
                   stroke-dasharray: 0 100;
                   animation: pieChart 1s ease-out forwards;
-                  animation-delay: 0.2s;
+                  animation-delay: 0.3s;
                   --percent: 97.06;
                 }
                 
@@ -950,7 +936,7 @@ const Map = () => {
                   stroke: #ff9800;
                   stroke-dasharray: 0 100;
                   animation: pieChart 1s ease-out forwards;
-                  animation-delay: 0.4s;
+                  animation-delay: 0.5s;
                   --percent: 2.94;
                   stroke-dashoffset: -97.06;
                 }
@@ -964,14 +950,17 @@ const Map = () => {
                 }
                 
                 .chart-percent {
-                  font-size: 16px;
+                  font-size: 18px;
                   font-weight: 700;
                   color: #1976d2;
+                  line-height: 1;
                 }
                 
                 .chart-label {
-                  font-size: 9px;
+                  font-size: 10px;
                   color: #999;
+                  margin-top: 2px;
+                  font-weight: 500;
                 }
                 
                 .legend {
@@ -981,27 +970,42 @@ const Map = () => {
                 .legend-item {
                   display: flex;
                   align-items: center;
-                  gap: 8px;
-                  margin-bottom: 8px;
+                  gap: 10px;
+                  margin-bottom: 10px;
+                  padding: 8px;
+                  background: #fafafa;
+                  border-radius: 6px;
+                  transition: all 0.2s ease;
+                }
+                
+                .legend-item:hover {
+                  background: #f5f5f5;
+                  transform: translateX(2px);
+                }
+                
+                .legend-item:last-child {
+                  margin-bottom: 0;
                 }
                 
                 .legend-color {
-                  width: 12px;
-                  height: 12px;
-                  border-radius: 3px;
+                  width: 14px;
+                  height: 14px;
+                  border-radius: 4px;
                   flex-shrink: 0;
+                  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
                 }
                 
                 .legend-text {
                   flex: 1;
-                  font-size: 11px;
-                  color: #333;
+                  font-size: 12px;
+                  color: #1a1a1a;
+                  font-weight: 500;
                 }
                 
                 .legend-percent {
-                  font-size: 11px;
-                  font-weight: 600;
-                  color: #666;
+                  font-size: 12px;
+                  font-weight: 700;
+                  color: #1976d2;
                 }
               </style>
               
@@ -1011,17 +1015,6 @@ const Map = () => {
                   <div class="popup-title">
                     <h3>NCUE</h3>
                     <p>Sampling Point</p>
-                  </div>
-                </div>
-                
-                <div class="info-grid">
-                  <div class="info-item">
-                    <div class="info-label">Longitude</div>
-                    <div class="info-value">120.5377°E</div>
-                  </div>
-                  <div class="info-item">
-                    <div class="info-label">Latitude</div>
-                    <div class="info-value">24.0513°N</div>
                   </div>
                 </div>
                 
@@ -1438,29 +1431,28 @@ const Map = () => {
                   .modern-popup {
                     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
                     animation: fadeIn 0.3s ease-out;
+                    padding: 20px;
                   }
                   
                   .popup-header {
                     display: flex;
                     align-items: center;
-                    gap: 12px;
-                    margin-bottom: 16px;
-                    padding-bottom: 12px;
-                    border-bottom: 2px solid #f0f0f0;
+                    gap: 14px;
+                    margin-bottom: 20px;
                   }
                   
                   .popup-icon {
-                    width: 40px;
-                    height: 40px;
+                    width: 48px;
+                    height: 48px;
                     background: linear-gradient(135deg, #1976d2 0%, #42a5f5 100%);
-                    border-radius: 10px;
+                    border-radius: 12px;
                     display: flex;
                     align-items: center;
                     justify-content: center;
                     color: white;
-                    font-size: 18px;
+                    font-size: 20px;
                     font-weight: 700;
-                    box-shadow: 0 4px 12px rgba(25, 118, 210, 0.3);
+                    box-shadow: 0 6px 16px rgba(25, 118, 210, 0.25);
                   }
                   
                   .popup-title {
@@ -1469,88 +1461,75 @@ const Map = () => {
                   
                   .popup-title h3 {
                     margin: 0;
-                    font-size: 16px;
+                    font-size: 18px;
                     font-weight: 700;
                     color: #1a1a1a;
+                    line-height: 1.3;
                   }
                   
                   .popup-title p {
-                    margin: 2px 0 0 0;
-                    font-size: 11px;
+                    margin: 4px 0 0 0;
+                    font-size: 12px;
                     color: #999;
-                  }
-                  
-                  .info-grid {
-                    display: grid;
-                    grid-template-columns: 1fr 1fr;
-                    gap: 10px;
-                    margin-bottom: 16px;
-                  }
-                  
-                  .info-item {
-                    background: #f8f9fa;
-                    padding: 10px;
-                    border-radius: 8px;
-                    border-left: 3px solid #1976d2;
-                  }
-                  
-                  .info-label {
-                    font-size: 10px;
-                    color: #666;
-                    margin-bottom: 4px;
-                    text-transform: uppercase;
-                    letter-spacing: 0.5px;
-                  }
-                  
-                  .info-value {
-                    font-size: 13px;
-                    font-weight: 600;
-                    color: #1a1a1a;
+                    font-weight: 500;
                   }
                   
                   .chart-section {
-                    margin-top: 16px;
-                    padding-top: 16px;
-                    border-top: 2px solid #f0f0f0;
+                    margin-top: 0;
+                    padding-top: 18px;
+                    border-top: 2px solid #f5f5f5;
                   }
                   
                   .chart-title {
-                    font-size: 12px;
-                    font-weight: 600;
-                    color: #333;
-                    margin-bottom: 12px;
+                    font-size: 13px;
+                    font-weight: 700;
+                    color: #1a1a1a;
+                    margin-bottom: 16px;
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                  }
+                  
+                  .chart-title::before {
+                    content: '';
+                    width: 4px;
+                    height: 16px;
+                    background: linear-gradient(135deg, #1976d2 0%, #42a5f5 100%);
+                    border-radius: 2px;
                   }
                   
                   .pie-chart-container {
                     display: flex;
                     align-items: center;
-                    gap: 16px;
+                    gap: 20px;
                   }
                   
                   .pie-chart {
                     position: relative;
-                    width: 80px;
-                    height: 80px;
+                    width: 90px;
+                    height: 90px;
+                    flex-shrink: 0;
                   }
                   
                   .pie-chart svg {
                     transform: rotate(-90deg);
+                    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.08));
                   }
                   
                   .pie-chart circle {
                     fill: none;
-                    stroke-width: 8;
+                    stroke-width: 9;
                   }
                   
                   .pie-bg {
-                    stroke: #f0f0f0;
+                    stroke: #f5f5f5;
                   }
                   
                   .pie-slice-1 {
                     stroke: #1976d2;
                     stroke-dasharray: 0 100;
                     animation: pieChart 1s ease-out forwards;
-                    animation-delay: 0.2s;
+                    animation-delay: 0.3s;
                     --percent: 97.06;
                   }
                   
@@ -1558,7 +1537,7 @@ const Map = () => {
                     stroke: #ff9800;
                     stroke-dasharray: 0 100;
                     animation: pieChart 1s ease-out forwards;
-                    animation-delay: 0.4s;
+                    animation-delay: 0.5s;
                     --percent: 2.94;
                     stroke-dashoffset: -97.06;
                   }
@@ -1572,14 +1551,17 @@ const Map = () => {
                   }
                   
                   .chart-percent {
-                    font-size: 16px;
+                    font-size: 18px;
                     font-weight: 700;
                     color: #1976d2;
+                    line-height: 1;
                   }
                   
                   .chart-label {
-                    font-size: 9px;
+                    font-size: 10px;
                     color: #999;
+                    margin-top: 2px;
+                    font-weight: 500;
                   }
                   
                   .legend {
@@ -1589,27 +1571,42 @@ const Map = () => {
                   .legend-item {
                     display: flex;
                     align-items: center;
-                    gap: 8px;
-                    margin-bottom: 8px;
+                    gap: 10px;
+                    margin-bottom: 10px;
+                    padding: 8px;
+                    background: #fafafa;
+                    border-radius: 6px;
+                    transition: all 0.2s ease;
+                  }
+                  
+                  .legend-item:hover {
+                    background: #f5f5f5;
+                    transform: translateX(2px);
+                  }
+                  
+                  .legend-item:last-child {
+                    margin-bottom: 0;
                   }
                   
                   .legend-color {
-                    width: 12px;
-                    height: 12px;
-                    border-radius: 3px;
+                    width: 14px;
+                    height: 14px;
+                    border-radius: 4px;
                     flex-shrink: 0;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
                   }
                   
                   .legend-text {
                     flex: 1;
-                    font-size: 11px;
-                    color: #333;
+                    font-size: 12px;
+                    color: #1a1a1a;
+                    font-weight: 500;
                   }
                   
                   .legend-percent {
-                    font-size: 11px;
-                    font-weight: 600;
-                    color: #666;
+                    font-size: 12px;
+                    font-weight: 700;
+                    color: #1976d2;
                   }
                 </style>
                 
@@ -1619,17 +1616,6 @@ const Map = () => {
                     <div class="popup-title">
                       <h3>NCUE</h3>
                       <p>Sampling Point</p>
-                    </div>
-                  </div>
-                  
-                  <div class="info-grid">
-                    <div class="info-item">
-                      <div class="info-label">Longitude</div>
-                      <div class="info-value">120.5377°E</div>
-                    </div>
-                    <div class="info-item">
-                      <div class="info-label">Latitude</div>
-                      <div class="info-value">24.0513°N</div>
                     </div>
                   </div>
                   
