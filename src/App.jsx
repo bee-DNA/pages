@@ -3,12 +3,8 @@ import { ThemeProvider, createTheme, CssBaseline, Box } from "@mui/material";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import Home from "./pages/Home";
-import Query from "./pages/Query";
 import Search from "./pages/Search";
-import Heatmap from "./pages/Heatmap";
-import ComplexHeatmap from "./pages/ComplexHeatmap";
 import Map from "./pages/Map";
-import CgMLST from "./pages/CgMLST";
 import "./i18n/config";
 
 // Material-UI 主題設定
@@ -54,12 +50,8 @@ function App() {
           >
             <Routes>
               <Route path="/" element={<Home />} />
-              <Route path="/query" element={<Query />} />
               <Route path="/search" element={<Search />} />
-              <Route path="/heatmap" element={<Heatmap />} />
-              <Route path="/complex-heatmap" element={<ComplexHeatmap />} />
               <Route path="/map" element={<Map />} />
-              <Route path="/cgmlst" element={<CgMLST />} />
             </Routes>
           </Box>
           <Footer />

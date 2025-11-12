@@ -17,12 +17,8 @@ const Navbar = () => {
 
   // 導航項目
   const navItems = [
-    { key: "query", path: "/query" },
     { key: "search", path: "/search" },
-    { key: "heatmap", path: "/heatmap" },
-    { key: "complexHeatmap", path: "/complex-heatmap" },
     { key: "map", path: "/map" },
-    { key: "cgMLST", path: "/cgmlst" },
   ];
 
   // 切換語言

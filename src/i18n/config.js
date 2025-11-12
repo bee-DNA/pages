@@ -7,12 +7,8 @@ const resources = {
     translation: {
       // 導航欄
       nav: {
-        query: "Query",
         search: "Search",
-        heatmap: "Heatmap",
-        complexHeatmap: "ComplexHeatmap",
         map: "Map",
-        cgMLST: "cgMLST",
       },
       // 頁面標題
       title: "Bee Metagenomics",
@@ -86,12 +82,8 @@ const resources = {
     translation: {
       // 導航欄
       nav: {
-        query: "查詢",
         search: "搜尋",
-        heatmap: "熱力圖",
-        complexHeatmap: "複雜熱力圖",
         map: "地圖",
-        cgMLST: "cgMLST",
       },
       // 頁面標題
       title: "Bee Metagenomics",
