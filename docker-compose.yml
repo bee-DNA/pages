@@ -1,0 +1,25 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:13
+    container_name: bee-db
+    environment:
+      POSTGRES_DB: bee_db
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    volumes:
+      - ./init:/docker-entrypoint-initdb.d
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - bee-network
+    restart: unless-stopped
+
+networks:
+  bee-network:
+    driver: bridge
+
+volumes:
+  postgres_data:

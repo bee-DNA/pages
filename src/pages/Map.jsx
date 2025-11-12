@@ -916,7 +916,7 @@ const Map = () => {
                 
                 .pie-slice-2 {
                   stroke: #ff9800;
-                
+                }
                 .chart-center {
                   position: absolute;
                   top: 50%;
@@ -1030,64 +1030,74 @@ const Map = () => {
                 </div>
               </div>
               
-              <script>
-                // Interactive pie chart
-                (function() {
-                  const pieSlices = document.querySelectorAll('#pie-chart-1 .pie-slice');
-                  const legendItems = document.querySelectorAll('.legend-item');
-                  const chartCenter = document.getElementById('chart-center-1');
-                  
-                  const defaultContent = chartCenter.innerHTML;
-                  
-                  // Pie slice hover
-                  pieSlices.forEach((slice, index) => {
-                    slice.addEventListener('mouseenter', function() {
-                      const species = this.getAttribute('data-species');
-                      const percent = this.getAttribute('data-percent');
-                      const color = this.getAttribute('data-color');
-                      
-                      chartCenter.innerHTML = 
-                        '<div class="chart-percent" style="color: ' + color + ';">' + percent + '%</div>' +
-                        '<div class="chart-label">' + species + '</div>';
-                      
-                      legendItems[index].classList.add('active');
-                    });
-                    
-                    slice.addEventListener('mouseleave', function() {
-                      chartCenter.innerHTML = defaultContent;
-                      legendItems.forEach(item => item.classList.remove('active'));
-                    });
-                  });
-                  
-                  // Legend item hover
-                  legendItems.forEach((item, index) => {
-                    item.addEventListener('mouseenter', function() {
-                      const slice = pieSlices[index];
-                      const species = slice.getAttribute('data-species');
-                      const percent = slice.getAttribute('data-percent');
-                      const color = slice.getAttribute('data-color');
-                      
-                      chartCenter.innerHTML = 
-                        '<div class="chart-percent" style="color: ' + color + ';">' + percent + '%</div>' +
-                        '<div class="chart-label">' + species + '</div>';
-                      
-                      item.classList.add('active');
-                      slice.style.filter = 'brightness(1.1)';
-                      slice.style.strokeWidth = '12';
-                    });
-                    
-                    item.addEventListener('mouseleave', function() {
-                      chartCenter.innerHTML = defaultContent;
-                      item.classList.remove('active');
-                      pieSlices[index].style.filter = '';
-                      pieSlices[index].style.strokeWidth = '';
-                    });
-                  });
-                })();
-              </script>`
+              `
             )
           )
           .addTo(map.current);
+        // Attach interactions for first marker popup
+        marker.getPopup().on("open", () => {
+          try {
+            const popupEl = marker.getPopup().getElement();
+            if (!popupEl) return;
+            if (popupEl.dataset.pieListenersAttached === "true") return;
+            popupEl.dataset.pieListenersAttached = "true";
+            const pie = popupEl.querySelector("#pie-chart-1");
+            if (!pie) return;
+            const pieSlices = pie.querySelectorAll(".pie-slice");
+            const legendItems = popupEl.querySelectorAll(".legend-item");
+            const chartCenter = popupEl.querySelector("#chart-center-1");
+            const defaultContent = chartCenter?.innerHTML || "";
+            pieSlices.forEach((slice, index) => {
+              slice.addEventListener("mouseenter", function () {
+                const species = this.getAttribute("data-species");
+                const percent = this.getAttribute("data-percent");
+                const color = this.getAttribute("data-color");
+                chartCenter.innerHTML =
+                  '<div class="chart-percent" style="color: ' +
+                  color +
+                  ';">' +
+                  percent +
+                  "%</div>" +
+                  '<div class="chart-label">' +
+                  species +
+                  "</div>";
+                legendItems[index].classList.add("active");
+              });
+              slice.addEventListener("mouseleave", function () {
+                chartCenter.innerHTML = defaultContent;
+                legendItems.forEach((item) => item.classList.remove("active"));
+              });
+            });
+            legendItems.forEach((item, index) => {
+              item.addEventListener("mouseenter", function () {
+                const slice = pieSlices[index];
+                const species = slice.getAttribute("data-species");
+                const percent = slice.getAttribute("data-percent");
+                const color = slice.getAttribute("data-color");
+                chartCenter.innerHTML =
+                  '<div class="chart-percent" style="color: ' +
+                  color +
+                  ';">' +
+                  percent +
+                  "%</div>" +
+                  '<div class="chart-label">' +
+                  species +
+                  "</div>";
+                item.classList.add("active");
+                slice.style.filter = "brightness(1.1)";
+                slice.style.strokeWidth = "12";
+              });
+              item.addEventListener("mouseleave", function () {
+                chartCenter.innerHTML = defaultContent;
+                item.classList.remove("active");
+                pieSlices[index].style.filter = "";
+                pieSlices[index].style.strokeWidth = "";
+              });
+            });
+          } catch (err) {
+            console.error("Failed to attach popup interactions (1):", err);
+          }
+        });
       });
     };
 
@@ -1670,64 +1680,76 @@ const Map = () => {
                   </div>
                 </div>
                 
-                <script>
-                  // Interactive pie chart
-                  (function() {
-                    const pieSlices = document.querySelectorAll('#pie-chart-2 .pie-slice');
-                    const legendItems = document.querySelectorAll('#pie-chart-2 + .legend .legend-item');
-                    const chartCenter = document.getElementById('chart-center-2');
-                    
-                    const defaultContent = chartCenter.innerHTML;
-                    
-                    // Pie slice hover
-                    pieSlices.forEach((slice, index) => {
-                      slice.addEventListener('mouseenter', function() {
-                        const species = this.getAttribute('data-species');
-                        const percent = this.getAttribute('data-percent');
-                        const color = this.getAttribute('data-color');
-                        
-                        chartCenter.innerHTML = 
-                          '<div class="chart-percent" style="color: ' + color + ';">' + percent + '%</div>' +
-                          '<div class="chart-label">' + species + '</div>';
-                        
-                        legendItems[index].classList.add('active');
-                      });
-                      
-                      slice.addEventListener('mouseleave', function() {
-                        chartCenter.innerHTML = defaultContent;
-                        legendItems.forEach(item => item.classList.remove('active'));
-                      });
-                    });
-                    
-                    // Legend item hover
-                    legendItems.forEach((item, index) => {
-                      item.addEventListener('mouseenter', function() {
-                        const slice = pieSlices[index];
-                        const species = slice.getAttribute('data-species');
-                        const percent = slice.getAttribute('data-percent');
-                        const color = slice.getAttribute('data-color');
-                        
-                        chartCenter.innerHTML = 
-                          '<div class="chart-percent" style="color: ' + color + ';">' + percent + '%</div>' +
-                          '<div class="chart-label">' + species + '</div>';
-                        
-                        item.classList.add('active');
-                        slice.style.filter = 'brightness(1.1)';
-                        slice.style.strokeWidth = '12';
-                      });
-                      
-                      item.addEventListener('mouseleave', function() {
-                        chartCenter.innerHTML = defaultContent;
-                        item.classList.remove('active');
-                        pieSlices[index].style.filter = '';
-                        pieSlices[index].style.strokeWidth = '';
-                      });
-                    });
-                  })();
-                </script>`
+                `
               )
             )
             .addTo(map.current);
+          // Attach interactions for second marker popup
+          marker.getPopup().on("open", () => {
+            try {
+              const popupEl = marker.getPopup().getElement();
+              if (!popupEl) return;
+              if (popupEl.dataset.pieListenersAttached === "true") return;
+              popupEl.dataset.pieListenersAttached = "true";
+              const pie = popupEl.querySelector("#pie-chart-2");
+              if (!pie) return;
+              const pieSlices = pie.querySelectorAll(".pie-slice");
+              const legendItems = popupEl.querySelectorAll(".legend-item");
+              const chartCenter = popupEl.querySelector("#chart-center-2");
+              const defaultContent = chartCenter?.innerHTML || "";
+              pieSlices.forEach((slice, index) => {
+                slice.addEventListener("mouseenter", function () {
+                  const species = this.getAttribute("data-species");
+                  const percent = this.getAttribute("data-percent");
+                  const color = this.getAttribute("data-color");
+                  chartCenter.innerHTML =
+                    '<div class="chart-percent" style="color: ' +
+                    color +
+                    ';">' +
+                    percent +
+                    "%</div>" +
+                    '<div class="chart-label">' +
+                    species +
+                    "</div>";
+                  legendItems[index].classList.add("active");
+                });
+                slice.addEventListener("mouseleave", function () {
+                  chartCenter.innerHTML = defaultContent;
+                  legendItems.forEach((item) =>
+                    item.classList.remove("active")
+                  );
+                });
+              });
+              legendItems.forEach((item, index) => {
+                item.addEventListener("mouseenter", function () {
+                  const slice = pieSlices[index];
+                  const species = slice.getAttribute("data-species");
+                  const percent = slice.getAttribute("data-percent");
+                  const color = slice.getAttribute("data-color");
+                  chartCenter.innerHTML =
+                    '<div class="chart-percent" style="color: ' +
+                    color +
+                    ';">' +
+                    percent +
+                    "%</div>" +
+                    '<div class="chart-label">' +
+                    species +
+                    "</div>";
+                  item.classList.add("active");
+                  slice.style.filter = "brightness(1.1)";
+                  slice.style.strokeWidth = "12";
+                });
+                item.addEventListener("mouseleave", function () {
+                  chartCenter.innerHTML = defaultContent;
+                  item.classList.remove("active");
+                  pieSlices[index].style.filter = "";
+                  pieSlices[index].style.strokeWidth = "";
+                });
+              });
+            } catch (err) {
+              console.error("Failed to attach popup interactions (2):", err);
+            }
+          });
 
           // Don't auto open popup - open on click only
 
