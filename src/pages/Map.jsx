@@ -1062,10 +1062,10 @@ const Map = () => {
             </Box>
           </Box>
 
-          {/* Center: Time Display */}
+          {/* Center: Time Display - HIDDEN */}
           <Box
             sx={{
-              display: "flex",
+              display: "none",
               alignItems: "center",
               gap: 1,
               px: 2,
@@ -1114,11 +1114,13 @@ const Map = () => {
             </Box>
           </Box>
 
-          {/* Data Mode Selector: 即時 | 搜尋 | 日期 */}
-          <DataModeSelector
-            currentMode={dataMode}
-            onModeChange={handleModeChange}
-          />
+          {/* Data Mode Selector: 即時 | 搜尋 | 日期 - HIDDEN */}
+          <Box sx={{ display: "none" }}>
+            <DataModeSelector
+              currentMode={dataMode}
+              onModeChange={handleModeChange}
+            />
+          </Box>
 
           {/* Right: Map Style Toggle & Layer Control */}
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
@@ -1183,12 +1185,12 @@ const Map = () => {
               />
             </Box>
 
-            {/* Layer Control Button */}
+            {/* Layer Control Button - HIDDEN */}
             <Box
               data-layer-toggle
               onClick={() => setExpanded(!expanded)}
               sx={{
-                display: "flex",
+                display: "none",
                 alignItems: "center",
                 gap: 1,
                 px: 2,
