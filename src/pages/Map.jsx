@@ -770,8 +770,8 @@ const Map = () => {
 
         // Re-add custom marker
         const createCustomMarker = (number, color) => {
-          const el = document.createElement('div');
-          el.className = 'custom-marker';
+          const el = document.createElement("div");
+          el.className = "custom-marker";
           el.style.cssText = `
             width: 36px;
             height: 36px;
@@ -789,32 +789,32 @@ const Map = () => {
             transition: box-shadow 0.2s ease, border-width 0.2s ease;
           `;
           el.textContent = number;
-          
+
           // Hover effect
-          el.addEventListener('mouseenter', () => {
-            el.style.boxShadow = '0 4px 12px rgba(0,0,0,0.4)';
-            el.style.borderWidth = '4px';
+          el.addEventListener("mouseenter", () => {
+            el.style.boxShadow = "0 4px 12px rgba(0,0,0,0.4)";
+            el.style.borderWidth = "4px";
           });
-          el.addEventListener('mouseleave', () => {
-            el.style.boxShadow = '0 2px 8px rgba(0,0,0,0.3)';
-            el.style.borderWidth = '3px';
+          el.addEventListener("mouseleave", () => {
+            el.style.boxShadow = "0 2px 8px rgba(0,0,0,0.3)";
+            el.style.borderWidth = "3px";
           });
-          
+
           return el;
         };
 
-        const markerElement = createCustomMarker('1', '#1976d2');
+        const markerElement = createCustomMarker("1", "#1976d2");
         const marker = new mapboxgl.Marker({
           element: markerElement,
-          anchor: 'center',
+          anchor: "center",
         })
           .setLngLat([120.5377, 24.0513])
           .setPopup(
-            new mapboxgl.Popup({ 
+            new mapboxgl.Popup({
               offset: 25,
               closeButton: true,
               closeOnClick: false,
-              maxWidth: '320px'
+              maxWidth: "320px",
             }).setHTML(
               `<style>
                 @keyframes fadeIn {
@@ -880,34 +880,37 @@ const Map = () => {
                 }
                 
                 .chart-title {
-                  font-size: 13px;
+                  font-size: 11px;
                   font-weight: 700;
                   color: #1a1a1a;
-                  margin-bottom: 16px;
+                  margin-bottom: 12px;
                   display: flex;
                   align-items: center;
                   gap: 6px;
+                  text-transform: uppercase;
+                  letter-spacing: 0.5px;
                 }
                 
                 .chart-title::before {
                   content: '';
-                  width: 4px;
-                  height: 16px;
+                  width: 3px;
+                  height: 12px;
                   background: linear-gradient(135deg, #1976d2 0%, #42a5f5 100%);
                   border-radius: 2px;
                 }
                 
                 .pie-chart-container {
                   display: flex;
-                  align-items: center;
-                  gap: 20px;
+                  align-items: flex-start;
+                  gap: 16px;
                 }
                 
                 .pie-chart {
                   position: relative;
-                  width: 90px;
-                  height: 90px;
+                  width: 100px;
+                  height: 100px;
                   flex-shrink: 0;
+                  cursor: pointer;
                 }
                 
                 .pie-chart svg {
@@ -917,28 +920,33 @@ const Map = () => {
                 
                 .pie-chart circle {
                   fill: none;
-                  stroke-width: 9;
+                  stroke-width: 10;
+                  transition: all 0.3s ease;
                 }
                 
                 .pie-bg {
                   stroke: #f5f5f5;
                 }
                 
-                .pie-slice-1 {
-                  stroke: #1976d2;
+                .pie-slice {
                   stroke-dasharray: 0 100;
                   animation: pieChart 1s ease-out forwards;
+                  cursor: pointer;
+                }
+                
+                .pie-slice:hover {
+                  filter: brightness(1.1);
+                  stroke-width: 12;
+                }
+                
+                .pie-slice-1 {
+                  stroke: #1976d2;
                   animation-delay: 0.3s;
-                  --percent: 97.06;
                 }
                 
                 .pie-slice-2 {
                   stroke: #ff9800;
-                  stroke-dasharray: 0 100;
-                  animation: pieChart 1s ease-out forwards;
                   animation-delay: 0.5s;
-                  --percent: 2.94;
-                  stroke-dashoffset: -97.06;
                 }
                 
                 .chart-center {
@@ -947,65 +955,83 @@ const Map = () => {
                   left: 50%;
                   transform: translate(-50%, -50%);
                   text-align: center;
+                  pointer-events: none;
+                  transition: all 0.3s ease;
                 }
                 
                 .chart-percent {
-                  font-size: 18px;
+                  font-size: 20px;
                   font-weight: 700;
                   color: #1976d2;
                   line-height: 1;
                 }
                 
                 .chart-label {
-                  font-size: 10px;
+                  font-size: 9px;
                   color: #999;
-                  margin-top: 2px;
+                  margin-top: 3px;
                   font-weight: 500;
+                  text-transform: uppercase;
+                  letter-spacing: 0.3px;
                 }
                 
                 .legend {
                   flex: 1;
+                  display: flex;
+                  flex-direction: column;
+                  gap: 6px;
+                  min-width: 0;
                 }
                 
                 .legend-item {
                   display: flex;
                   align-items: center;
-                  gap: 10px;
-                  margin-bottom: 10px;
-                  padding: 8px;
+                  gap: 8px;
+                  padding: 6px 8px;
                   background: #fafafa;
                   border-radius: 6px;
                   transition: all 0.2s ease;
+                  cursor: pointer;
+                  border: 2px solid transparent;
                 }
                 
-                .legend-item:hover {
-                  background: #f5f5f5;
+                .legend-item:hover,
+                .legend-item.active {
+                  background: #f0f7ff;
+                  border-color: #1976d2;
                   transform: translateX(2px);
                 }
                 
-                .legend-item:last-child {
-                  margin-bottom: 0;
-                }
-                
                 .legend-color {
-                  width: 14px;
-                  height: 14px;
-                  border-radius: 4px;
+                  width: 12px;
+                  height: 12px;
+                  border-radius: 3px;
                   flex-shrink: 0;
                   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                  transition: all 0.2s ease;
+                }
+                
+                .legend-item:hover .legend-color,
+                .legend-item.active .legend-color {
+                  transform: scale(1.2);
+                  box-shadow: 0 3px 8px rgba(0,0,0,0.2);
                 }
                 
                 .legend-text {
                   flex: 1;
-                  font-size: 12px;
+                  font-size: 11px;
                   color: #1a1a1a;
                   font-weight: 500;
+                  white-space: nowrap;
+                  overflow: hidden;
+                  text-overflow: ellipsis;
                 }
                 
                 .legend-percent {
-                  font-size: 12px;
+                  font-size: 11px;
                   font-weight: 700;
                   color: #1976d2;
+                  flex-shrink: 0;
                 }
               </style>
               
@@ -1021,24 +1047,28 @@ const Map = () => {
                 <div class="chart-section">
                   <div class="chart-title">Species Distribution</div>
                   <div class="pie-chart-container">
-                    <div class="pie-chart">
+                    <div class="pie-chart" id="pie-chart-1">
                       <svg viewBox="0 0 36 36">
                         <circle class="pie-bg" cx="18" cy="18" r="15.915"/>
-                        <circle class="pie-slice-1" cx="18" cy="18" r="15.915"/>
-                        <circle class="pie-slice-2" cx="18" cy="18" r="15.915"/>
+                        <circle class="pie-slice pie-slice-1" cx="18" cy="18" r="15.915" 
+                          data-species="Acinetobacter" data-percent="97.06" data-color="#1976d2"
+                          style="stroke-dasharray: 97.06 100; stroke-dashoffset: 0;"/>
+                        <circle class="pie-slice pie-slice-2" cx="18" cy="18" r="15.915"
+                          data-species="Staphylococcus" data-percent="2.94" data-color="#ff9800"
+                          style="stroke-dasharray: 2.94 100; stroke-dashoffset: -97.06;"/>
                       </svg>
-                      <div class="chart-center">
+                      <div class="chart-center" id="chart-center-1">
                         <div class="chart-percent">100%</div>
                         <div class="chart-label">Total</div>
                       </div>
                     </div>
                     <div class="legend">
-                      <div class="legend-item">
+                      <div class="legend-item" data-index="0">
                         <div class="legend-color" style="background: #1976d2;"></div>
                         <div class="legend-text">Acinetobacter</div>
                         <div class="legend-percent">97.06%</div>
                       </div>
-                      <div class="legend-item">
+                      <div class="legend-item" data-index="1">
                         <div class="legend-color" style="background: #ff9800;"></div>
                         <div class="legend-text">Staphylococcus</div>
                         <div class="legend-percent">2.94%</div>
@@ -1046,7 +1076,63 @@ const Map = () => {
                     </div>
                   </div>
                 </div>
-              </div>`
+              </div>
+              
+              <script>
+                // Interactive pie chart
+                (function() {
+                  const pieSlices = document.querySelectorAll('#pie-chart-1 .pie-slice');
+                  const legendItems = document.querySelectorAll('.legend-item');
+                  const chartCenter = document.getElementById('chart-center-1');
+                  
+                  const defaultContent = chartCenter.innerHTML;
+                  
+                  // Pie slice hover
+                  pieSlices.forEach((slice, index) => {
+                    slice.addEventListener('mouseenter', function() {
+                      const species = this.getAttribute('data-species');
+                      const percent = this.getAttribute('data-percent');
+                      const color = this.getAttribute('data-color');
+                      
+                      chartCenter.innerHTML = 
+                        '<div class="chart-percent" style="color: ' + color + ';">' + percent + '%</div>' +
+                        '<div class="chart-label">' + species + '</div>';
+                      
+                      legendItems[index].classList.add('active');
+                    });
+                    
+                    slice.addEventListener('mouseleave', function() {
+                      chartCenter.innerHTML = defaultContent;
+                      legendItems.forEach(item => item.classList.remove('active'));
+                    });
+                  });
+                  
+                  // Legend item hover
+                  legendItems.forEach((item, index) => {
+                    item.addEventListener('mouseenter', function() {
+                      const slice = pieSlices[index];
+                      const species = slice.getAttribute('data-species');
+                      const percent = slice.getAttribute('data-percent');
+                      const color = slice.getAttribute('data-color');
+                      
+                      chartCenter.innerHTML = 
+                        '<div class="chart-percent" style="color: ' + color + ';">' + percent + '%</div>' +
+                        '<div class="chart-label">' + species + '</div>';
+                      
+                      item.classList.add('active');
+                      slice.style.filter = 'brightness(1.1)';
+                      slice.style.strokeWidth = '12';
+                    });
+                    
+                    item.addEventListener('mouseleave', function() {
+                      chartCenter.innerHTML = defaultContent;
+                      item.classList.remove('active');
+                      pieSlices[index].style.filter = '';
+                      pieSlices[index].style.strokeWidth = '';
+                    });
+                  });
+                })();
+              </script>`
             )
           )
           .addTo(map.current);
@@ -1411,11 +1497,11 @@ const Map = () => {
           })
             .setLngLat([120.5377, 24.0513])
             .setPopup(
-              new mapboxgl.Popup({ 
+              new mapboxgl.Popup({
                 offset: 25,
                 closeButton: true,
                 closeOnClick: false,
-                maxWidth: '320px'
+                maxWidth: "320px",
               }).setHTML(
                 `<style>
                   @keyframes fadeIn {
@@ -1481,34 +1567,37 @@ const Map = () => {
                   }
                   
                   .chart-title {
-                    font-size: 13px;
+                    font-size: 11px;
                     font-weight: 700;
                     color: #1a1a1a;
-                    margin-bottom: 16px;
+                    margin-bottom: 12px;
                     display: flex;
                     align-items: center;
                     gap: 6px;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
                   }
                   
                   .chart-title::before {
                     content: '';
-                    width: 4px;
-                    height: 16px;
+                    width: 3px;
+                    height: 12px;
                     background: linear-gradient(135deg, #1976d2 0%, #42a5f5 100%);
                     border-radius: 2px;
                   }
                   
                   .pie-chart-container {
                     display: flex;
-                    align-items: center;
-                    gap: 20px;
+                    align-items: flex-start;
+                    gap: 16px;
                   }
                   
                   .pie-chart {
                     position: relative;
-                    width: 90px;
-                    height: 90px;
+                    width: 100px;
+                    height: 100px;
                     flex-shrink: 0;
+                    cursor: pointer;
                   }
                   
                   .pie-chart svg {
@@ -1518,28 +1607,33 @@ const Map = () => {
                   
                   .pie-chart circle {
                     fill: none;
-                    stroke-width: 9;
+                    stroke-width: 10;
+                    transition: all 0.3s ease;
                   }
                   
                   .pie-bg {
                     stroke: #f5f5f5;
                   }
                   
-                  .pie-slice-1 {
-                    stroke: #1976d2;
+                  .pie-slice {
                     stroke-dasharray: 0 100;
                     animation: pieChart 1s ease-out forwards;
+                    cursor: pointer;
+                  }
+                  
+                  .pie-slice:hover {
+                    filter: brightness(1.1);
+                    stroke-width: 12;
+                  }
+                  
+                  .pie-slice-1 {
+                    stroke: #1976d2;
                     animation-delay: 0.3s;
-                    --percent: 97.06;
                   }
                   
                   .pie-slice-2 {
                     stroke: #ff9800;
-                    stroke-dasharray: 0 100;
-                    animation: pieChart 1s ease-out forwards;
                     animation-delay: 0.5s;
-                    --percent: 2.94;
-                    stroke-dashoffset: -97.06;
                   }
                   
                   .chart-center {
@@ -1548,65 +1642,83 @@ const Map = () => {
                     left: 50%;
                     transform: translate(-50%, -50%);
                     text-align: center;
+                    pointer-events: none;
+                    transition: all 0.3s ease;
                   }
                   
                   .chart-percent {
-                    font-size: 18px;
+                    font-size: 20px;
                     font-weight: 700;
                     color: #1976d2;
                     line-height: 1;
                   }
                   
                   .chart-label {
-                    font-size: 10px;
+                    font-size: 9px;
                     color: #999;
-                    margin-top: 2px;
+                    margin-top: 3px;
                     font-weight: 500;
+                    text-transform: uppercase;
+                    letter-spacing: 0.3px;
                   }
                   
                   .legend {
                     flex: 1;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 6px;
+                    min-width: 0;
                   }
                   
                   .legend-item {
                     display: flex;
                     align-items: center;
-                    gap: 10px;
-                    margin-bottom: 10px;
-                    padding: 8px;
+                    gap: 8px;
+                    padding: 6px 8px;
                     background: #fafafa;
                     border-radius: 6px;
                     transition: all 0.2s ease;
+                    cursor: pointer;
+                    border: 2px solid transparent;
                   }
                   
-                  .legend-item:hover {
-                    background: #f5f5f5;
+                  .legend-item:hover,
+                  .legend-item.active {
+                    background: #f0f7ff;
+                    border-color: #1976d2;
                     transform: translateX(2px);
                   }
                   
-                  .legend-item:last-child {
-                    margin-bottom: 0;
-                  }
-                  
                   .legend-color {
-                    width: 14px;
-                    height: 14px;
-                    border-radius: 4px;
+                    width: 12px;
+                    height: 12px;
+                    border-radius: 3px;
                     flex-shrink: 0;
                     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                    transition: all 0.2s ease;
+                  }
+                  
+                  .legend-item:hover .legend-color,
+                  .legend-item.active .legend-color {
+                    transform: scale(1.2);
+                    box-shadow: 0 3px 8px rgba(0,0,0,0.2);
                   }
                   
                   .legend-text {
                     flex: 1;
-                    font-size: 12px;
+                    font-size: 11px;
                     color: #1a1a1a;
                     font-weight: 500;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
                   }
                   
                   .legend-percent {
-                    font-size: 12px;
+                    font-size: 11px;
                     font-weight: 700;
                     color: #1976d2;
+                    flex-shrink: 0;
                   }
                 </style>
                 
@@ -1622,24 +1734,28 @@ const Map = () => {
                   <div class="chart-section">
                     <div class="chart-title">Species Distribution</div>
                     <div class="pie-chart-container">
-                      <div class="pie-chart">
+                      <div class="pie-chart" id="pie-chart-2">
                         <svg viewBox="0 0 36 36">
                           <circle class="pie-bg" cx="18" cy="18" r="15.915"/>
-                          <circle class="pie-slice-1" cx="18" cy="18" r="15.915"/>
-                          <circle class="pie-slice-2" cx="18" cy="18" r="15.915"/>
+                          <circle class="pie-slice pie-slice-1" cx="18" cy="18" r="15.915" 
+                            data-species="Acinetobacter" data-percent="97.06" data-color="#1976d2"
+                            style="stroke-dasharray: 97.06 100; stroke-dashoffset: 0;"/>
+                          <circle class="pie-slice pie-slice-2" cx="18" cy="18" r="15.915"
+                            data-species="Staphylococcus" data-percent="2.94" data-color="#ff9800"
+                            style="stroke-dasharray: 2.94 100; stroke-dashoffset: -97.06;"/>
                         </svg>
-                        <div class="chart-center">
+                        <div class="chart-center" id="chart-center-2">
                           <div class="chart-percent">100%</div>
                           <div class="chart-label">Total</div>
                         </div>
                       </div>
                       <div class="legend">
-                        <div class="legend-item">
+                        <div class="legend-item" data-index="0">
                           <div class="legend-color" style="background: #1976d2;"></div>
                           <div class="legend-text">Acinetobacter</div>
                           <div class="legend-percent">97.06%</div>
                         </div>
-                        <div class="legend-item">
+                        <div class="legend-item" data-index="1">
                           <div class="legend-color" style="background: #ff9800;"></div>
                           <div class="legend-text">Staphylococcus</div>
                           <div class="legend-percent">2.94%</div>
@@ -1647,7 +1763,63 @@ const Map = () => {
                       </div>
                     </div>
                   </div>
-                </div>`
+                </div>
+                
+                <script>
+                  // Interactive pie chart
+                  (function() {
+                    const pieSlices = document.querySelectorAll('#pie-chart-2 .pie-slice');
+                    const legendItems = document.querySelectorAll('#pie-chart-2 + .legend .legend-item');
+                    const chartCenter = document.getElementById('chart-center-2');
+                    
+                    const defaultContent = chartCenter.innerHTML;
+                    
+                    // Pie slice hover
+                    pieSlices.forEach((slice, index) => {
+                      slice.addEventListener('mouseenter', function() {
+                        const species = this.getAttribute('data-species');
+                        const percent = this.getAttribute('data-percent');
+                        const color = this.getAttribute('data-color');
+                        
+                        chartCenter.innerHTML = 
+                          '<div class="chart-percent" style="color: ' + color + ';">' + percent + '%</div>' +
+                          '<div class="chart-label">' + species + '</div>';
+                        
+                        legendItems[index].classList.add('active');
+                      });
+                      
+                      slice.addEventListener('mouseleave', function() {
+                        chartCenter.innerHTML = defaultContent;
+                        legendItems.forEach(item => item.classList.remove('active'));
+                      });
+                    });
+                    
+                    // Legend item hover
+                    legendItems.forEach((item, index) => {
+                      item.addEventListener('mouseenter', function() {
+                        const slice = pieSlices[index];
+                        const species = slice.getAttribute('data-species');
+                        const percent = slice.getAttribute('data-percent');
+                        const color = slice.getAttribute('data-color');
+                        
+                        chartCenter.innerHTML = 
+                          '<div class="chart-percent" style="color: ' + color + ';">' + percent + '%</div>' +
+                          '<div class="chart-label">' + species + '</div>';
+                        
+                        item.classList.add('active');
+                        slice.style.filter = 'brightness(1.1)';
+                        slice.style.strokeWidth = '12';
+                      });
+                      
+                      item.addEventListener('mouseleave', function() {
+                        chartCenter.innerHTML = defaultContent;
+                        item.classList.remove('active');
+                        pieSlices[index].style.filter = '';
+                        pieSlices[index].style.strokeWidth = '';
+                      });
+                    });
+                  })();
+                </script>`
               )
             )
             .addTo(map.current);
