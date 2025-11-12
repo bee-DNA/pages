@@ -937,8 +937,60 @@ const Map = () => {
       locale: { language: "zh-Hans" },
     });
 
-    // 添加導航控制器
-    map.current.addControl(new mapboxgl.NavigationControl(), "top-right");
+    // 添加導航控制器 (只顯示縮放按鈕,隱藏指南針)
+    map.current.addControl(
+      new mapboxgl.NavigationControl({ showCompass: false }),
+      "top-right"
+    );
+
+    // 自定義導航控制器樣式
+    const styleSheet = document.createElement("style");
+    styleSheet.textContent = `
+      /* 美化 Mapbox 縮放按鈕 */
+      .mapboxgl-ctrl-group {
+        background: white !important;
+        border-radius: 8px !important;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15) !important;
+        border: none !important;
+      }
+      
+      .mapboxgl-ctrl-group button {
+        width: 32px !important;
+        height: 32px !important;
+        border: none !important;
+        background-color: white !important;
+        transition: all 0.2s ease !important;
+      }
+      
+      .mapboxgl-ctrl-group button:hover {
+        background-color: #f5f5f5 !important;
+      }
+      
+      .mapboxgl-ctrl-group button:active {
+        background-color: #e0e0e0 !important;
+      }
+      
+      .mapboxgl-ctrl-group button + button {
+        border-top: 1px solid #e0e0e0 !important;
+      }
+      
+      .mapboxgl-ctrl-group button:first-child {
+        border-radius: 8px 8px 0 0 !important;
+      }
+      
+      .mapboxgl-ctrl-group button:last-child {
+        border-radius: 0 0 8px 8px !important;
+      }
+      
+      .mapboxgl-ctrl-icon {
+        opacity: 0.7 !important;
+      }
+      
+      .mapboxgl-ctrl-group button:hover .mapboxgl-ctrl-icon {
+        opacity: 1 !important;
+      }
+    `;
+    document.head.appendChild(styleSheet);
 
     // 添加比例尺
     map.current.addControl(
@@ -1269,9 +1321,10 @@ const Map = () => {
             </Box>
           )}
 
-          {/* Temperature Legend (Top Left) */}
+          {/* Temperature Legend (Top Left) - HIDDEN */}
           <Box
             sx={{
+              display: "none",
               position: "absolute",
               top: 10,
               left: 10,
