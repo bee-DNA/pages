@@ -1098,16 +1098,18 @@ const Map = () => {
               border: 3px solid white;
               box-shadow: 0 2px 8px rgba(0,0,0,0.3);
               cursor: pointer;
-              transition: transform 0.2s;
+              transition: all 0.2s ease;
             `;
             el.textContent = number;
             
-            // Hover effect
+            // Hover effect - 使用 box-shadow 和 border 來實現效果
             el.addEventListener('mouseenter', () => {
-              el.style.transform = 'scale(1.1)';
+              el.style.boxShadow = '0 4px 12px rgba(0,0,0,0.4)';
+              el.style.borderWidth = '4px';
             });
             el.addEventListener('mouseleave', () => {
-              el.style.transform = 'scale(1)';
+              el.style.boxShadow = '0 2px 8px rgba(0,0,0,0.3)';
+              el.style.borderWidth = '3px';
             });
             
             return el;
@@ -1392,9 +1394,9 @@ const Map = () => {
               left: "16px",
               backgroundColor: "white",
               borderRadius: "8px",
-              padding: "12px 16px",
+              padding: "12px 14px",
               boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
-              minWidth: "160px",
+              minWidth: "120px",
               zIndex: 1,
             }}
           >
@@ -1403,35 +1405,82 @@ const Map = () => {
               sx={{
                 fontWeight: 700,
                 color: "#333",
-                marginBottom: "12px",
+                marginBottom: "10px",
                 fontSize: "13px",
               }}
             >
-              Sample Points
+              Sample Count
             </Typography>
-            <Box sx={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-              <Box sx={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+              {/* 76-100 */}
+              <Box sx={{ display: "flex", alignItems: "center", gap: "8px" }}>
                 <Box
                   sx={{
-                    width: "28px",
-                    height: "28px",
-                    backgroundColor: "#1976d2",
+                    width: "18px",
+                    height: "18px",
+                    backgroundColor: "#D32F2F",
                     borderRadius: "50%",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    color: "white",
-                    fontWeight: 700,
-                    fontSize: "14px",
-                    border: "2px solid white",
-                    boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
                     flexShrink: 0,
+                    border: "2px solid white",
+                    boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
                   }}
-                >
-                  1
-                </Box>
-                <Typography sx={{ fontSize: "12px", color: "#666" }}>
-                  Active Site
+                />
+                <Typography sx={{ fontSize: "11px", color: "#666", fontWeight: 500 }}>
+                  76-100
+                </Typography>
+              </Box>
+              
+              {/* 51-75 */}
+              <Box sx={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <Box
+                  sx={{
+                    width: "18px",
+                    height: "18px",
+                    backgroundColor: "#F57C00",
+                    borderRadius: "50%",
+                    flexShrink: 0,
+                    border: "2px solid white",
+                    boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
+                  }}
+                />
+                <Typography sx={{ fontSize: "11px", color: "#666", fontWeight: 500 }}>
+                  51-75
+                </Typography>
+              </Box>
+              
+              {/* 26-50 */}
+              <Box sx={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <Box
+                  sx={{
+                    width: "18px",
+                    height: "18px",
+                    backgroundColor: "#388E3C",
+                    borderRadius: "50%",
+                    flexShrink: 0,
+                    border: "2px solid white",
+                    boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
+                  }}
+                />
+                <Typography sx={{ fontSize: "11px", color: "#666", fontWeight: 500 }}>
+                  26-50
+                </Typography>
+              </Box>
+              
+              {/* 0-25 */}
+              <Box sx={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <Box
+                  sx={{
+                    width: "18px",
+                    height: "18px",
+                    backgroundColor: "#1976D2",
+                    borderRadius: "50%",
+                    flexShrink: 0,
+                    border: "2px solid white",
+                    boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
+                  }}
+                />
+                <Typography sx={{ fontSize: "11px", color: "#666", fontWeight: 500 }}>
+                  0-25
                 </Typography>
               </Box>
             </Box>
