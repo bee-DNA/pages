@@ -999,42 +999,53 @@ const Map = () => {
         opacity: 1 !important;
       }
       
-      /* 版權資訊 - 只顯示圖示,點擊展開 */
+      /* 版權資訊 - 緊湊模式樣式 */
       .mapboxgl-ctrl-attrib {
         font-size: 10px !important;
-        padding: 0 !important;
-        background-color: rgba(255, 255, 255, 0.7) !important;
+        background-color: rgba(255, 255, 255, 0.8) !important;
         border-radius: 4px !important;
+      }
+      
+      /* 緊湊模式 - 未展開狀態 */
+      .mapboxgl-ctrl-attrib.mapboxgl-compact {
+        min-height: 24px !important;
+        padding: 0 !important;
+        background-color: rgba(255, 255, 255, 0.8) !important;
+        border-radius: 4px !important;
+      }
+      
+      /* 緊湊模式 - 展開狀態 */
+      .mapboxgl-ctrl-attrib.mapboxgl-compact-show {
+        padding: 4px 28px 4px 8px !important;
+        background-color: rgba(255, 255, 255, 0.95) !important;
       }
       
       .mapboxgl-ctrl-attrib-button {
         width: 24px !important;
         height: 24px !important;
-        background-color: rgba(255, 255, 255, 0.8) !important;
+        background-color: transparent !important;
         border-radius: 4px !important;
         cursor: pointer !important;
       }
       
       .mapboxgl-ctrl-attrib-button:hover {
-        background-color: rgba(255, 255, 255, 0.95) !important;
-      }
-      
-      /* 預設隱藏展開的內容 */
-      .mapboxgl-ctrl-attrib.mapboxgl-compact {
-        min-height: 24px !important;
-      }
-      
-      .mapboxgl-ctrl-attrib.mapboxgl-compact::after {
-        display: none !important;
+        background-color: rgba(0, 0, 0, 0.05) !important;
       }
       
       .mapboxgl-ctrl-attrib-inner {
         font-size: 10px !important;
-        padding: 2px 8px !important;
+        line-height: 1.4 !important;
       }
       
       .mapboxgl-ctrl-attrib a {
         font-size: 10px !important;
+        color: rgba(0, 0, 0, 0.75) !important;
+        text-decoration: none !important;
+      }
+      
+      .mapboxgl-ctrl-attrib a:hover {
+        color: rgba(0, 0, 0, 0.9) !important;
+        text-decoration: underline !important;
       }
     `;
     document.head.appendChild(styleSheet);
@@ -1069,10 +1080,44 @@ const Map = () => {
           // Layer state will be automatically applied inside addWeatherLayers()
           addWeatherLayers();
 
-          // NCUE Marker
+          // 創建自訂標記元素
+          const createCustomMarker = (number, color) => {
+            const el = document.createElement('div');
+            el.className = 'custom-marker';
+            el.style.cssText = `
+              width: 36px;
+              height: 36px;
+              background-color: ${color};
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              color: white;
+              font-weight: 700;
+              font-size: 16px;
+              border: 3px solid white;
+              box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+              cursor: pointer;
+              transition: transform 0.2s;
+            `;
+            el.textContent = number;
+            
+            // Hover effect
+            el.addEventListener('mouseenter', () => {
+              el.style.transform = 'scale(1.1)';
+            });
+            el.addEventListener('mouseleave', () => {
+              el.style.transform = 'scale(1)';
+            });
+            
+            return el;
+          };
+
+          // NCUE Marker with custom style
+          const markerElement = createCustomMarker('1', '#1976d2');
           const marker = new mapboxgl.Marker({
-            color: "#FF6B6B",
-            scale: 1.2,
+            element: markerElement,
+            anchor: 'center',
           })
             .setLngLat([120.5377, 24.0513])
             .setPopup(
@@ -1338,6 +1383,59 @@ const Map = () => {
               border: "2px solid #e0e0e0",
             }}
           />
+
+          {/* 圖例 - 左上角 */}
+          <Box
+            sx={{
+              position: "absolute",
+              top: "16px",
+              left: "16px",
+              backgroundColor: "white",
+              borderRadius: "8px",
+              padding: "12px 16px",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+              minWidth: "160px",
+              zIndex: 1,
+            }}
+          >
+            <Typography
+              variant="subtitle2"
+              sx={{
+                fontWeight: 700,
+                color: "#333",
+                marginBottom: "12px",
+                fontSize: "13px",
+              }}
+            >
+              Sample Points
+            </Typography>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <Box
+                  sx={{
+                    width: "28px",
+                    height: "28px",
+                    backgroundColor: "#1976d2",
+                    borderRadius: "50%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "white",
+                    fontWeight: 700,
+                    fontSize: "14px",
+                    border: "2px solid white",
+                    boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
+                    flexShrink: 0,
+                  }}
+                >
+                  1
+                </Box>
+                <Typography sx={{ fontSize: "12px", color: "#666" }}>
+                  Active Site
+                </Typography>
+              </Box>
+            </Box>
+          </Box>
 
           {/* Integrated Layer Control Panel (Right Side) */}
           {expanded && (
