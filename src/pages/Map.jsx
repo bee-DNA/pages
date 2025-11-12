@@ -810,23 +810,249 @@ const Map = () => {
         })
           .setLngLat([120.5377, 24.0513])
           .setPopup(
-            new mapboxgl.Popup({ offset: 25 }).setHTML(
-              `<div style="padding: 10px;">
-                <h3 style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600;">
-                  NCUE
-                </h3>
-                <p style="margin: 4px 0; font-size: 12px; color: #666;">
-                  <strong>Longitude:</strong> 120.5377°E
-                </p>
-                <p style="margin: 4px 0; font-size: 12px; color: #666;">
-                  <strong>Latitude:</strong> 24.0513°N
-                </p>
-                <p style="margin: 8px 0 0 0; font-size: 11px; color: #999;">
-                  Demo Sampling Point
-                </p>
-                <p style="margin: 4px 0 0 0; font-size: 11px; color: #1976d2;">
-                  🌡️ Temperature layers enabled
-                </p>
+            new mapboxgl.Popup({ 
+              offset: 25,
+              closeButton: true,
+              closeOnClick: false,
+              maxWidth: '320px'
+            }).setHTML(
+              `<style>
+                @keyframes fadeIn {
+                  from { opacity: 0; transform: translateY(-10px); }
+                  to { opacity: 1; transform: translateY(0); }
+                }
+                
+                @keyframes pieChart {
+                  0% { stroke-dasharray: 0 100; }
+                  100% { stroke-dasharray: var(--percent) 100; }
+                }
+                
+                .modern-popup {
+                  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+                  animation: fadeIn 0.3s ease-out;
+                }
+                
+                .popup-header {
+                  display: flex;
+                  align-items: center;
+                  gap: 12px;
+                  margin-bottom: 16px;
+                  padding-bottom: 12px;
+                  border-bottom: 2px solid #f0f0f0;
+                }
+                
+                .popup-icon {
+                  width: 40px;
+                  height: 40px;
+                  background: linear-gradient(135deg, #1976d2 0%, #42a5f5 100%);
+                  border-radius: 10px;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  color: white;
+                  font-size: 18px;
+                  font-weight: 700;
+                  box-shadow: 0 4px 12px rgba(25, 118, 210, 0.3);
+                }
+                
+                .popup-title {
+                  flex: 1;
+                }
+                
+                .popup-title h3 {
+                  margin: 0;
+                  font-size: 16px;
+                  font-weight: 700;
+                  color: #1a1a1a;
+                }
+                
+                .popup-title p {
+                  margin: 2px 0 0 0;
+                  font-size: 11px;
+                  color: #999;
+                }
+                
+                .info-grid {
+                  display: grid;
+                  grid-template-columns: 1fr 1fr;
+                  gap: 10px;
+                  margin-bottom: 16px;
+                }
+                
+                .info-item {
+                  background: #f8f9fa;
+                  padding: 10px;
+                  border-radius: 8px;
+                  border-left: 3px solid #1976d2;
+                }
+                
+                .info-label {
+                  font-size: 10px;
+                  color: #666;
+                  margin-bottom: 4px;
+                  text-transform: uppercase;
+                  letter-spacing: 0.5px;
+                }
+                
+                .info-value {
+                  font-size: 13px;
+                  font-weight: 600;
+                  color: #1a1a1a;
+                }
+                
+                .chart-section {
+                  margin-top: 16px;
+                  padding-top: 16px;
+                  border-top: 2px solid #f0f0f0;
+                }
+                
+                .chart-title {
+                  font-size: 12px;
+                  font-weight: 600;
+                  color: #333;
+                  margin-bottom: 12px;
+                }
+                
+                .pie-chart-container {
+                  display: flex;
+                  align-items: center;
+                  gap: 16px;
+                }
+                
+                .pie-chart {
+                  position: relative;
+                  width: 80px;
+                  height: 80px;
+                }
+                
+                .pie-chart svg {
+                  transform: rotate(-90deg);
+                }
+                
+                .pie-chart circle {
+                  fill: none;
+                  stroke-width: 8;
+                }
+                
+                .pie-bg {
+                  stroke: #f0f0f0;
+                }
+                
+                .pie-slice-1 {
+                  stroke: #1976d2;
+                  stroke-dasharray: 0 100;
+                  animation: pieChart 1s ease-out forwards;
+                  animation-delay: 0.2s;
+                  --percent: 97.06;
+                }
+                
+                .pie-slice-2 {
+                  stroke: #ff9800;
+                  stroke-dasharray: 0 100;
+                  animation: pieChart 1s ease-out forwards;
+                  animation-delay: 0.4s;
+                  --percent: 2.94;
+                  stroke-dashoffset: -97.06;
+                }
+                
+                .chart-center {
+                  position: absolute;
+                  top: 50%;
+                  left: 50%;
+                  transform: translate(-50%, -50%);
+                  text-align: center;
+                }
+                
+                .chart-percent {
+                  font-size: 16px;
+                  font-weight: 700;
+                  color: #1976d2;
+                }
+                
+                .chart-label {
+                  font-size: 9px;
+                  color: #999;
+                }
+                
+                .legend {
+                  flex: 1;
+                }
+                
+                .legend-item {
+                  display: flex;
+                  align-items: center;
+                  gap: 8px;
+                  margin-bottom: 8px;
+                }
+                
+                .legend-color {
+                  width: 12px;
+                  height: 12px;
+                  border-radius: 3px;
+                  flex-shrink: 0;
+                }
+                
+                .legend-text {
+                  flex: 1;
+                  font-size: 11px;
+                  color: #333;
+                }
+                
+                .legend-percent {
+                  font-size: 11px;
+                  font-weight: 600;
+                  color: #666;
+                }
+              </style>
+              
+              <div class="modern-popup">
+                <div class="popup-header">
+                  <div class="popup-icon">1</div>
+                  <div class="popup-title">
+                    <h3>NCUE</h3>
+                    <p>Sampling Point</p>
+                  </div>
+                </div>
+                
+                <div class="info-grid">
+                  <div class="info-item">
+                    <div class="info-label">Longitude</div>
+                    <div class="info-value">120.5377°E</div>
+                  </div>
+                  <div class="info-item">
+                    <div class="info-label">Latitude</div>
+                    <div class="info-value">24.0513°N</div>
+                  </div>
+                </div>
+                
+                <div class="chart-section">
+                  <div class="chart-title">Species Distribution</div>
+                  <div class="pie-chart-container">
+                    <div class="pie-chart">
+                      <svg viewBox="0 0 36 36">
+                        <circle class="pie-bg" cx="18" cy="18" r="15.915"/>
+                        <circle class="pie-slice-1" cx="18" cy="18" r="15.915"/>
+                        <circle class="pie-slice-2" cx="18" cy="18" r="15.915"/>
+                      </svg>
+                      <div class="chart-center">
+                        <div class="chart-percent">100%</div>
+                        <div class="chart-label">Total</div>
+                      </div>
+                    </div>
+                    <div class="legend">
+                      <div class="legend-item">
+                        <div class="legend-color" style="background: #1976d2;"></div>
+                        <div class="legend-text">Acinetobacter</div>
+                        <div class="legend-percent">97.06%</div>
+                      </div>
+                      <div class="legend-item">
+                        <div class="legend-color" style="background: #ff9800;"></div>
+                        <div class="legend-text">Staphylococcus</div>
+                        <div class="legend-percent">2.94%</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>`
             )
           )
@@ -1082,6 +1308,40 @@ const Map = () => {
         color: rgba(0, 0, 0, 0.9) !important;
         text-decoration: underline !important;
       }
+      
+      /* 現代化彈出視窗樣式 */
+      .mapboxgl-popup {
+        z-index: 10;
+      }
+      
+      .mapboxgl-popup-content {
+        padding: 0 !important;
+        border-radius: 12px !important;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.15) !important;
+        overflow: hidden;
+      }
+      
+      .mapboxgl-popup-close-button {
+        width: 28px !important;
+        height: 28px !important;
+        font-size: 20px !important;
+        color: #999 !important;
+        padding: 0 !important;
+        right: 8px !important;
+        top: 8px !important;
+        border-radius: 6px !important;
+        transition: all 0.2s ease !important;
+      }
+      
+      .mapboxgl-popup-close-button:hover {
+        background-color: #f5f5f5 !important;
+        color: #333 !important;
+      }
+      
+      .mapboxgl-popup-tip {
+        border-top-color: white !important;
+        border-bottom-color: white !important;
+      }
     `;
     document.head.appendChild(styleSheet);
 
@@ -1158,30 +1418,255 @@ const Map = () => {
           })
             .setLngLat([120.5377, 24.0513])
             .setPopup(
-              new mapboxgl.Popup({ offset: 25 }).setHTML(
-                `<div style="padding: 10px;">
-                  <h3 style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600;">
-                    NCUE
-                  </h3>
-                  <p style="margin: 4px 0; font-size: 12px; color: #666;">
-                    <strong>Longitude:</strong> 120.5377°E
-                  </p>
-                  <p style="margin: 4px 0; font-size: 12px; color: #666;">
-                    <strong>Latitude:</strong> 24.0513°N
-                  </p>
-                  <p style="margin: 8px 0 0 0; font-size: 11px; color: #999;">
-                    Demo Sampling Point
-                  </p>
-                  <p style="margin: 4px 0 0 0; font-size: 11px; color: #1976d2;">
-                    🌡️ Temperature layers enabled
-                  </p>
+              new mapboxgl.Popup({ 
+                offset: 25,
+                closeButton: true,
+                closeOnClick: false,
+                maxWidth: '320px'
+              }).setHTML(
+                `<style>
+                  @keyframes fadeIn {
+                    from { opacity: 0; transform: translateY(-10px); }
+                    to { opacity: 1; transform: translateY(0); }
+                  }
+                  
+                  @keyframes pieChart {
+                    0% { stroke-dasharray: 0 100; }
+                    100% { stroke-dasharray: var(--percent) 100; }
+                  }
+                  
+                  .modern-popup {
+                    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+                    animation: fadeIn 0.3s ease-out;
+                  }
+                  
+                  .popup-header {
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    margin-bottom: 16px;
+                    padding-bottom: 12px;
+                    border-bottom: 2px solid #f0f0f0;
+                  }
+                  
+                  .popup-icon {
+                    width: 40px;
+                    height: 40px;
+                    background: linear-gradient(135deg, #1976d2 0%, #42a5f5 100%);
+                    border-radius: 10px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: white;
+                    font-size: 18px;
+                    font-weight: 700;
+                    box-shadow: 0 4px 12px rgba(25, 118, 210, 0.3);
+                  }
+                  
+                  .popup-title {
+                    flex: 1;
+                  }
+                  
+                  .popup-title h3 {
+                    margin: 0;
+                    font-size: 16px;
+                    font-weight: 700;
+                    color: #1a1a1a;
+                  }
+                  
+                  .popup-title p {
+                    margin: 2px 0 0 0;
+                    font-size: 11px;
+                    color: #999;
+                  }
+                  
+                  .info-grid {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 10px;
+                    margin-bottom: 16px;
+                  }
+                  
+                  .info-item {
+                    background: #f8f9fa;
+                    padding: 10px;
+                    border-radius: 8px;
+                    border-left: 3px solid #1976d2;
+                  }
+                  
+                  .info-label {
+                    font-size: 10px;
+                    color: #666;
+                    margin-bottom: 4px;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                  }
+                  
+                  .info-value {
+                    font-size: 13px;
+                    font-weight: 600;
+                    color: #1a1a1a;
+                  }
+                  
+                  .chart-section {
+                    margin-top: 16px;
+                    padding-top: 16px;
+                    border-top: 2px solid #f0f0f0;
+                  }
+                  
+                  .chart-title {
+                    font-size: 12px;
+                    font-weight: 600;
+                    color: #333;
+                    margin-bottom: 12px;
+                  }
+                  
+                  .pie-chart-container {
+                    display: flex;
+                    align-items: center;
+                    gap: 16px;
+                  }
+                  
+                  .pie-chart {
+                    position: relative;
+                    width: 80px;
+                    height: 80px;
+                  }
+                  
+                  .pie-chart svg {
+                    transform: rotate(-90deg);
+                  }
+                  
+                  .pie-chart circle {
+                    fill: none;
+                    stroke-width: 8;
+                  }
+                  
+                  .pie-bg {
+                    stroke: #f0f0f0;
+                  }
+                  
+                  .pie-slice-1 {
+                    stroke: #1976d2;
+                    stroke-dasharray: 0 100;
+                    animation: pieChart 1s ease-out forwards;
+                    animation-delay: 0.2s;
+                    --percent: 97.06;
+                  }
+                  
+                  .pie-slice-2 {
+                    stroke: #ff9800;
+                    stroke-dasharray: 0 100;
+                    animation: pieChart 1s ease-out forwards;
+                    animation-delay: 0.4s;
+                    --percent: 2.94;
+                    stroke-dashoffset: -97.06;
+                  }
+                  
+                  .chart-center {
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    text-align: center;
+                  }
+                  
+                  .chart-percent {
+                    font-size: 16px;
+                    font-weight: 700;
+                    color: #1976d2;
+                  }
+                  
+                  .chart-label {
+                    font-size: 9px;
+                    color: #999;
+                  }
+                  
+                  .legend {
+                    flex: 1;
+                  }
+                  
+                  .legend-item {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    margin-bottom: 8px;
+                  }
+                  
+                  .legend-color {
+                    width: 12px;
+                    height: 12px;
+                    border-radius: 3px;
+                    flex-shrink: 0;
+                  }
+                  
+                  .legend-text {
+                    flex: 1;
+                    font-size: 11px;
+                    color: #333;
+                  }
+                  
+                  .legend-percent {
+                    font-size: 11px;
+                    font-weight: 600;
+                    color: #666;
+                  }
+                </style>
+                
+                <div class="modern-popup">
+                  <div class="popup-header">
+                    <div class="popup-icon">1</div>
+                    <div class="popup-title">
+                      <h3>NCUE</h3>
+                      <p>Sampling Point</p>
+                    </div>
+                  </div>
+                  
+                  <div class="info-grid">
+                    <div class="info-item">
+                      <div class="info-label">Longitude</div>
+                      <div class="info-value">120.5377°E</div>
+                    </div>
+                    <div class="info-item">
+                      <div class="info-label">Latitude</div>
+                      <div class="info-value">24.0513°N</div>
+                    </div>
+                  </div>
+                  
+                  <div class="chart-section">
+                    <div class="chart-title">Species Distribution</div>
+                    <div class="pie-chart-container">
+                      <div class="pie-chart">
+                        <svg viewBox="0 0 36 36">
+                          <circle class="pie-bg" cx="18" cy="18" r="15.915"/>
+                          <circle class="pie-slice-1" cx="18" cy="18" r="15.915"/>
+                          <circle class="pie-slice-2" cx="18" cy="18" r="15.915"/>
+                        </svg>
+                        <div class="chart-center">
+                          <div class="chart-percent">100%</div>
+                          <div class="chart-label">Total</div>
+                        </div>
+                      </div>
+                      <div class="legend">
+                        <div class="legend-item">
+                          <div class="legend-color" style="background: #1976d2;"></div>
+                          <div class="legend-text">Acinetobacter</div>
+                          <div class="legend-percent">97.06%</div>
+                        </div>
+                        <div class="legend-item">
+                          <div class="legend-color" style="background: #ff9800;"></div>
+                          <div class="legend-text">Staphylococcus</div>
+                          <div class="legend-percent">2.94%</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>`
               )
             )
             .addTo(map.current);
 
-          // Auto open popup
-          marker.togglePopup();
+          // Don't auto open popup - open on click only
 
           // Mark as initialized
           setIsInitialized(true);
