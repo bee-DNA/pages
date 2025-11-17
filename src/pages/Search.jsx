@@ -560,20 +560,29 @@ const Search = () => {
                         .filter((row, rowIndex) => {
                           const sample = samples[rowIndex];
                           if (!sample) return false;
-                          
+
                           const matchesSearch =
                             searchQuery === "" ||
-                            sample.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                            sample.location.toLowerCase().includes(searchQuery.toLowerCase());
+                            sample.name
+                              .toLowerCase()
+                              .includes(searchQuery.toLowerCase()) ||
+                            sample.location
+                              .toLowerCase()
+                              .includes(searchQuery.toLowerCase());
 
                           const matchesLocation =
-                            filterLocation === "all" || sample.location === filterLocation;
+                            filterLocation === "all" ||
+                            sample.location === filterLocation;
 
                           const matchesBacteria =
                             filterBacteria === "all" ||
-                            sample.bacteria.some((b) => b.name === filterBacteria);
+                            sample.bacteria.some(
+                              (b) => b.name === filterBacteria
+                            );
 
-                          return matchesSearch && matchesLocation && matchesBacteria;
+                          return (
+                            matchesSearch && matchesLocation && matchesBacteria
+                          );
                         })
                         .map((row, rowIndex) => (
                           <tr
