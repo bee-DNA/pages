@@ -16,6 +16,8 @@ import {
   MenuItem,
   IconButton,
   Tooltip,
+  ToggleButtonGroup,
+  ToggleButton,
 } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { useState, useEffect, useMemo } from "react";
@@ -27,6 +29,8 @@ import LocationOnIcon from "@mui/icons-material/LocationOn";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import BiotechIcon from "@mui/icons-material/Biotech";
+import GridViewIcon from "@mui/icons-material/GridView";
+import TableRowsIcon from "@mui/icons-material/TableRows";
 
 // 圓餅圖組件
 const PieChart = ({ data, colors }) => {
@@ -34,7 +38,9 @@ const PieChart = ({ data, colors }) => {
   let currentAngle = -90; // 從頂部開始
 
   return (
-    <Box sx={{ position: "relative", width: 160, height: 160, margin: "0 auto" }}>
+    <Box
+      sx={{ position: "relative", width: 160, height: 160, margin: "0 auto" }}
+    >
       <svg width="160" height="160" viewBox="0 0 160 160">
         {data.map((item, index) => {
           const percentage = (item.value / total) * 100;
@@ -170,7 +176,8 @@ const SampleCard = ({ sample, bacteriaColors }) => {
                     width: 16,
                     height: 16,
                     borderRadius: "4px",
-                    backgroundColor: bacteriaColors[index % bacteriaColors.length],
+                    backgroundColor:
+                      bacteriaColors[index % bacteriaColors.length],
                   }}
                 />
                 <Typography variant="body2" sx={{ fontWeight: 500 }}>
@@ -221,9 +228,16 @@ const Search = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterLocation, setFilterLocation] = useState("all");
   const [filterBacteria, setFilterBacteria] = useState("all");
+  const [viewMode, setViewMode] = useState("cards"); // "cards" 或 "table"
 
   // 菌種顏色配置
-  const bacteriaColors = ["#1976d2", "#ff9800", "#4caf50", "#f44336", "#9c27b0"];
+  const bacteriaColors = [
+    "#1976d2",
+    "#ff9800",
+    "#4caf50",
+    "#f44336",
+    "#9c27b0",
+  ];
 
   useEffect(() => {
     const loadExcelData = async () => {
@@ -262,7 +276,6 @@ const Search = () => {
     loadExcelData();
   }, []);
 
-
   // 將原始資料轉換為結構化樣品資料
   const samples = useMemo(() => {
     if (!rawData || rawData.length === 0) return [];
@@ -270,7 +283,7 @@ const Search = () => {
     // 假設資料格式: [ID, Name, Location, Date, Bacteria1, Percentage1, Bacteria2, Percentage2, ...]
     return rawData.map((row, index) => {
       const bacteria = [];
-      
+
       // 提取菌種和百分比 (從第5列開始,每2列一組)
       for (let i = 4; i < row.length; i += 2) {
         if (row[i] && row[i + 1]) {
@@ -390,7 +403,7 @@ const Search = () => {
                   </Grid>
 
                   {/* 地點篩選 */}
-                  <Grid item xs={12} sm={6} md={3}>
+                  <Grid item xs={12} sm={6} md={2}>
                     <FormControl fullWidth>
                       <InputLabel>地點</InputLabel>
                       <Select
@@ -410,7 +423,7 @@ const Search = () => {
                   </Grid>
 
                   {/* 菌種篩選 */}
-                  <Grid item xs={12} sm={6} md={3}>
+                  <Grid item xs={12} sm={6} md={2}>
                     <FormControl fullWidth>
                       <InputLabel>菌種</InputLabel>
                       <Select
@@ -429,8 +442,45 @@ const Search = () => {
                     </FormControl>
                   </Grid>
 
+                  {/* 視圖切換按鈕 */}
+                  <Grid item xs={12} sm={6} md={2}>
+                    <ToggleButtonGroup
+                      value={viewMode}
+                      exclusive
+                      onChange={(e, newMode) => {
+                        if (newMode !== null) {
+                          setViewMode(newMode);
+                        }
+                      }}
+                      fullWidth
+                      sx={{
+                        "& .MuiToggleButton-root": {
+                          borderRadius: "12px",
+                          "&.Mui-selected": {
+                            backgroundColor: "#1976d2",
+                            color: "white",
+                            "&:hover": {
+                              backgroundColor: "#1565c0",
+                            },
+                          },
+                        },
+                      }}
+                    >
+                      <ToggleButton value="cards" aria-label="卡片視圖">
+                        <Tooltip title="卡片視圖">
+                          <GridViewIcon />
+                        </Tooltip>
+                      </ToggleButton>
+                      <ToggleButton value="table" aria-label="表格視圖">
+                        <Tooltip title="表格視圖">
+                          <TableRowsIcon />
+                        </Tooltip>
+                      </ToggleButton>
+                    </ToggleButtonGroup>
+                  </Grid>
+
                   {/* 結果統計 */}
-                  <Grid item xs={12} md={2}>
+                  <Grid item xs={12} sm={6} md={2}>
                     <Box
                       sx={{
                         textAlign: { xs: "left", md: "right" },
@@ -465,14 +515,93 @@ const Search = () => {
                     請嘗試調整搜尋條件或篩選器
                   </Typography>
                 </Box>
-              ) : (
+              ) : viewMode === "cards" ? (
+                /* 卡片視圖 */
                 <Grid container spacing={3}>
                   {filteredSamples.map((sample, index) => (
                     <Grid item xs={12} sm={6} md={4} lg={3} key={index}>
-                      <SampleCard sample={sample} bacteriaColors={bacteriaColors} />
+                      <SampleCard
+                        sample={sample}
+                        bacteriaColors={bacteriaColors}
+                      />
                     </Grid>
                   ))}
                 </Grid>
+              ) : (
+                /* 表格視圖 */
+                <Box sx={{ overflowX: "auto" }}>
+                  <table
+                    style={{
+                      width: "100%",
+                      borderCollapse: "collapse",
+                      fontSize: "14px",
+                    }}
+                  >
+                    <thead>
+                      <tr style={{ backgroundColor: "#f5f5f5" }}>
+                        {headers.map((header, index) => (
+                          <th
+                            key={index}
+                            style={{
+                              padding: "12px",
+                              textAlign: "left",
+                              borderBottom: "2px solid #ddd",
+                              fontWeight: 600,
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            {header}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {rawData
+                        .filter((row, rowIndex) => {
+                          const sample = samples[rowIndex];
+                          if (!sample) return false;
+                          
+                          const matchesSearch =
+                            searchQuery === "" ||
+                            sample.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                            sample.location.toLowerCase().includes(searchQuery.toLowerCase());
+
+                          const matchesLocation =
+                            filterLocation === "all" || sample.location === filterLocation;
+
+                          const matchesBacteria =
+                            filterBacteria === "all" ||
+                            sample.bacteria.some((b) => b.name === filterBacteria);
+
+                          return matchesSearch && matchesLocation && matchesBacteria;
+                        })
+                        .map((row, rowIndex) => (
+                          <tr
+                            key={rowIndex}
+                            style={{
+                              backgroundColor:
+                                rowIndex % 2 === 0 ? "white" : "#fafafa",
+                            }}
+                          >
+                            {row.map((cell, cellIndex) => (
+                              <td
+                                key={cellIndex}
+                                style={{
+                                  padding: "10px 12px",
+                                  borderBottom: "1px solid #eee",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                {cell !== null && cell !== undefined
+                                  ? String(cell)
+                                  : ""}
+                              </td>
+                            ))}
+                          </tr>
+                        ))}
+                    </tbody>
+                  </table>
+                </Box>
               )}
             </>
           )}
