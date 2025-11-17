@@ -245,10 +245,10 @@ const Search = () => {
         setLoading(true);
         setError(null);
 
-        // 從 public/search-data/ 讀取測試數據
+        // Load test data from public/search-data/
         const response = await fetch("/search-data/測試數據.xlsx");
         if (!response.ok) {
-          throw new Error("無法載入測試數據");
+          throw new Error("Unable to load test data");
         }
 
         const arrayBuffer = await response.arrayBuffer();
@@ -258,7 +258,7 @@ const Search = () => {
         const firstSheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[firstSheetName];
 
-        // 轉換為 JSON
+        // Convert to JSON
         const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
         if (jsonData.length > 0) {
@@ -266,7 +266,7 @@ const Search = () => {
           setRawData(jsonData.slice(1));
         }
       } catch (err) {
-        console.error("載入Excel檔案錯誤:", err);
+        console.error("Error loading Excel file:", err);
         setError(err.message);
       } finally {
         setLoading(false);
@@ -373,18 +373,18 @@ const Search = () => {
             </Box>
           ) : error ? (
             <Typography variant="body1" sx={{ color: "error.main" }}>
-              錯誤: {error}
+              Error: {error}
             </Typography>
           ) : (
             <>
               {/* 搜尋和篩選區域 */}
               <Box sx={{ mb: 4 }}>
                 <Grid container spacing={2} alignItems="center">
-                  {/* 搜尋框 */}
+                  {/* Search Box */}
                   <Grid item xs={12} md={4}>
                     <TextField
                       fullWidth
-                      placeholder="搜尋樣品名稱或地點..."
+                      placeholder="Search by sample name or location..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       InputProps={{
@@ -402,17 +402,17 @@ const Search = () => {
                     />
                   </Grid>
 
-                  {/* 地點篩選 */}
+                  {/* Location Filter */}
                   <Grid item xs={12} sm={6} md={2}>
                     <FormControl fullWidth>
-                      <InputLabel>地點</InputLabel>
+                      <InputLabel>Location</InputLabel>
                       <Select
                         value={filterLocation}
                         onChange={(e) => setFilterLocation(e.target.value)}
-                        label="地點"
+                        label="Location"
                         sx={{ borderRadius: "12px" }}
                       >
-                        <MenuItem value="all">所有地點</MenuItem>
+                        <MenuItem value="all">All Locations</MenuItem>
                         {locations.map((loc) => (
                           <MenuItem key={loc} value={loc}>
                             {loc}
@@ -422,17 +422,17 @@ const Search = () => {
                     </FormControl>
                   </Grid>
 
-                  {/* 菌種篩選 */}
+                  {/* Bacteria Filter */}
                   <Grid item xs={12} sm={6} md={2}>
                     <FormControl fullWidth>
-                      <InputLabel>菌種</InputLabel>
+                      <InputLabel>Bacteria</InputLabel>
                       <Select
                         value={filterBacteria}
                         onChange={(e) => setFilterBacteria(e.target.value)}
-                        label="菌種"
+                        label="Bacteria"
                         sx={{ borderRadius: "12px" }}
                       >
-                        <MenuItem value="all">所有菌種</MenuItem>
+                        <MenuItem value="all">All Bacteria</MenuItem>
                         {allBacteria.map((bacteria) => (
                           <MenuItem key={bacteria} value={bacteria}>
                             {bacteria}
@@ -466,13 +466,13 @@ const Search = () => {
                         },
                       }}
                     >
-                      <ToggleButton value="cards" aria-label="卡片視圖">
-                        <Tooltip title="卡片視圖">
+                      <ToggleButton value="cards" aria-label="Card View">
+                        <Tooltip title="Card View">
                           <GridViewIcon />
                         </Tooltip>
                       </ToggleButton>
-                      <ToggleButton value="table" aria-label="表格視圖">
-                        <Tooltip title="表格視圖">
+                      <ToggleButton value="table" aria-label="Table View">
+                        <Tooltip title="Table View">
                           <TableRowsIcon />
                         </Tooltip>
                       </ToggleButton>
@@ -492,7 +492,7 @@ const Search = () => {
                     >
                       <BiotechIcon sx={{ color: "#1976d2" }} />
                       <Typography variant="body1" sx={{ fontWeight: 600 }}>
-                        {filteredSamples.length} 筆樣品
+                        {filteredSamples.length} Samples
                       </Typography>
                     </Box>
                   </Grid>
@@ -509,10 +509,10 @@ const Search = () => {
                 >
                   <SearchIcon sx={{ fontSize: 64, color: "#ccc", mb: 2 }} />
                   <Typography variant="h6" sx={{ color: "#666", mb: 1 }}>
-                    找不到符合條件的樣品
+                    No samples found
                   </Typography>
                   <Typography variant="body2" sx={{ color: "#999" }}>
-                    請嘗試調整搜尋條件或篩選器
+                    Try adjusting your search or filters
                   </Typography>
                 </Box>
               ) : viewMode === "cards" ? (
