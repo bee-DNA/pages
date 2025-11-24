@@ -26,7 +26,6 @@ import ManageSearchIcon from "@mui/icons-material/ManageSearch";
 import SearchIcon from "@mui/icons-material/Search";
 import FilterListIcon from "@mui/icons-material/FilterList";
 
-
 const Search = () => {
   const { t } = useTranslation();
   const [data, setData] = useState([]);
@@ -67,18 +66,26 @@ const Search = () => {
     return data.filter((item) => {
       const matchesSearch =
         searchQuery === "" ||
-        (item.sample_name && item.sample_name.toLowerCase().includes(searchQuery.toLowerCase())) ||
-        (item.SRA && item.SRA.toLowerCase().includes(searchQuery.toLowerCase())) ||
-        (item.BioSample && item.BioSample.toLowerCase().includes(searchQuery.toLowerCase())) ||
-        (item.完整檔名 && item.完整檔名.toLowerCase().includes(searchQuery.toLowerCase()));
+        (item.sample_name &&
+          item.sample_name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (item.SRA &&
+          item.SRA.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (item.BioSample &&
+          item.BioSample.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (item.完整檔名 &&
+          item.完整檔名.toLowerCase().includes(searchQuery.toLowerCase()));
 
       const matchesOrganization =
-        filterOrganization === "all" || item.organization === filterOrganization;
+        filterOrganization === "all" ||
+        item.organization === filterOrganization;
 
       const matchesCountry =
-        filterCountry === "all" || 
+        filterCountry === "all" ||
         (item.geo_loc_name && item.geo_loc_name.includes(filterCountry)) ||
-        (item["geographic location (country and/or sea)"] && item["geographic location (country and/or sea)"].includes(filterCountry));
+        (item["geographic location (country and/or sea)"] &&
+          item["geographic location (country and/or sea)"].includes(
+            filterCountry
+          ));
 
       return matchesSearch && matchesOrganization && matchesCountry;
     });
@@ -95,7 +102,7 @@ const Search = () => {
     const countrySet = new Set();
     data.forEach((item) => {
       if (item.geo_loc_name) {
-        const country = item.geo_loc_name.split(':')[0];
+        const country = item.geo_loc_name.split(":")[0];
         if (country) countrySet.add(country);
       }
       if (item["geographic location (country and/or sea)"]) {
@@ -212,7 +219,8 @@ const Search = () => {
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                   <FilterListIcon sx={{ color: "#1976d2" }} />
                   <Typography variant="body2" sx={{ color: "#666" }}>
-                    Showing <strong>{filteredData.length}</strong> of <strong>{data.length}</strong> samples
+                    Showing <strong>{filteredData.length}</strong> of{" "}
+                    <strong>{data.length}</strong> samples
                   </Typography>
                 </Box>
               </Box>
@@ -239,18 +247,57 @@ const Search = () => {
                     <Table stickyHeader aria-label="biosample table">
                       <TableHead>
                         <TableRow>
-                          <TableCell sx={{ fontWeight: 700, backgroundColor: "#f5f5f5" }}>編號</TableCell>
-                          <TableCell sx={{ fontWeight: 700, backgroundColor: "#f5f5f5" }}>SRA</TableCell>
-                          <TableCell sx={{ fontWeight: 700, backgroundColor: "#f5f5f5" }}>完整檔名</TableCell>
-                          <TableCell sx={{ fontWeight: 700, backgroundColor: "#f5f5f5" }} align="right">
+                          <TableCell
+                            sx={{ fontWeight: 700, backgroundColor: "#f5f5f5" }}
+                          >
+                            編號
+                          </TableCell>
+                          <TableCell
+                            sx={{ fontWeight: 700, backgroundColor: "#f5f5f5" }}
+                          >
+                            SRA
+                          </TableCell>
+                          <TableCell
+                            sx={{ fontWeight: 700, backgroundColor: "#f5f5f5" }}
+                          >
+                            完整檔名
+                          </TableCell>
+                          <TableCell
+                            sx={{ fontWeight: 700, backgroundColor: "#f5f5f5" }}
+                            align="right"
+                          >
                             檔案大小(MB)
                           </TableCell>
-                          <TableCell sx={{ fontWeight: 700, backgroundColor: "#f5f5f5" }}>BioSample</TableCell>
-                          <TableCell sx={{ fontWeight: 700, backgroundColor: "#f5f5f5" }}>Sample Name</TableCell>
-                          <TableCell sx={{ fontWeight: 700, backgroundColor: "#f5f5f5" }}>Collection Date</TableCell>
-                          <TableCell sx={{ fontWeight: 700, backgroundColor: "#f5f5f5" }}>Location</TableCell>
-                          <TableCell sx={{ fontWeight: 700, backgroundColor: "#f5f5f5" }}>Organization</TableCell>
-                          <TableCell sx={{ fontWeight: 700, backgroundColor: "#f5f5f5" }}>Host</TableCell>
+                          <TableCell
+                            sx={{ fontWeight: 700, backgroundColor: "#f5f5f5" }}
+                          >
+                            BioSample
+                          </TableCell>
+                          <TableCell
+                            sx={{ fontWeight: 700, backgroundColor: "#f5f5f5" }}
+                          >
+                            Sample Name
+                          </TableCell>
+                          <TableCell
+                            sx={{ fontWeight: 700, backgroundColor: "#f5f5f5" }}
+                          >
+                            Collection Date
+                          </TableCell>
+                          <TableCell
+                            sx={{ fontWeight: 700, backgroundColor: "#f5f5f5" }}
+                          >
+                            Location
+                          </TableCell>
+                          <TableCell
+                            sx={{ fontWeight: 700, backgroundColor: "#f5f5f5" }}
+                          >
+                            Organization
+                          </TableCell>
+                          <TableCell
+                            sx={{ fontWeight: 700, backgroundColor: "#f5f5f5" }}
+                          >
+                            Host
+                          </TableCell>
                         </TableRow>
                       </TableHead>
                       <TableBody>
@@ -259,44 +306,80 @@ const Search = () => {
                             key={index}
                             hover
                             sx={{
-                              "&:nth-of-type(odd)": { backgroundColor: "#fafafa" },
+                              "&:nth-of-type(odd)": {
+                                backgroundColor: "#fafafa",
+                              },
                               cursor: "pointer",
                             }}
                           >
                             <TableCell>{row.編號 || "-"}</TableCell>
                             <TableCell>
-                              <Chip 
-                                label={row.SRA || "-"} 
-                                size="small" 
-                                color="primary" 
+                              <Chip
+                                label={row.SRA || "-"}
+                                size="small"
+                                color="primary"
                                 variant="outlined"
                               />
                             </TableCell>
-                            <TableCell sx={{ maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis" }}>
+                            <TableCell
+                              sx={{
+                                maxWidth: 200,
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                              }}
+                            >
                               {row.完整檔名 || "-"}
                             </TableCell>
                             <TableCell align="right">
-                              {row["檔案大小(MB)"] ? parseFloat(row["檔案大小(MB)"]).toLocaleString() : "-"}
+                              {row["檔案大小(MB)"]
+                                ? parseFloat(
+                                    row["檔案大小(MB)"]
+                                  ).toLocaleString()
+                                : "-"}
                             </TableCell>
                             <TableCell>
-                              <Chip 
-                                label={row.BioSample || "-"} 
-                                size="small" 
-                                color="secondary" 
+                              <Chip
+                                label={row.BioSample || "-"}
+                                size="small"
+                                color="secondary"
                                 variant="outlined"
                               />
                             </TableCell>
-                            <TableCell sx={{ maxWidth: 250, overflow: "hidden", textOverflow: "ellipsis" }}>
+                            <TableCell
+                              sx={{
+                                maxWidth: 250,
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                              }}
+                            >
                               {row.sample_name || row.sample_title || "-"}
                             </TableCell>
                             <TableCell>
-                              {row.collection_date || row["collection time"] || "-"}
+                              {row.collection_date ||
+                                row["collection time"] ||
+                                "-"}
                             </TableCell>
-                            <TableCell sx={{ maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis" }}>
-                              {row.geo_loc_name || row["geographic location (region and locality)"] || "-"}
+                            <TableCell
+                              sx={{
+                                maxWidth: 200,
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                              }}
+                            >
+                              {row.geo_loc_name ||
+                                row[
+                                  "geographic location (region and locality)"
+                                ] ||
+                                "-"}
                             </TableCell>
                             <TableCell>{row.organization || "-"}</TableCell>
-                            <TableCell sx={{ maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis" }}>
+                            <TableCell
+                              sx={{
+                                maxWidth: 200,
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                              }}
+                            >
                               {row.host || row.scientific_name || "-"}
                             </TableCell>
                           </TableRow>

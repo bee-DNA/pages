@@ -38,11 +38,16 @@ const Map = () => {
   const layersRef = useRef(null);
   const addWeatherLayersRef = useRef(null);
   const layerPanelRef = useRef(null); // For click outside detection
+  const biosampleMarkersRef = useRef([]); // 儲存 biosample markers
 
   // 後端配置
   const [backendConfig, setBackendConfig] = useState(null);
   const [availableDates, setAvailableDates] = useState([]);
   const [timestampCount, setTimestampCount] = useState(48); // 預設值
+  
+  // BioSample 資料
+  const [biosampleData, setBiosampleData] = useState([]);
+  const [countryStats, setCountryStats] = useState([]); // 國家統計資料
 
   // 圖層狀態管理
   const [layerStates, setLayerStates] = useState({
@@ -103,6 +108,229 @@ const Map = () => {
 
     fetchConfig();
   }, []);
+
+  // 載入 BioSample 資料
+  useEffect(() => {
+    const loadBiosampleData = async () => {
+      try {
+        const response = await fetch("/biosample_enhanced.json");
+        if (!response.ok) {
+          throw new Error("Failed to load biosample data");
+        }
+        const data = await response.json();
+        setBiosampleData(data);
+        
+        // 處理資料並按國家統計
+        processCountryStats(data);
+      } catch (error) {
+        console.error("Error loading biosample data:", error);
+      }
+    };
+
+    loadBiosampleData();
+  }, []);
+
+  // 處理國家統計資料
+  const processCountryStats = (data) => {
+    const countryMap = new Map();
+    
+    data.forEach(item => {
+      // 提取國家資訊
+      let country = null;
+      let coords = null;
+      
+      // 從 geo_loc_name 提取國家
+      if (item.geo_loc_name) {
+        country = item.geo_loc_name.split(':')[0].trim();
+      } else if (item["geographic location (country and/or sea)"]) {
+        country = item["geographic location (country and/or sea)"].trim();
+      }
+      
+      // 解析座標
+      if (item.lat_lon) {
+        coords = parseLatLon(item.lat_lon);
+      } else if (item["geographic location (latitude)"] && item["geographic location (longitude)"]) {
+        coords = {
+          lat: parseFloat(item["geographic location (latitude)"]),
+          lng: parseFloat(item["geographic location (longitude)"])
+        };
+      }
+      
+      // 只處理有國家和座標的資料
+      if (country && coords && !isNaN(coords.lat) && !isNaN(coords.lng)) {
+        if (!countryMap.has(country)) {
+          countryMap.set(country, {
+            country,
+            count: 0,
+            coords: coords,
+            samples: []
+          });
+        }
+        
+        const countryData = countryMap.get(country);
+        countryData.count += 1;
+        countryData.samples.push(item);
+      }
+    });
+    
+    const stats = Array.from(countryMap.values()).sort((a, b) => b.count - a.count);
+    setCountryStats(stats);
+    console.log("Country statistics processed:", stats);
+  };
+
+  // 解析經緯度字串 (例如: "24.34 N 123.91 E")
+  const parseLatLon = (latLonStr) => {
+    if (!latLonStr) return null;
+    
+    try {
+      const parts = latLonStr.trim().split(/\s+/);
+      if (parts.length < 4) return null;
+      
+      let lat = parseFloat(parts[0]);
+      let lng = parseFloat(parts[2]);
+      
+      // 處理南緯和西經
+      if (parts[1].toUpperCase() === 'S') lat = -lat;
+      if (parts[3].toUpperCase() === 'W') lng = -lng;
+      
+      return { lat, lng };
+    } catch (error) {
+      return null;
+    }
+  };
+
+  // 根據數量獲取顏色 (漸層: 綠色 -> 黃色 -> 橙色 -> 紅色)
+  const getColorByCount = (count, maxCount) => {
+    const ratio = count / maxCount;
+    
+    if (ratio <= 0.25) return '#4caf50'; // 綠色 (少)
+    if (ratio <= 0.5) return '#ff9800';  // 橙色 (中)
+    if (ratio <= 0.75) return '#f44336'; // 紅色 (多)
+    return '#9c27b0'; // 紫色 (很多)
+  };
+
+  // 根據數量獲取標記大小
+  const getSizeByCount = (count, maxCount) => {
+    const ratio = count / maxCount;
+    const minSize = 32;
+    const maxSize = 56;
+    
+    return Math.floor(minSize + (maxSize - minSize) * ratio);
+  };
+
+  // 顯示 BioSample 標記
+  const displayBiosampleMarkers = () => {
+    if (!map.current || countryStats.length === 0) {
+      console.log("Map or country stats not ready");
+      return;
+    }
+
+    // 清除舊的標記
+    biosampleMarkersRef.current.forEach(marker => marker.remove());
+    biosampleMarkersRef.current = [];
+
+    const maxCount = countryStats[0].count; // 最大數量
+
+    console.log(`Displaying ${countryStats.length} country markers`);
+
+    countryStats.forEach((countryData, index) => {
+      const { country, count, coords, samples } = countryData;
+      const color = getColorByCount(count, maxCount);
+      const size = getSizeByCount(count, maxCount);
+
+      // 建立自訂標記
+      const el = document.createElement('div');
+      el.className = 'biosample-marker';
+      el.style.cssText = `
+        width: ${size}px;
+        height: ${size}px;
+        background-color: ${color};
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 700;
+        font-size: ${Math.floor(size * 0.35)}px;
+        border: 3px solid white;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        cursor: pointer;
+        transition: all 0.2s ease;
+      `;
+      el.textContent = count;
+
+      // 懸停效果
+      el.addEventListener('mouseenter', () => {
+        el.style.transform = 'scale(1.15)';
+        el.style.boxShadow = '0 4px 16px rgba(0,0,0,0.4)';
+        el.style.zIndex = '1000';
+      });
+      el.addEventListener('mouseleave', () => {
+        el.style.transform = 'scale(1)';
+        el.style.boxShadow = '0 2px 8px rgba(0,0,0,0.3)';
+        el.style.zIndex = 'auto';
+      });
+
+      // 建立 Popup 內容
+      const popupContent = `
+        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 12px;">
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 2px solid #eee;">
+            <div style="width: 40px; height: 40px; background: ${color}; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-size: 18px; font-weight: 700;">
+              ${count}
+            </div>
+            <div>
+              <h3 style="margin: 0; font-size: 16px; font-weight: 600; color: #1a1a1a;">${country}</h3>
+              <p style="margin: 2px 0 0 0; font-size: 12px; color: #999;">BioSample Count</p>
+            </div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; background: #f5f5f5; border-radius: 6px;">
+              <span style="font-size: 13px; color: #666;">Total Samples:</span>
+              <span style="font-size: 14px; font-weight: 700; color: ${color};">${count}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; background: #f5f5f5; border-radius: 6px;">
+              <span style="font-size: 13px; color: #666;">Location:</span>
+              <span style="font-size: 13px; font-weight: 600; color: #1a1a1a;">${coords.lat.toFixed(2)}°, ${coords.lng.toFixed(2)}°</span>
+            </div>
+            ${samples.slice(0, 3).map(s => `
+              <div style="padding: 6px 10px; background: #fafafa; border-radius: 6px; border-left: 3px solid ${color};">
+                <div style="font-size: 12px; font-weight: 600; color: #1a1a1a; margin-bottom: 2px;">${s.sample_name || s.SRA}</div>
+                <div style="font-size: 11px; color: #999;">${s.organization || 'N/A'}</div>
+              </div>
+            `).join('')}
+            ${count > 3 ? `<div style="text-align: center; font-size: 11px; color: #999; padding: 4px;">... and ${count - 3} more samples</div>` : ''}
+          </div>
+        </div>
+      `;
+
+      // 建立並加入標記
+      const marker = new mapboxgl.Marker({
+        element: el,
+        anchor: 'center'
+      })
+        .setLngLat([coords.lng, coords.lat])
+        .setPopup(
+          new mapboxgl.Popup({
+            offset: 25,
+            closeButton: true,
+            closeOnClick: false,
+            maxWidth: '320px'
+          }).setHTML(popupContent)
+        )
+        .addTo(map.current);
+
+      biosampleMarkersRef.current.push(marker);
+    });
+
+    console.log(`Added ${biosampleMarkersRef.current.length} biosample markers`);
+  };
+
+  // 當 countryStats 更新時顯示標記
+  useEffect(() => {
+    if (isInitialized && countryStats.length > 0) {
+      displayBiosampleMarkers();
+    }
+  }, [countryStats, isInitialized]);
 
   // 時間軸動畫控制（僅在歷史資料模式使用）
   const {
@@ -2001,7 +2229,7 @@ const Map = () => {
               borderRadius: "8px",
               padding: "12px 14px",
               boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
-              minWidth: "120px",
+              minWidth: "140px",
               zIndex: 1,
             }}
           >
@@ -2014,16 +2242,16 @@ const Map = () => {
                 fontSize: "13px",
               }}
             >
-              Sample Count
+              BioSample Count
             </Typography>
             <Box sx={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-              {/* 76-100 */}
+              {/* 很多 (76-100%) */}
               <Box sx={{ display: "flex", alignItems: "center", gap: "8px" }}>
                 <Box
                   sx={{
                     width: "18px",
                     height: "18px",
-                    backgroundColor: "#D32F2F",
+                    backgroundColor: "#9c27b0",
                     borderRadius: "50%",
                     flexShrink: 0,
                     border: "2px solid white",
@@ -2033,17 +2261,17 @@ const Map = () => {
                 <Typography
                   sx={{ fontSize: "11px", color: "#666", fontWeight: 500 }}
                 >
-                  76-100
+                  Very High
                 </Typography>
               </Box>
 
-              {/* 51-75 */}
+              {/* 多 (51-75%) */}
               <Box sx={{ display: "flex", alignItems: "center", gap: "8px" }}>
                 <Box
                   sx={{
                     width: "18px",
                     height: "18px",
-                    backgroundColor: "#F57C00",
+                    backgroundColor: "#f44336",
                     borderRadius: "50%",
                     flexShrink: 0,
                     border: "2px solid white",
@@ -2053,17 +2281,17 @@ const Map = () => {
                 <Typography
                   sx={{ fontSize: "11px", color: "#666", fontWeight: 500 }}
                 >
-                  51-75
+                  High
                 </Typography>
               </Box>
 
-              {/* 26-50 */}
+              {/* 中 (26-50%) */}
               <Box sx={{ display: "flex", alignItems: "center", gap: "8px" }}>
                 <Box
                   sx={{
                     width: "18px",
                     height: "18px",
-                    backgroundColor: "#388E3C",
+                    backgroundColor: "#ff9800",
                     borderRadius: "50%",
                     flexShrink: 0,
                     border: "2px solid white",
@@ -2073,17 +2301,17 @@ const Map = () => {
                 <Typography
                   sx={{ fontSize: "11px", color: "#666", fontWeight: 500 }}
                 >
-                  26-50
+                  Medium
                 </Typography>
               </Box>
 
-              {/* 0-25 */}
+              {/* 少 (0-25%) */}
               <Box sx={{ display: "flex", alignItems: "center", gap: "8px" }}>
                 <Box
                   sx={{
                     width: "18px",
                     height: "18px",
-                    backgroundColor: "#1976D2",
+                    backgroundColor: "#4caf50",
                     borderRadius: "50%",
                     flexShrink: 0,
                     border: "2px solid white",
@@ -2093,7 +2321,7 @@ const Map = () => {
                 <Typography
                   sx={{ fontSize: "11px", color: "#666", fontWeight: 500 }}
                 >
-                  0-25
+                  Low
                 </Typography>
               </Box>
             </Box>
