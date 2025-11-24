@@ -132,6 +132,27 @@ const Map = () => {
     loadBiosampleData();
   }, []);
 
+  // 解析經緯度字串 (例如: "24.34 N 123.91 E")
+  const parseLatLon = (latLonStr) => {
+    if (!latLonStr) return null;
+    
+    try {
+      const parts = latLonStr.trim().split(/\s+/);
+      if (parts.length < 4) return null;
+      
+      let lat = parseFloat(parts[0]);
+      let lng = parseFloat(parts[2]);
+      
+      // 處理南緯和西經
+      if (parts[1].toUpperCase() === 'S') lat = -lat;
+      if (parts[3].toUpperCase() === 'W') lng = -lng;
+      
+      return { lat, lng };
+    } catch (error) {
+      return null;
+    }
+  };
+
   // 處理國家統計資料
   const processCountryStats = (data) => {
     console.log("開始處理國家統計資料...");
@@ -182,46 +203,6 @@ const Map = () => {
     setCountryStats(stats);
   };
 
-  // 解析經緯度字串 (例如: "24.34 N 123.91 E")
-  const parseLatLon = (latLonStr) => {
-    if (!latLonStr) return null;
-    
-    try {
-      const parts = latLonStr.trim().split(/\s+/);
-      if (parts.length < 4) return null;
-      
-      let lat = parseFloat(parts[0]);
-      let lng = parseFloat(parts[2]);
-      
-      // 處理南緯和西經
-      if (parts[1].toUpperCase() === 'S') lat = -lat;
-      if (parts[3].toUpperCase() === 'W') lng = -lng;
-      
-      return { lat, lng };
-    } catch (error) {
-      return null;
-    }
-  };
-
-  // 根據數量獲取顏色 (漸層: 綠色 -> 黃色 -> 橙色 -> 紅色)
-  const getColorByCount = (count, maxCount) => {
-    const ratio = count / maxCount;
-    
-    if (ratio <= 0.25) return '#4caf50'; // 綠色 (少)
-    if (ratio <= 0.5) return '#ff9800';  // 橙色 (中)
-    if (ratio <= 0.75) return '#f44336'; // 紅色 (多)
-    return '#9c27b0'; // 紫色 (很多)
-  };
-
-  // 根據數量獲取標記大小
-  const getSizeByCount = (count, maxCount) => {
-    const ratio = count / maxCount;
-    const minSize = 32;
-    const maxSize = 56;
-    
-    return Math.floor(minSize + (maxSize - minSize) * ratio);
-  };
-
   // 顯示 BioSample 標記
   const displayBiosampleMarkers = () => {
     if (!map.current || countryStats.length === 0) {
@@ -233,14 +214,12 @@ const Map = () => {
     biosampleMarkersRef.current.forEach(marker => marker.remove());
     biosampleMarkersRef.current = [];
 
-    const maxCount = countryStats[0].count; // 最大數量
-
     console.log(`Displaying ${countryStats.length} country markers`);
 
-    countryStats.forEach((countryData, index) => {
+    countryStats.forEach((countryData) => {
       const { country, count, coords, samples } = countryData;
-      const color = getColorByCount(count, maxCount);
-      const size = getSizeByCount(count, maxCount);
+      const color = '#1976d2'; // 固定藍色
+      const size = 40; // 固定大小
 
       // 建立自訂標記
       const el = document.createElement('div');
@@ -255,7 +234,7 @@ const Map = () => {
         justify-content: center;
         color: white;
         font-weight: 700;
-        font-size: ${Math.floor(size * 0.35)}px;
+        font-size: 14px;
         border: 3px solid white;
         box-shadow: 0 2px 8px rgba(0,0,0,0.3);
         cursor: pointer;
@@ -277,32 +256,15 @@ const Map = () => {
 
       // 建立 Popup 內容
       const popupContent = `
-        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 12px;">
-          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 2px solid #eee;">
-            <div style="width: 40px; height: 40px; background: ${color}; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-size: 18px; font-weight: 700;">
+        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 16px; min-width: 200px;">
+          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+            <div style="width: 48px; height: 48px; background: ${color}; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px; font-weight: 700;">
               ${count}
             </div>
             <div>
-              <h3 style="margin: 0; font-size: 16px; font-weight: 600; color: #1a1a1a;">${country}</h3>
-              <p style="margin: 2px 0 0 0; font-size: 12px; color: #999;">BioSample Count</p>
+              <h3 style="margin: 0; font-size: 18px; font-weight: 700; color: #1a1a1a;">${country}</h3>
+              <p style="margin: 4px 0 0 0; font-size: 13px; color: #666;">BioSample Count</p>
             </div>
-          </div>
-          <div style="display: flex; flex-direction: column; gap: 8px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; background: #f5f5f5; border-radius: 6px;">
-              <span style="font-size: 13px; color: #666;">Total Samples:</span>
-              <span style="font-size: 14px; font-weight: 700; color: ${color};">${count}</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; background: #f5f5f5; border-radius: 6px;">
-              <span style="font-size: 13px; color: #666;">Location:</span>
-              <span style="font-size: 13px; font-weight: 600; color: #1a1a1a;">${coords.lat.toFixed(2)}°, ${coords.lng.toFixed(2)}°</span>
-            </div>
-            ${samples.slice(0, 3).map(s => `
-              <div style="padding: 6px 10px; background: #fafafa; border-radius: 6px; border-left: 3px solid ${color};">
-                <div style="font-size: 12px; font-weight: 600; color: #1a1a1a; margin-bottom: 2px;">${s.sample_name || s.SRA}</div>
-                <div style="font-size: 11px; color: #999;">${s.organization || 'N/A'}</div>
-              </div>
-            `).join('')}
-            ${count > 3 ? `<div style="text-align: center; font-size: 11px; color: #999; padding: 4px;">... and ${count - 3} more samples</div>` : ''}
           </div>
         </div>
       `;
@@ -318,7 +280,7 @@ const Map = () => {
             offset: 25,
             closeButton: true,
             closeOnClick: false,
-            maxWidth: '320px'
+            maxWidth: '280px'
           }).setHTML(popupContent)
         )
         .addTo(map.current);
