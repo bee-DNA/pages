@@ -49,6 +49,77 @@ const Map = () => {
   const [biosampleData, setBiosampleData] = useState([]);
   const [countryStats, setCountryStats] = useState([]); // 國家統計資料
 
+  // 解析經緯度字串 (例如: "24.34 N 123.91 E")
+  const parseLatLon = (latLonStr) => {
+    if (!latLonStr) return null;
+    
+    try {
+      const parts = latLonStr.trim().split(/\s+/);
+      if (parts.length < 4) return null;
+      
+      let lat = parseFloat(parts[0]);
+      let lng = parseFloat(parts[2]);
+      
+      // 處理南緯和西經
+      if (parts[1].toUpperCase() === 'S') lat = -lat;
+      if (parts[3].toUpperCase() === 'W') lng = -lng;
+      
+      return { lat, lng };
+    } catch (error) {
+      return null;
+    }
+  };
+
+  // 處理國家統計資料
+  const processCountryStats = (data) => {
+    console.log("開始處理國家統計資料...");
+    const countryMap = new Map();
+    
+    data.forEach(item => {
+      // 提取國家資訊
+      let country = null;
+      let coords = null;
+      
+      // 從 geo_loc_name 提取國家
+      if (item.geo_loc_name) {
+        country = item.geo_loc_name.split(':')[0].trim();
+      } else if (item["geographic location (country and/or sea)"]) {
+        country = item["geographic location (country and/or sea)"].trim();
+      }
+      
+      // 解析座標
+      if (item.lat_lon) {
+        coords = parseLatLon(item.lat_lon);
+      } else if (item["geographic location (latitude)"] && item["geographic location (longitude)"]) {
+        coords = {
+          lat: parseFloat(item["geographic location (latitude)"]),
+          lng: parseFloat(item["geographic location (longitude)"])
+        };
+      }
+      
+      // 只處理有國家和座標的資料
+      if (country && coords && !isNaN(coords.lat) && !isNaN(coords.lng)) {
+        if (!countryMap.has(country)) {
+          countryMap.set(country, {
+            country,
+            count: 0,
+            coords: coords,
+            samples: []
+          });
+        }
+        
+        const countryData = countryMap.get(country);
+        countryData.count += 1;
+        countryData.samples.push(item);
+      }
+    });
+    
+    const stats = Array.from(countryMap.values()).sort((a, b) => b.count - a.count);
+    console.log(`處理完成: 找到 ${stats.length} 個國家的資料`);
+    console.log("前5個國家:", stats.slice(0, 5).map(s => `${s.country}: ${s.count}`));
+    setCountryStats(stats);
+  };
+
   // 圖層狀態管理
   const [layerStates, setLayerStates] = useState({
     sst: {
@@ -131,77 +202,6 @@ const Map = () => {
 
     loadBiosampleData();
   }, []);
-
-  // 解析經緯度字串 (例如: "24.34 N 123.91 E")
-  const parseLatLon = (latLonStr) => {
-    if (!latLonStr) return null;
-    
-    try {
-      const parts = latLonStr.trim().split(/\s+/);
-      if (parts.length < 4) return null;
-      
-      let lat = parseFloat(parts[0]);
-      let lng = parseFloat(parts[2]);
-      
-      // 處理南緯和西經
-      if (parts[1].toUpperCase() === 'S') lat = -lat;
-      if (parts[3].toUpperCase() === 'W') lng = -lng;
-      
-      return { lat, lng };
-    } catch (error) {
-      return null;
-    }
-  };
-
-  // 處理國家統計資料
-  const processCountryStats = (data) => {
-    console.log("開始處理國家統計資料...");
-    const countryMap = new Map();
-    
-    data.forEach(item => {
-      // 提取國家資訊
-      let country = null;
-      let coords = null;
-      
-      // 從 geo_loc_name 提取國家
-      if (item.geo_loc_name) {
-        country = item.geo_loc_name.split(':')[0].trim();
-      } else if (item["geographic location (country and/or sea)"]) {
-        country = item["geographic location (country and/or sea)"].trim();
-      }
-      
-      // 解析座標
-      if (item.lat_lon) {
-        coords = parseLatLon(item.lat_lon);
-      } else if (item["geographic location (latitude)"] && item["geographic location (longitude)"]) {
-        coords = {
-          lat: parseFloat(item["geographic location (latitude)"]),
-          lng: parseFloat(item["geographic location (longitude)"])
-        };
-      }
-      
-      // 只處理有國家和座標的資料
-      if (country && coords && !isNaN(coords.lat) && !isNaN(coords.lng)) {
-        if (!countryMap.has(country)) {
-          countryMap.set(country, {
-            country,
-            count: 0,
-            coords: coords,
-            samples: []
-          });
-        }
-        
-        const countryData = countryMap.get(country);
-        countryData.count += 1;
-        countryData.samples.push(item);
-      }
-    });
-    
-    const stats = Array.from(countryMap.values()).sort((a, b) => b.count - a.count);
-    console.log(`處理完成: 找到 ${stats.length} 個國家的資料`);
-    console.log("前5個國家:", stats.slice(0, 5).map(s => `${s.country}: ${s.count}`));
-    setCountryStats(stats);
-  };
 
   // 顯示 BioSample 標記
   const displayBiosampleMarkers = () => {
