@@ -113,11 +113,13 @@ const Map = () => {
   useEffect(() => {
     const loadBiosampleData = async () => {
       try {
+        console.log("開始載入 BioSample 資料...");
         const response = await fetch("/biosample_enhanced.json");
         if (!response.ok) {
           throw new Error("Failed to load biosample data");
         }
         const data = await response.json();
+        console.log(`成功載入 ${data.length} 筆 BioSample 資料`);
         setBiosampleData(data);
         
         // 處理資料並按國家統計
@@ -132,6 +134,7 @@ const Map = () => {
 
   // 處理國家統計資料
   const processCountryStats = (data) => {
+    console.log("開始處理國家統計資料...");
     const countryMap = new Map();
     
     data.forEach(item => {
@@ -174,8 +177,9 @@ const Map = () => {
     });
     
     const stats = Array.from(countryMap.values()).sort((a, b) => b.count - a.count);
+    console.log(`處理完成: 找到 ${stats.length} 個國家的資料`);
+    console.log("前5個國家:", stats.slice(0, 5).map(s => `${s.country}: ${s.count}`));
     setCountryStats(stats);
-    console.log("Country statistics processed:", stats);
   };
 
   // 解析經緯度字串 (例如: "24.34 N 123.91 E")
@@ -327,8 +331,12 @@ const Map = () => {
 
   // 當 countryStats 更新時顯示標記
   useEffect(() => {
+    console.log(`useEffect 觸發: isInitialized=${isInitialized}, countryStats.length=${countryStats.length}`);
     if (isInitialized && countryStats.length > 0) {
+      console.log("條件符合，開始顯示標記...");
       displayBiosampleMarkers();
+    } else {
+      console.log("條件不符合，等待地圖初始化或資料載入");
     }
   }, [countryStats, isInitialized]);
 
