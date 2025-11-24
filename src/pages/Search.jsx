@@ -61,9 +61,27 @@ const Search = () => {
     loadData();
   }, []);
 
+  // 合併相同 SRA 編號的資料（_1 和 _2）
+  const groupedData = useMemo(() => {
+    const groups = new Map();
+    
+    data.forEach((item) => {
+      const sra = item.SRA;
+      if (!groups.has(sra)) {
+        groups.set(sra, { ...item, files: [] });
+      }
+      groups.get(sra).files.push({
+        完整檔名: item.完整檔名,
+        檔案大小: item["檔案大小(MB)"],
+      });
+    });
+    
+    return Array.from(groups.values());
+  }, [data]);
+
   // 篩選後的資料
   const filteredData = useMemo(() => {
-    return data.filter((item) => {
+    return groupedData.filter((item) => {
       const matchesSearch =
         searchQuery === "" ||
         (item.sample_name &&
@@ -72,8 +90,8 @@ const Search = () => {
           item.SRA.toLowerCase().includes(searchQuery.toLowerCase())) ||
         (item.BioSample &&
           item.BioSample.toLowerCase().includes(searchQuery.toLowerCase())) ||
-        (item.完整檔名 &&
-          item.完整檔名.toLowerCase().includes(searchQuery.toLowerCase()));
+        (item.files &&
+          item.files.some(f => f.完整檔名 && f.完整檔名.toLowerCase().includes(searchQuery.toLowerCase())));
 
       const matchesOrganization =
         filterOrganization === "all" ||
@@ -89,18 +107,18 @@ const Search = () => {
 
       return matchesSearch && matchesOrganization && matchesCountry;
     });
-  }, [data, searchQuery, filterOrganization, filterCountry]);
+  }, [groupedData, searchQuery, filterOrganization, filterCountry]);
 
   // 獲取所有唯一的組織
   const organizations = useMemo(() => {
-    const orgs = new Set(data.map((s) => s.organization).filter(Boolean));
+    const orgs = new Set(groupedData.map((s) => s.organization).filter(Boolean));
     return Array.from(orgs).sort();
-  }, [data]);
+  }, [groupedData]);
 
   // 獲取所有唯一的國家
   const countries = useMemo(() => {
     const countrySet = new Set();
-    data.forEach((item) => {
+    groupedData.forEach((item) => {
       if (item.geo_loc_name) {
         const country = item.geo_loc_name.split(":")[0];
         if (country) countrySet.add(country);
@@ -110,7 +128,7 @@ const Search = () => {
       }
     });
     return Array.from(countrySet).sort();
-  }, [data]);
+  }, [groupedData]);
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -220,7 +238,7 @@ const Search = () => {
                   <FilterListIcon sx={{ color: "#1976d2" }} />
                   <Typography variant="body2" sx={{ color: "#666" }}>
                     Showing <strong>{filteredData.length}</strong> of{" "}
-                    <strong>{data.length}</strong> samples
+                    <strong>{groupedData.length}</strong> samples
                   </Typography>
                 </Box>
               </Box>
@@ -323,19 +341,41 @@ const Search = () => {
                             </TableCell>
                             <TableCell
                               sx={{
-                                maxWidth: 200,
+                                maxWidth: 300,
                                 overflow: "hidden",
-                                textOverflow: "ellipsis",
                               }}
                             >
-                              {row.完整檔名 || "-"}
+                              {row.files && row.files.length > 0 ? (
+                                <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
+                                  {row.files.map((file, idx) => (
+                                    <Box key={idx} sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                                      <Chip
+                                        label={`_${idx + 1}`}
+                                        size="small"
+                                        sx={{ minWidth: 35, height: 20, fontSize: "0.7rem" }}
+                                      />
+                                      <Typography variant="body2" sx={{ fontSize: "0.875rem" }}>
+                                        {file.完整檔名}
+                                      </Typography>
+                                    </Box>
+                                  ))}
+                                </Box>
+                              ) : (
+                                "-"
+                              )}
                             </TableCell>
                             <TableCell align="right">
-                              {row["檔案大小(MB)"]
-                                ? parseFloat(
-                                    row["檔案大小(MB)"]
-                                  ).toLocaleString()
-                                : "-"}
+                              {row.files && row.files.length > 0 ? (
+                                <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5, alignItems: "flex-end" }}>
+                                  {row.files.map((file, idx) => (
+                                    <Typography key={idx} variant="body2" sx={{ fontSize: "0.875rem" }}>
+                                      {file.檔案大小 ? parseFloat(file.檔案大小).toLocaleString() : "-"}
+                                    </Typography>
+                                  ))}
+                                </Box>
+                              ) : (
+                                "-"
+                              )}
                             </TableCell>
                             <TableCell>
                               <Chip
