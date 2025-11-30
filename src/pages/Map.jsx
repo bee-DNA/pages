@@ -44,7 +44,7 @@ const Map = () => {
   const [backendConfig, setBackendConfig] = useState(null);
   const [availableDates, setAvailableDates] = useState([]);
   const [timestampCount, setTimestampCount] = useState(48); // 預設值
-  
+
   // BioSample 資料
   const [biosampleData, setBiosampleData] = useState([]);
   const [countryStats, setCountryStats] = useState([]); // 國家統計資料
@@ -52,18 +52,18 @@ const Map = () => {
   // 解析經緯度字串 (例如: "24.34 N 123.91 E")
   const parseLatLon = (latLonStr) => {
     if (!latLonStr) return null;
-    
+
     try {
       const parts = latLonStr.trim().split(/\s+/);
       if (parts.length < 4) return null;
-      
+
       let lat = parseFloat(parts[0]);
       let lng = parseFloat(parts[2]);
-      
+
       // 處理南緯和西經
-      if (parts[1].toUpperCase() === 'S') lat = -lat;
-      if (parts[3].toUpperCase() === 'W') lng = -lng;
-      
+      if (parts[1].toUpperCase() === "S") lat = -lat;
+      if (parts[3].toUpperCase() === "W") lng = -lng;
+
       return { lat, lng };
     } catch (error) {
       return null;
@@ -74,29 +74,32 @@ const Map = () => {
   const processCountryStats = (data) => {
     console.log("開始處理國家統計資料...");
     const countryMap = new Map();
-    
-    data.forEach(item => {
+
+    data.forEach((item) => {
       // 提取國家資訊
       let country = null;
       let coords = null;
-      
+
       // 從 geo_loc_name 提取國家
       if (item.geo_loc_name) {
-        country = item.geo_loc_name.split(':')[0].trim();
+        country = item.geo_loc_name.split(":")[0].trim();
       } else if (item["geographic location (country and/or sea)"]) {
         country = item["geographic location (country and/or sea)"].trim();
       }
-      
+
       // 解析座標
       if (item.lat_lon) {
         coords = parseLatLon(item.lat_lon);
-      } else if (item["geographic location (latitude)"] && item["geographic location (longitude)"]) {
+      } else if (
+        item["geographic location (latitude)"] &&
+        item["geographic location (longitude)"]
+      ) {
         coords = {
           lat: parseFloat(item["geographic location (latitude)"]),
-          lng: parseFloat(item["geographic location (longitude)"])
+          lng: parseFloat(item["geographic location (longitude)"]),
         };
       }
-      
+
       // 只處理有國家和座標的資料
       if (country && coords && !isNaN(coords.lat) && !isNaN(coords.lng)) {
         if (!countryMap.has(country)) {
@@ -104,19 +107,24 @@ const Map = () => {
             country,
             count: 0,
             coords: coords,
-            samples: []
+            samples: [],
           });
         }
-        
+
         const countryData = countryMap.get(country);
         countryData.count += 1;
         countryData.samples.push(item);
       }
     });
-    
-    const stats = Array.from(countryMap.values()).sort((a, b) => b.count - a.count);
+
+    const stats = Array.from(countryMap.values()).sort(
+      (a, b) => b.count - a.count
+    );
     console.log(`處理完成: 找到 ${stats.length} 個國家的資料`);
-    console.log("前5個國家:", stats.slice(0, 5).map(s => `${s.country}: ${s.count}`));
+    console.log(
+      "前5個國家:",
+      stats.slice(0, 5).map((s) => `${s.country}: ${s.count}`)
+    );
     setCountryStats(stats);
   };
 
@@ -192,7 +200,7 @@ const Map = () => {
         const data = await response.json();
         console.log(`成功載入 ${data.length} 筆 BioSample 資料`);
         setBiosampleData(data);
-        
+
         // 處理資料並按國家統計
         processCountryStats(data);
       } catch (error) {
@@ -211,19 +219,19 @@ const Map = () => {
     }
 
     // 清除舊的標記
-    biosampleMarkersRef.current.forEach(marker => marker.remove());
+    biosampleMarkersRef.current.forEach((marker) => marker.remove());
     biosampleMarkersRef.current = [];
 
     console.log(`Displaying ${countryStats.length} country markers`);
 
     countryStats.forEach((countryData) => {
       const { country, count, coords, samples } = countryData;
-      const color = '#1976d2'; // 固定藍色
+      const color = "#1976d2"; // 固定藍色
       const size = 40; // 固定大小
 
       // 建立自訂標記
-      const el = document.createElement('div');
-      el.className = 'biosample-marker';
+      const el = document.createElement("div");
+      el.className = "biosample-marker";
       el.style.cssText = `
         width: ${size}px;
         height: ${size}px;
@@ -243,15 +251,15 @@ const Map = () => {
       el.textContent = count;
 
       // 懸停效果
-      el.addEventListener('mouseenter', () => {
-        el.style.transform = 'scale(1.15)';
-        el.style.boxShadow = '0 4px 16px rgba(0,0,0,0.4)';
-        el.style.zIndex = '1000';
+      el.addEventListener("mouseenter", () => {
+        el.style.transform = "scale(1.15)";
+        el.style.boxShadow = "0 4px 16px rgba(0,0,0,0.4)";
+        el.style.zIndex = "1000";
       });
-      el.addEventListener('mouseleave', () => {
-        el.style.transform = 'scale(1)';
-        el.style.boxShadow = '0 2px 8px rgba(0,0,0,0.3)';
-        el.style.zIndex = 'auto';
+      el.addEventListener("mouseleave", () => {
+        el.style.transform = "scale(1)";
+        el.style.boxShadow = "0 2px 8px rgba(0,0,0,0.3)";
+        el.style.zIndex = "auto";
       });
 
       // 建立 Popup 內容
@@ -272,7 +280,7 @@ const Map = () => {
       // 建立並加入標記
       const marker = new mapboxgl.Marker({
         element: el,
-        anchor: 'center'
+        anchor: "center",
       })
         .setLngLat([coords.lng, coords.lat])
         .setPopup(
@@ -280,7 +288,7 @@ const Map = () => {
             offset: 25,
             closeButton: true,
             closeOnClick: false,
-            maxWidth: '280px'
+            maxWidth: "280px",
           }).setHTML(popupContent)
         )
         .addTo(map.current);
@@ -288,12 +296,16 @@ const Map = () => {
       biosampleMarkersRef.current.push(marker);
     });
 
-    console.log(`Added ${biosampleMarkersRef.current.length} biosample markers`);
+    console.log(
+      `Added ${biosampleMarkersRef.current.length} biosample markers`
+    );
   };
 
   // 當 countryStats 更新時顯示標記
   useEffect(() => {
-    console.log(`useEffect 觸發: isInitialized=${isInitialized}, countryStats.length=${countryStats.length}`);
+    console.log(
+      `useEffect 觸發: isInitialized=${isInitialized}, countryStats.length=${countryStats.length}`
+    );
     if (isInitialized && countryStats.length > 0) {
       console.log("條件符合，開始顯示標記...");
       displayBiosampleMarkers();
@@ -1616,7 +1628,9 @@ const Map = () => {
 
           // Mark as initialized
           setIsInitialized(true);
-          console.log("Initial setup complete - BioSample markers will be added when data is loaded");
+          console.log(
+            "Initial setup complete - BioSample markers will be added when data is loaded"
+          );
         }, 500);
       });
     });

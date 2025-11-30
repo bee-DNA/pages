@@ -64,7 +64,7 @@ const Search = () => {
   // 合併相同 SRA 編號的資料（_1 和 _2）
   const groupedData = useMemo(() => {
     const groups = new Map();
-    
+
     data.forEach((item) => {
       const sra = item.SRA;
       if (!groups.has(sra)) {
@@ -75,7 +75,7 @@ const Search = () => {
         檔案大小: item["檔案大小(MB)"],
       });
     });
-    
+
     return Array.from(groups.values());
   }, [data]);
 
@@ -91,7 +91,11 @@ const Search = () => {
         (item.BioSample &&
           item.BioSample.toLowerCase().includes(searchQuery.toLowerCase())) ||
         (item.files &&
-          item.files.some(f => f.完整檔名 && f.完整檔名.toLowerCase().includes(searchQuery.toLowerCase())));
+          item.files.some(
+            (f) =>
+              f.完整檔名 &&
+              f.完整檔名.toLowerCase().includes(searchQuery.toLowerCase())
+          ));
 
       const matchesOrganization =
         filterOrganization === "all" ||
@@ -111,7 +115,9 @@ const Search = () => {
 
   // 獲取所有唯一的組織
   const organizations = useMemo(() => {
-    const orgs = new Set(groupedData.map((s) => s.organization).filter(Boolean));
+    const orgs = new Set(
+      groupedData.map((s) => s.organization).filter(Boolean)
+    );
     return Array.from(orgs).sort();
   }, [groupedData]);
 
@@ -346,15 +352,35 @@ const Search = () => {
                               }}
                             >
                               {row.files && row.files.length > 0 ? (
-                                <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
+                                <Box
+                                  sx={{
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    gap: 0.5,
+                                  }}
+                                >
                                   {row.files.map((file, idx) => (
-                                    <Box key={idx} sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                                    <Box
+                                      key={idx}
+                                      sx={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: 1,
+                                      }}
+                                    >
                                       <Chip
                                         label={`_${idx + 1}`}
                                         size="small"
-                                        sx={{ minWidth: 35, height: 20, fontSize: "0.7rem" }}
+                                        sx={{
+                                          minWidth: 35,
+                                          height: 20,
+                                          fontSize: "0.7rem",
+                                        }}
                                       />
-                                      <Typography variant="body2" sx={{ fontSize: "0.875rem" }}>
+                                      <Typography
+                                        variant="body2"
+                                        sx={{ fontSize: "0.875rem" }}
+                                      >
                                         {file.完整檔名}
                                       </Typography>
                                     </Box>
@@ -366,10 +392,25 @@ const Search = () => {
                             </TableCell>
                             <TableCell align="right">
                               {row.files && row.files.length > 0 ? (
-                                <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5, alignItems: "flex-end" }}>
+                                <Box
+                                  sx={{
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    gap: 0.5,
+                                    alignItems: "flex-end",
+                                  }}
+                                >
                                   {row.files.map((file, idx) => (
-                                    <Typography key={idx} variant="body2" sx={{ fontSize: "0.875rem" }}>
-                                      {file.檔案大小 ? parseFloat(file.檔案大小).toLocaleString() : "-"}
+                                    <Typography
+                                      key={idx}
+                                      variant="body2"
+                                      sx={{ fontSize: "0.875rem" }}
+                                    >
+                                      {file.檔案大小
+                                        ? parseFloat(
+                                            file.檔案大小
+                                          ).toLocaleString()
+                                        : "-"}
                                     </Typography>
                                   ))}
                                 </Box>
