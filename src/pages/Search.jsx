@@ -274,7 +274,7 @@ const Search = () => {
                           <TableCell
                             sx={{ fontWeight: 700, backgroundColor: "#f5f5f5" }}
                           >
-                            編號
+                            No.
                           </TableCell>
                           <TableCell
                             sx={{ fontWeight: 700, backgroundColor: "#f5f5f5" }}
@@ -284,13 +284,13 @@ const Search = () => {
                           <TableCell
                             sx={{ fontWeight: 700, backgroundColor: "#f5f5f5" }}
                           >
-                            完整檔名
+                            Filename
                           </TableCell>
                           <TableCell
                             sx={{ fontWeight: 700, backgroundColor: "#f5f5f5" }}
                             align="right"
                           >
-                            檔案大小(MB)
+                            File Size (MB)
                           </TableCell>
                           <TableCell
                             sx={{ fontWeight: 700, backgroundColor: "#f5f5f5" }}
@@ -336,7 +336,9 @@ const Search = () => {
                               cursor: "pointer",
                             }}
                           >
-                            <TableCell>{row.編號 || "-"}</TableCell>
+                            <TableCell>
+                              {page * rowsPerPage + index + 1}
+                            </TableCell>
                             <TableCell>
                               <Chip
                                 label={row.SRA || "-"}

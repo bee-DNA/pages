@@ -72,10 +72,12 @@ const Map = () => {
 
   // 處理國家統計資料
   const processCountryStats = (data) => {
-    console.log("開始處理國家統計資料...");
+    console.log("開始處理國家統計資料...", `總共 ${data.length} 筆資料`);
     const countryMap = new Map();
+    let validCount = 0;
+    let invalidCount = 0;
 
-    data.forEach((item) => {
+    data.forEach((item, index) => {
       // 提取國家資訊
       let country = null;
       let coords = null;
@@ -100,8 +102,21 @@ const Map = () => {
         };
       }
 
+      // Debug: 記錄前幾筆資料的處理情況
+      if (index < 5) {
+        console.log(`資料 ${index}:`, {
+          country,
+          coords,
+          hasGeoLocName: !!item.geo_loc_name,
+          hasLatLon: !!item.lat_lon,
+          hasLatitude: !!item["geographic location (latitude)"],
+          hasLongitude: !!item["geographic location (longitude)"],
+        });
+      }
+
       // 只處理有國家和座標的資料
       if (country && coords && !isNaN(coords.lat) && !isNaN(coords.lng)) {
+        validCount++;
         if (!countryMap.has(country)) {
           countryMap.set(country, {
             country,
@@ -114,6 +129,11 @@ const Map = () => {
         const countryData = countryMap.get(country);
         countryData.count += 1;
         countryData.samples.push(item);
+      } else {
+        invalidCount++;
+        if (invalidCount <= 3) {
+          console.warn(`無效資料 ${index}:`, { country, coords, item: item });
+        }
       }
     });
 
@@ -121,6 +141,7 @@ const Map = () => {
       (a, b) => b.count - a.count
     );
     console.log(`處理完成: 找到 ${stats.length} 個國家的資料`);
+    console.log(`有效資料: ${validCount} 筆, 無效資料: ${invalidCount} 筆`);
     console.log(
       "前5個國家:",
       stats.slice(0, 5).map((s) => `${s.country}: ${s.count}`)
@@ -193,23 +214,51 @@ const Map = () => {
     const loadBiosampleData = async () => {
       try {
         console.log("開始載入 BioSample 資料...");
+        console.log(
+          "請求路徑:",
+          window.location.origin + "/biosample_enhanced.json"
+        );
+
         const response = await fetch("/biosample_enhanced.json");
+        console.log("Response status:", response.status, response.statusText);
+
         if (!response.ok) {
-          throw new Error("Failed to load biosample data");
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
+
         const data = await response.json();
-        console.log(`成功載入 ${data.length} 筆 BioSample 資料`);
+        console.log(`✅ 成功載入 ${data.length} 筆 BioSample 資料`);
+        console.log("前3筆資料樣本:", data.slice(0, 3));
         setBiosampleData(data);
 
         // 處理資料並按國家統計
         processCountryStats(data);
       } catch (error) {
-        console.error("Error loading biosample data:", error);
+        console.error("❌ Error loading biosample data:", error);
+        console.error("Error details:", {
+          message: error.message,
+          stack: error.stack,
+        });
       }
     };
 
     loadBiosampleData();
   }, []);
+
+  // 根據樣本數量獲取顏色
+  const getColorByCount = (count, maxCount) => {
+    const percentage = (count / maxCount) * 100;
+
+    if (percentage >= 76) {
+      return { color: "#9c27b0", label: "Very High" }; // 紫色
+    } else if (percentage >= 51) {
+      return { color: "#f44336", label: "High" }; // 紅色
+    } else if (percentage >= 26) {
+      return { color: "#ff9800", label: "Medium" }; // 橙色
+    } else {
+      return { color: "#4caf50", label: "Low" }; // 綠色
+    }
+  };
 
   // 顯示 BioSample 標記
   const displayBiosampleMarkers = () => {
@@ -224,10 +273,23 @@ const Map = () => {
 
     console.log(`Displaying ${countryStats.length} country markers`);
 
+    // 找出最大樣本數
+    const maxCount = Math.max(...countryStats.map((c) => c.count));
+    console.log(`Max sample count: ${maxCount}`);
+
     countryStats.forEach((countryData) => {
       const { country, count, coords, samples } = countryData;
-      const color = "#1976d2"; // 固定藍色
-      const size = 40; // 固定大小
+
+      // 根據數量獲取顏色
+      const { color, label } = getColorByCount(count, maxCount);
+
+      // 根據數量調整大小
+      const percentage = (count / maxCount) * 100;
+      let size = 30;
+      if (percentage >= 76) size = 50;
+      else if (percentage >= 51) size = 45;
+      else if (percentage >= 26) size = 40;
+      else size = 35;
 
       // 建立自訂標記
       const el = document.createElement("div");
@@ -242,7 +304,7 @@ const Map = () => {
         justify-content: center;
         color: white;
         font-weight: 700;
-        font-size: 14px;
+        font-size: ${size > 40 ? "16px" : "14px"};
         border: 3px solid white;
         box-shadow: 0 2px 8px rgba(0,0,0,0.3);
         cursor: pointer;
@@ -264,7 +326,7 @@ const Map = () => {
 
       // 建立 Popup 內容
       const popupContent = `
-        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 16px; min-width: 200px;">
+        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 16px; min-width: 220px;">
           <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
             <div style="width: 48px; height: 48px; background: ${color}; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px; font-weight: 700;">
               ${count}
@@ -273,6 +335,10 @@ const Map = () => {
               <h3 style="margin: 0; font-size: 18px; font-weight: 700; color: #1a1a1a;">${country}</h3>
               <p style="margin: 4px 0 0 0; font-size: 13px; color: #666;">BioSample Count</p>
             </div>
+          </div>
+          <div style="background: #f5f5f5; padding: 8px 12px; border-radius: 6px; display: flex; align-items: center; justify-content: space-between;">
+            <span style="font-size: 12px; color: #666;">Level:</span>
+            <span style="font-size: 12px; font-weight: 600; color: ${color};">${label}</span>
           </div>
         </div>
       `;
@@ -297,7 +363,7 @@ const Map = () => {
     });
 
     console.log(
-      `Added ${biosampleMarkersRef.current.length} biosample markers`
+      `Added ${biosampleMarkersRef.current.length} biosample markers with dynamic colors`
     );
   };
 

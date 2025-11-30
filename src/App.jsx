@@ -5,6 +5,7 @@ import Footer from "./components/Footer";
 import Home from "./pages/Home";
 import Search from "./pages/Search";
 import Map from "./pages/Map";
+import Maps from "./pages/Maps";
 import "./i18n/config";
 
 // Material-UI 主題設定
@@ -51,7 +52,8 @@ function App() {
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/search" element={<Search />} />
-              <Route path="/map" element={<Map />} />
+              <Route path="/map" element={<Maps />} />
+              <Route path="/map-old" element={<Map />} />
             </Routes>
           </Box>
           <Footer />
