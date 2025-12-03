@@ -92,4 +92,17 @@ export const api = {
       "0"
     )}/{z}/{x}/{y}`;
   },
+
+  // Chat API
+  async chat(message) {
+    const response = await fetch(`${API_URL}/api/chat`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ message }),
+    });
+    if (!response.ok) throw new Error("Failed to send message");
+    return response.json();
+  },
 };
