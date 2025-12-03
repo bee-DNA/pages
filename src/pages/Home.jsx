@@ -57,7 +57,9 @@ const Home = () => {
       setChatResponse(result.answer || JSON.stringify(result));
     } catch (error) {
       console.error("Chat failed:", error);
-      setChatResponse("Error: Failed to get response from server. Please ensure the backend is running.");
+      setChatResponse(
+        "Error: Failed to get response from server. Please ensure the backend is running."
+      );
     } finally {
       setChatLoading(false);
     }
