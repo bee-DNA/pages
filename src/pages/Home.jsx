@@ -52,12 +52,12 @@ const Home = () => {
     setChatLoading(true);
     setChatResponse("");
     try {
-      const result = await api.chat(chatInput);
-      // Assuming the backend returns { reply: "answer" } or { answer: "answer" }
-      setChatResponse(result.reply || result.answer || JSON.stringify(result));
+      // 使用新的 Python 後端查詢 API
+      const result = await api.queryBioSample(chatInput);
+      setChatResponse(result.answer || JSON.stringify(result));
     } catch (error) {
       console.error("Chat failed:", error);
-      setChatResponse("Error: Failed to get response from server.");
+      setChatResponse("Error: Failed to get response from server. Please ensure the backend is running.");
     } finally {
       setChatLoading(false);
     }
