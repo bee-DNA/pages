@@ -1,8 +1,103 @@
+// 主 API URL (Go 後端 - 氣象/地圖/圖磚服務)
 const API_URL = import.meta.env.VITE_API_URL || "https://md2pdf.dpdns.org/bee";
+
+// 蜜蜂元基因體 API URL (Python 後端 - 樣本查詢/NLP)
+const METAGENOMICS_API_URL =
+  import.meta.env.VITE_METAGENOMICS_API_URL || "http://localhost:8000";
 
 export const api = {
   // API 基礎 URL
   API_URL,
+  METAGENOMICS_API_URL,
+
+  // ==================== 蜜蜂元基因體 API (Python 後端) ====================
+
+  // 自然語言查詢 BioSample 資料
+  async queryBioSample(question, useRwkv = true) {
+    const response = await fetch(`${METAGENOMICS_API_URL}/query`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ question, use_rwkv: useRwkv }),
+    });
+    if (!response.ok) throw new Error("Failed to query biosample data");
+    return response.json();
+  },
+
+  // 健康檢查 (Python 後端)
+  async metagenomicsHealthCheck() {
+    const response = await fetch(`${METAGENOMICS_API_URL}/health`);
+    if (!response.ok)
+      throw new Error("Metagenomics backend health check failed");
+    return response.json();
+  },
+
+  // 測試端點
+  async testCount() {
+    const response = await fetch(`${METAGENOMICS_API_URL}/test/count`);
+    if (!response.ok) throw new Error("Failed to get count");
+    return response.json();
+  },
+
+  async testCountry(country) {
+    const response = await fetch(
+      `${METAGENOMICS_API_URL}/test/country/${encodeURIComponent(country)}`
+    );
+    if (!response.ok) throw new Error("Failed to get country data");
+    return response.json();
+  },
+
+  async testSample(sampleId) {
+    const response = await fetch(
+      `${METAGENOMICS_API_URL}/test/sample/${encodeURIComponent(sampleId)}`
+    );
+    if (!response.ok) throw new Error("Failed to get sample data");
+    return response.json();
+  },
+
+  async testGroup(field = "Country") {
+    const response = await fetch(
+      `${METAGENOMICS_API_URL}/test/group/${encodeURIComponent(field)}`
+    );
+    if (!response.ok) throw new Error("Failed to get group data");
+    return response.json();
+  },
+
+  // NLP 測試端點
+  async testNlpParse(text) {
+    const response = await fetch(`${METAGENOMICS_API_URL}/test/nlp/parse`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ text }),
+    });
+    if (!response.ok) throw new Error("Failed to parse NLP");
+    return response.json();
+  },
+
+  async getNlpExamples() {
+    const response = await fetch(`${METAGENOMICS_API_URL}/test/nlp/examples`);
+    if (!response.ok) throw new Error("Failed to get NLP examples");
+    return response.json();
+  },
+
+  async getCountries() {
+    const response = await fetch(`${METAGENOMICS_API_URL}/test/nlp/countries`);
+    if (!response.ok) throw new Error("Failed to get countries");
+    return response.json();
+  },
+
+  async getAntibiotics() {
+    const response = await fetch(
+      `${METAGENOMICS_API_URL}/test/nlp/antibiotics`
+    );
+    if (!response.ok) throw new Error("Failed to get antibiotics");
+    return response.json();
+  },
+
+  // ==================== 原有 API (Go 後端) ====================
 
   // 樣本 API
   async getSamples(page = 1, pageSize = 20) {
@@ -50,7 +145,7 @@ export const api = {
     return response.json();
   },
 
-  // 健康檢查
+  // 健康檢查 (Go 後端)
   async healthCheck() {
     const response = await fetch(`${API_URL}/health`);
     if (!response.ok) throw new Error("Health check failed");
