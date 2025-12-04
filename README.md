@@ -92,10 +92,14 @@ npm run preview
 
 ## 🔧 環境變數
 
-創建 `.env` 文件來設定環境變數：
+創建 `.env.local` 文件來設定環境變數：
 
 ```env
-VITE_API_URL=https://md2pdf.dpdns.org
+# Go 後端 API URL (氣象/地圖/圖磚服務)
+VITE_API_URL=https://md2pdf.dpdns.org/bee
+
+# Python 後端 API URL (聊天/樣本查詢/NLP)
+VITE_METAGENOMICS_API_URL=https://md2pdf.dpdns.org/beeback
 ```
 
 ## 📦 部署
@@ -171,8 +175,9 @@ VITE_API_URL=https://md2pdf.dpdns.org
 
 ## 🔗 相關連結
 
-- 後端 API: https://md2pdf.dpdns.org
-- GitHub 倉庫: (待設定)
+- Go 後端 API (氣象/地圖): https://md2pdf.dpdns.org/bee
+- Python 後端 API (聊天/NLP): https://md2pdf.dpdns.org/beeback
+- GitHub 倉庫: https://github.com/bee-DNA/pages
 
 ## 📄 授權
 
