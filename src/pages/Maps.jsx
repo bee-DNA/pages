@@ -1,9 +1,13 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import { Container, Box, Typography } from "@mui/material";
 import MapIcon from "@mui/icons-material/Map";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { useTranslation } from "react-i18next";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import dayjs from "dayjs";
 
 // Mapbox Access Token
 mapboxgl.accessToken =
@@ -23,6 +27,10 @@ const Maps = () => {
   // BioSample 資料
   const [biosampleData, setBiosampleData] = useState([]);
   const [countryStats, setCountryStats] = useState([]);
+
+  // 年份篩選
+  const [startYear, setStartYear] = useState(null);
+  const [endYear, setEndYear] = useState(null);
 
   // 解析經緯度字串 (例如: "24.34 N 123.91 E")
   const parseLatLon = (latLonStr) => {
@@ -44,12 +52,31 @@ const Maps = () => {
     }
   };
 
-  // 處理國家統計資料
-  const processCountryStats = (data) => {
+  // 從 collection_date 提取年份
+  const extractYear = (dateStr) => {
+    if (!dateStr) return null;
+    // 處理 "2011-10-09" 或 "2011" 格式
+    const yearMatch = dateStr.match(/^(\d{4})/);
+    return yearMatch ? parseInt(yearMatch[1], 10) : null;
+  };
+
+  // 處理國家統計資料（支援年份篩選）
+  const processCountryStats = (data, filterStartYear, filterEndYear) => {
     console.log("📊 開始處理國家統計資料...", `總共 ${data.length} 筆`);
+    console.log(
+      `📅 篩選條件: ${filterStartYear || "無"} ~ ${filterEndYear || "無"}`
+    );
     const countryMap = new Map();
 
     data.forEach((item) => {
+      // 檢查 collection_date - 沒有日期的資料一律排除
+      const year = extractYear(item.collection_date);
+      if (year === null) return;
+
+      // 年份篩選
+      if (filterStartYear && year < filterStartYear) return;
+      if (filterEndYear && year > filterEndYear) return;
+
       let country = null;
       let coords = null;
 
@@ -115,7 +142,7 @@ const Maps = () => {
         const data = await response.json();
         console.log(`✅ 成功載入 ${data.length} 筆 BioSample 資料`);
         setBiosampleData(data);
-        processCountryStats(data);
+        processCountryStats(data, null, null);
       } catch (error) {
         console.error("❌ 載入 BioSample 資料失敗:", error);
       }
@@ -123,6 +150,15 @@ const Maps = () => {
 
     loadBiosampleData();
   }, []);
+
+  // 當年份篩選變更時重新計算統計
+  useEffect(() => {
+    if (biosampleData.length > 0) {
+      const filterStart = startYear ? startYear.year() : null;
+      const filterEnd = endYear ? endYear.year() : null;
+      processCountryStats(biosampleData, filterStart, filterEnd);
+    }
+  }, [startYear, endYear]);
 
   // 顯示標記
   const displayMarkers = () => {
@@ -304,8 +340,26 @@ const Maps = () => {
             gap: 2,
           }}
         >
-          {/* 左側：標題 */}
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+          {/* 左側：標題（點擊可重置篩選） */}
+          <Box
+            onClick={() => {
+              setStartYear(null);
+              setEndYear(null);
+            }}
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 1.5,
+              cursor: "pointer",
+              padding: "4px 8px",
+              marginLeft: "-8px",
+              borderRadius: "8px",
+              transition: "background-color 0.2s",
+              "&:hover": {
+                backgroundColor: "rgba(25, 118, 210, 0.08)",
+              },
+            }}
+          >
             <Box
               sx={{
                 width: "28px",
@@ -326,7 +380,7 @@ const Maps = () => {
                   lineHeight: 1.2,
                 }}
               >
-                Map
+                {t("map.title")}
               </Typography>
               <Typography
                 variant="caption"
@@ -337,68 +391,66 @@ const Maps = () => {
             </Box>
           </Box>
 
-          {/* 右側：地圖樣式切換 - 隱藏 */}
-          <Box sx={{ display: "none", alignItems: "center", gap: 2 }}>
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                backgroundColor: "#f0f0f0",
-                borderRadius: "20px",
-                padding: "3px",
-                position: "relative",
-              }}
-            >
-              <Box
-                onClick={() => setMapStyle("streets")}
-                sx={{
-                  position: "relative",
-                  zIndex: 1,
-                  padding: "6px 14px",
-                  borderRadius: "17px",
-                  cursor: "pointer",
-                  fontSize: "12px",
-                  fontWeight: 600,
-                  color: mapStyle === "streets" ? "white" : "#666",
-                  transition: "color 0.2s",
-                  userSelect: "none",
+          {/* 右側：年份篩選 */}
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+              <DatePicker
+                label="Start Year"
+                views={["year"]}
+                value={startYear}
+                onChange={(newValue) => setStartYear(newValue)}
+                maxDate={endYear || undefined}
+                slotProps={{
+                  textField: {
+                    size: "small",
+                    sx: {
+                      width: 130,
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: "8px",
+                        backgroundColor: "#f5f5f5",
+                      },
+                      "& .MuiInputLabel-root": {
+                        fontSize: "13px",
+                      },
+                      "& .MuiOutlinedInput-input": {
+                        fontSize: "13px",
+                        padding: "8px 12px",
+                      },
+                    },
+                  },
                 }}
-              >
-                {t("map.mapStyle.street")}
-              </Box>
-              <Box
-                onClick={() => setMapStyle("satellite")}
-                sx={{
-                  position: "relative",
-                  zIndex: 1,
-                  padding: "6px 14px",
-                  borderRadius: "17px",
-                  cursor: "pointer",
-                  fontSize: "12px",
-                  fontWeight: 600,
-                  color: mapStyle === "satellite" ? "white" : "#666",
-                  transition: "color 0.2s",
-                  userSelect: "none",
-                }}
-              >
-                {t("map.mapStyle.satellite")}
-              </Box>
-              {/* 滑動背景 */}
-              <Box
-                sx={{
-                  position: "absolute",
-                  top: "3px",
-                  left: mapStyle === "streets" ? "3px" : "50%",
-                  width: "calc(50% - 3px)",
-                  height: "calc(100% - 6px)",
-                  backgroundColor: "#1976d2",
-                  borderRadius: "17px",
-                  transition: "left 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                  zIndex: 0,
+              />
+              <Typography sx={{ color: "#666", fontSize: "14px" }}>
+                ~
+              </Typography>
+              <DatePicker
+                label="End Year"
+                views={["year"]}
+                value={endYear}
+                onChange={(newValue) => setEndYear(newValue)}
+                minDate={startYear || undefined}
+                slotProps={{
+                  textField: {
+                    size: "small",
+                    sx: {
+                      width: 130,
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: "8px",
+                        backgroundColor: "#f5f5f5",
+                      },
+                      "& .MuiInputLabel-root": {
+                        fontSize: "13px",
+                      },
+                      "& .MuiOutlinedInput-input": {
+                        fontSize: "13px",
+                        padding: "8px 12px",
+                      },
+                    },
+                  },
                 }}
               />
             </Box>
-          </Box>
+          </LocalizationProvider>
         </Box>
 
         {/* 地圖容器 */}
