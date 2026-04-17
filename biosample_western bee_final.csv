@@ -1,0 +1,320 @@
+﻿SRA,BioSample,NCBI_BioSample_ID,collection_date,env_broad_scale,env_local_scale,env_medium,geo_loc_name,host,lat_lon
+SRR10810002,SAMN13698786,13698786,2017/9/1,city,lower digestive tract,not applicable,Japan:Tsukuba,Apis mellifera,36.03 N 140.07 E
+SRR10810003,SAMN13698785,13698785,2017/9/1,city,lower digestive tract,not applicable,Japan:Tsukuba,Apis mellifera,36.03 N 140.07 E
+SRR10810004,SAMN13698784,13698784,2017/9/1,city,lower digestive tract,not applicable,Japan:Tsukuba,Apis mellifera,36.03 N 140.07 E
+SRR10810005,SAMN13698783,13698783,2017/9/1,city,lower digestive tract,not applicable,Japan:Tsukuba,Apis mellifera,36.03 N 140.07 E
+SRR10810006,SAMN13698782,13698782,2017/9/1,city,lower digestive tract,not applicable,Japan:Tsukuba,Apis mellifera,36.03 N 140.07 E
+SRR10810007,SAMN13698781,13698781,2017/9/1,city,lower digestive tract,not applicable,Japan:Tsukuba,Apis mellifera,36.03 N 140.07 E
+SRR10810018,SAMN13698780,13698780,2017/9/1,city,lower digestive tract,not applicable,Japan:Tsukuba,Apis mellifera,36.03 N 140.07 E
+SRR10810029,SAMN13698779,13698779,2017/9/1,city,lower digestive tract,not applicable,Japan:Tsukuba,Apis mellifera,36.03 N 140.07 E
+SRR10810030,SAMN13698796,13698796,2017/9/2,city,lower digestive tract,not applicable,Japan:Hongo,Apis mellifera,35.42 N 139.45 E
+SRR10810031,SAMN13698795,13698795,2017/9/2,city,lower digestive tract,not applicable,Japan:Hongo,Apis mellifera,35.42 N 139.45 E
+SRR10810032,SAMN13698794,13698794,2017/9/2,city,lower digestive tract,not applicable,Japan:Hongo,Apis mellifera,35.42 N 139.45 E
+SRR10810033,SAMN13698793,13698793,2017/9/2,city,lower digestive tract,not applicable,Japan:Hongo,Apis mellifera,35.42 N 139.45 E
+SRR10810034,SAMN13698792,13698792,2017/9/2,city,lower digestive tract,not applicable,Japan:Hongo,Apis mellifera,35.42 N 139.45 E
+SRR10810035,SAMN13698791,13698791,2017/9/2,city,lower digestive tract,not applicable,Japan:Hongo,Apis mellifera,35.42 N 139.45 E
+SRR10810036,SAMN13698790,13698790,2017/9/2,city,lower digestive tract,not applicable,Japan:Hongo,Apis mellifera,35.42 N 139.45 E
+SRR10810037,SAMN13698789,13698789,2017/9/2,city,lower digestive tract,not applicable,Japan:Hongo,Apis mellifera,35.42 N 139.45 E
+SRR10810038,SAMN13698788,13698788,2017/9/2,city,lower digestive tract,not applicable,Japan:Hongo,Apis mellifera,35.42 N 139.45 E
+SRR10810039,SAMN13698787,13698787,2017/9/2,city,lower digestive tract,not applicable,Japan:Hongo,Apis mellifera,35.42 N 139.45 E
+SRR10810040,SAMN13698778,13698778,2017/9/1,city,lower digestive tract,not applicable,Japan:Tsukuba,Apis mellifera,36.03 N 140.07 E
+SRR10810041,SAMN13698777,13698777,2017/9/1,city,lower digestive tract,not applicable,Japan:Tsukuba,Apis mellifera,36.03 N 140.07 E
+SRR10838798,SAMN13742222,13742222,17-Jan,,,,Switzerland: Lausanne,Apis mellifera,46.52 N 6.58 E
+SRR12180935,SAMN15488375,15488375,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12180936,SAMN15488374,15488374,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12180937,SAMN15488373,15488373,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12180938,SAMN15488372,15488372,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12180939,SAMN15488371,15488371,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12180940,SAMN15488370,15488370,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12180941,SAMN15488369,15488369,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12180942,SAMN15488368,15488368,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12180943,SAMN15488367,15488367,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12180944,SAMN15488366,15488366,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12180945,SAMN15488285,15488285,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12180946,SAMN15488365,15488365,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12180947,SAMN15488364,15488364,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12180948,SAMN15488363,15488363,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12180949,SAMN15488362,15488362,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12180950,SAMN15488361,15488361,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12180951,SAMN15488360,15488360,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12180952,SAMN15488359,15488359,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12180953,SAMN15488358,15488358,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12180954,SAMN15488357,15488357,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12180955,SAMN15488356,15488356,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12180956,SAMN15488284,15488284,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12180957,SAMN15488355,15488355,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12180958,SAMN15488354,15488354,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12180959,SAMN15488353,15488353,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12180960,SAMN15488352,15488352,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12180961,SAMN15488351,15488351,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12180962,SAMN15488350,15488350,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12180963,SAMN15488349,15488349,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12180964,SAMN15488348,15488348,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12180965,SAMN15488347,15488347,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12180966,SAMN15488346,15488346,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12180967,SAMN15488283,15488283,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12180968,SAMN15488345,15488345,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12180969,SAMN15488344,15488344,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12180970,SAMN15488343,15488343,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12180971,SAMN15488342,15488342,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12180972,SAMN15488341,15488341,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12180973,SAMN15488340,15488340,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12180974,SAMN15488339,15488339,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12180975,SAMN15488338,15488338,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12180976,SAMN15488337,15488337,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12180977,SAMN15488336,15488336,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12180978,SAMN15488282,15488282,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12180979,SAMN15488335,15488335,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12180980,SAMN15488334,15488334,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12180981,SAMN15488333,15488333,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12180982,SAMN15488332,15488332,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12180983,SAMN15488331,15488331,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12180984,SAMN15488330,15488330,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12180985,SAMN15488329,15488329,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12180986,SAMN15488328,15488328,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12180987,SAMN15488327,15488327,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12180988,SAMN15488326,15488326,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12180989,SAMN15488281,15488281,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12180990,SAMN15488325,15488325,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12180991,SAMN15488324,15488324,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12180992,SAMN15488323,15488323,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12180993,SAMN15488322,15488322,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12180994,SAMN15488321,15488321,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12180995,SAMN15488320,15488320,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12180996,SAMN15488319,15488319,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12180997,SAMN15488318,15488318,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12180998,SAMN15488317,15488317,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12180999,SAMN15488316,15488316,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12181000,SAMN15488280,15488280,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12181001,SAMN15488315,15488315,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12181002,SAMN15488314,15488314,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12181003,SAMN15488313,15488313,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12181004,SAMN15488312,15488312,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12181005,SAMN15488311,15488311,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12181006,SAMN15488310,15488310,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12181007,SAMN15488309,15488309,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12181008,SAMN15488308,15488308,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12181009,SAMN15488307,15488307,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12181010,SAMN15488306,15488306,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12181011,SAMN15488279,15488279,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12181012,SAMN15488305,15488305,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12181013,SAMN15488304,15488304,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12181014,SAMN15488303,15488303,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12181015,SAMN15488302,15488302,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12181016,SAMN15488301,15488301,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12181017,SAMN15488300,15488300,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12181018,SAMN15488299,15488299,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12181019,SAMN15488298,15488298,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12181020,SAMN15488297,15488297,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12181021,SAMN15488296,15488296,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12181022,SAMN15488278,15488278,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12181023,SAMN15488295,15488295,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12181024,SAMN15488294,15488294,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12181025,SAMN15488293,15488293,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12181026,SAMN15488292,15488292,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12181027,SAMN15488291,15488291,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12181028,SAMN15488290,15488290,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12181029,SAMN15488289,15488289,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12181030,SAMN15488400,15488400,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12181031,SAMN15488399,15488399,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12181032,SAMN15488398,15488398,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12181033,SAMN15488397,15488397,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12181034,SAMN15488396,15488396,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12181035,SAMN15488288,15488288,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12181036,SAMN15488395,15488395,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12181037,SAMN15488394,15488394,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12181038,SAMN15488393,15488393,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12181039,SAMN15488392,15488392,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12181040,SAMN15488391,15488391,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12181041,SAMN15488390,15488390,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12181042,SAMN15488389,15488389,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12181043,SAMN15488388,15488388,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12181044,SAMN15488387,15488387,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12181045,SAMN15488386,15488386,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12181046,SAMN15488287,15488287,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12181047,SAMN15488385,15488385,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12181048,SAMN15488384,15488384,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12181049,SAMN15488383,15488383,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12181050,SAMN15488382,15488382,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12181051,SAMN15488381,15488381,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12181052,SAMN15488380,15488380,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12181053,SAMN15488379,15488379,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12181054,SAMN15488378,15488378,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12181055,SAMN15488377,15488377,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12181056,SAMN15488376,15488376,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12181057,SAMN15488286,15488286,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12181058,SAMN15488277,15488277,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR12181059,SAMN15488276,15488276,2018,Apis mellifera gut biome,gut,digestive tract,China: Jilin,Apis mellifera,43.31 N 126.48 E
+SRR13256637,SAMN17084065,17084065,2019/3/21,,,,Hungary,Apis mellifera,47.94984 N 20.8146 E
+SRR13256638,SAMN17084064,17084064,2019/3/24,,,,Hungary,Apis mellifera,46.4787584 N 19.6045906 E
+SRR13256639,SAMN17084063,17084063,2019/3/18,,,,Hungary,Apis mellifera,47.7752778 N 19.67 E
+SRR13256640,SAMN17084054,17084054,2019/3/22,,,,Hungary,Apis mellifera,47.440008 N 18.5702107 E
+SRR13256641,SAMN17084053,17084053,2019/3/24,,,,Hungary,Apis mellifera,46.1228176 N 19.1570834 E
+SRR13256642,SAMN17084059,17084059,2019/3/20,,,,Hungary,Apis mellifera,46.4063333 N 18.2502167 E
+SRR13256643,SAMN17084060,17084060,2019/3/21,,,,Hungary,Apis mellifera,48.32655 N 20.7874 E
+SRR13256644,SAMN17084061,17084061,2019/3/18,,,,Hungary,Apis mellifera,47.9438889 N 20.3563889 E
+SRR13256645,SAMN17084062,17084062,2019/3/19,,,,Hungary,Apis mellifera,47.74785 N 21.78976 E
+SRR13256646,SAMN17084058,17084058,2019/3/19,,,,Hungary,Apis mellifera,47.35097 N 21.57983 E
+SRR13256647,SAMN17084057,17084057,2019/3/22,,,,Hungary,Apis mellifera,46.4292 N 20.07385 E
+SRR13256648,SAMN17084092,17084092,2019/5/27,,,,Hungary,Apis mellifera,48.32684 N 22.1602 E
+SRR13256649,SAMN17084091,17084091,2019/5/27,,,,Hungary,Apis mellifera,48.10336 N 22.21218 E
+SRR13256650,SAMN17084090,17084090,2019/5/24,,,,Hungary,Apis mellifera,47.1674118 N 19.486625 E
+SRR13256651,SAMN17084089,17084089,2019/5/23,,,,Hungary,Apis mellifera,47.6925666 N 18.2410594 E
+SRR13256652,SAMN17084088,17084088,2019/5/30,,,,Hungary,Apis mellifera,46.0808333 N 17.9911111 E
+SRR13256653,SAMN17084087,17084087,2019/5/28,,,,Hungary,Apis mellifera,46.9227067 N 17.2344951 E
+SRR13256654,SAMN17084086,17084086,2019/5/30,,,,Hungary,Apis mellifera,46.20143 N 17.45692 E
+SRR13256655,SAMN17084085,17084085,2019/5/23,,,,Hungary,Apis mellifera,47.51717 N 19.44835 E
+SRR13256656,SAMN17084084,17084084,2019/6/1,,,,Hungary,Apis mellifera,48.013136 N 20.046282 E
+SRR13256657,SAMN17084083,17084083,2019/5/24,,,,Hungary,Apis mellifera,47.8047222 N 19.6941667 E
+SRR13256658,SAMN17084056,17084056,2019/3/23,,,,Hungary,Apis mellifera,47.2850576 N 17.1092279 E
+SRR13256659,SAMN17084082,17084082,2019/5/23,,,,Hungary,Apis mellifera,47.67801 N 21.60493 E
+SRR13256660,SAMN17084081,17084081,2019/5/27,,,,Hungary,Apis mellifera,48.0622833 N 20.3570667 E
+SRR13256661,SAMN17084080,17084080,2019/5/27,,,,Hungary,Apis mellifera,48.32655 N 20.7874 E
+SRR13256662,SAMN17084079,17084079,2019/5/30,,,,Hungary,Apis mellifera,46.4063333 N 18.2502167 E
+SRR13256663,SAMN17084078,17084078,2019/5/23,,,,Hungary,Apis mellifera,47.703847 N 22.0095 E
+SRR13256664,SAMN17084077,17084077,2019/5/23,,,,Hungary,Apis mellifera,47.5940667 N 19.3012833 E
+SRR13256665,SAMN17084076,17084076,2019/5/28,,,,Hungary,Apis mellifera,47.2851149 N 17.1092712 E
+SRR13256666,SAMN17084075,17084075,2019/5/31,,,,Hungary,Apis mellifera,47.1736461 N 20.0151758 E
+SRR13256667,SAMN17084074,17084074,2019/5/23,,,,Hungary,Apis mellifera,47.4401701 N 18.5701916 E
+SRR13256668,SAMN17084073,17084073,2019/5/24,,,,Hungary,Apis mellifera,46.1228508 N 19.1569195 E
+SRR13256669,SAMN17084055,17084055,2019/3/25,,,,Hungary,Apis mellifera,47.1736666 N 20.0155754 E
+SRR13256670,SAMN17084072,17084072,2019/3/18,,,,Hungary,Apis mellifera,48.3355 N 22.26658 E
+SRR13256671,SAMN17084071,17084071,2019/3/18,,,,Hungary,Apis mellifera,48.10774 N 22.40761 E
+SRR13256672,SAMN17084070,17084070,2019/3/25,,,,Hungary,Apis mellifera,47.1809901 N 20.3707948 E
+SRR13256673,SAMN17084069,17084069,2019/3/22,,,,Hungary,Apis mellifera,47.6923631 N 18.2407845 E
+SRR13256674,SAMN17084068,17084068,2018/3/20,,,,Hungary,Apis mellifera,46.0808333 N 17.9911111 E
+SRR13256675,SAMN17084067,17084067,2019/3/23,,,,Hungary,Apis mellifera,46.9227287 N 17.2344026 E
+SRR13256676,SAMN17084066,17084066,2019/3/20,,,,Hungary,Apis mellifera,46.20143 N 17.45692 E
+SRR16972386,SAMN23258794,23258794,2018/9/29,,,,Austria: Poysdorf,Apis mellifera,48.67 N 16.63 E
+SRR16972387,SAMN23258793,23258793,2018/9/29,,,,Austria: Poysdorf,Apis mellifera,48.67 N 16.63 E
+SRR16972388,SAMN23258792,23258792,2018/9/29,,,,Austria: Poysdorf,Apis mellifera,48.67 N 16.63 E
+SRR16972389,SAMN23258765,23258765,2018/8/20,,,,Czech Republic: Prasily na Sumave,Apis mellifera,49.11 N 13.38 E
+SRR16972390,SAMN23258791,23258791,2018/9/29,,,,Austria: Poysdorf,Apis mellifera,48.67 N 16.63 E
+SRR16972391,SAMN23258790,23258790,2018/9/29,,,,Austria: Poysdorf,Apis mellifera,48.67 N 16.63 E
+SRR16972392,SAMN23258789,23258789,2018/9/29,,,,Austria: Poysdorf,Apis mellifera,48.67 N 16.63 E
+SRR16972393,SAMN23258788,23258788,2018/9/28,,,,Czech Republic: Brumov-Bylnice,Apis mellifera,49.09 N 18.02 E
+SRR16972394,SAMN23258787,23258787,2018/9/28,,,,Czech Republic: Brumov-Bylnice,Apis mellifera,49.09 N 18.02 E
+SRR16972395,SAMN23258786,23258786,2018/9/28,,,,Czech Republic: Brumov-Bylnice,Apis mellifera,49.09 N 18.02 E
+SRR16972396,SAMN23258785,23258785,2018/8/26,,,,Czech Republic: Slezsko,Apis mellifera,49.84 N 18.31 E
+SRR16972397,SAMN23258784,23258784,2018/8/26,,,,Czech Republic: Slezsko,Apis mellifera,49.84 N 18.31 E
+SRR16972398,SAMN23258783,23258783,2018/8/26,,,,Czech Republic: Slezsko,Apis mellifera,49.84 N 18.31 E
+SRR16972399,SAMN23258782,23258782,2018/8/26,,,,Czech Republic: Petrusov u Moravske Trebove,Apis mellifera,49.82 N 16.74 E
+SRR16972400,SAMN23258764,23258764,2018/8/8,,,,"Czech Republic: Usti Nad Labem, Brna",Apis mellifera,50.62 N 14.07 E
+SRR16972401,SAMN23258781,23258781,2018/8/26,,,,Czech Republic: Petrusov u Moravske Trebove,Apis mellifera,49.82 N 16.74 E
+SRR16972402,SAMN23258780,23258780,2018/8/26,,,,Czech Republic: Petrusov u Moravske Trebove,Apis mellifera,49.82 N 16.74 E
+SRR16972403,SAMN23258779,23258779,2018/8/26,,,,Czech Republic: Petrusov u Moravske Trebove,Apis mellifera,49.82 N 16.74 E
+SRR16972404,SAMN23258778,23258778,2018/8/26,,,,Czech Republic: Petrusov u Moravske Trebove,Apis mellifera,49.82 N 16.74 E
+SRR16972405,SAMN23258777,23258777,2018/8/26,,,,Czech Republic: Petrusov u Moravske Trebove,Apis mellifera,49.82 N 16.74 E
+SRR16972406,SAMN23258776,23258776,2018/8/20,,,,Czech Republic: Strakonice,Apis mellifera,49.26 N 13.91 E
+SRR16972407,SAMN23258775,23258775,2018/8/20,,,,Czech Republic: Strakonice,Apis mellifera,49.26 N 13.91 E
+SRR16972408,SAMN23258774,23258774,2018/8/20,,,,Czech Republic: Strakonice,Apis mellifera,49.26 N 13.91 E
+SRR16972409,SAMN23258773,23258773,2018/8/20,,,,Czech Republic: Prasily na Sumave,Apis mellifera,49.11 N 13.38 E
+SRR16972410,SAMN23258772,23258772,2018/8/20,,,,Czech Republic: Prasily na Sumave,Apis mellifera,49.11 N 13.38 E
+SRR16972411,SAMN23258763,23258763,2018/8/8,,,,"Czech Republic: Usti Nad Labem, Brna",Apis mellifera,50.62 N 14.07 E
+SRR16972412,SAMN23258762,23258762,2018/8/8,,,,"Czech Republic: Usti Nad Labem, Brna",Apis mellifera,50.62 N 14.07 E
+SRR16972413,SAMN23258771,23258771,2018/8/20,,,,Czech Republic: Prasily na Sumave,Apis mellifera,49.11 N 13.38 E
+SRR16972414,SAMN23258770,23258770,2018/8/20,,,,Czech Republic: Prasily na Sumave,Apis mellifera,49.11 N 13.38 E
+SRR16972415,SAMN23258769,23258769,2018/8/20,,,,Czech Republic: Prasily na Sumave,Apis mellifera,49.11 N 13.38 E
+SRR16972416,SAMN23258768,23258768,2018/8/20,,,,Czech Republic: Prasily na Sumave,Apis mellifera,49.11 N 13.38 E
+SRR16972417,SAMN23258767,23258767,2018/8/20,,,,Czech Republic: Prasily na Sumave,Apis mellifera,49.11 N 13.38 E
+SRR16972418,SAMN23258766,23258766,2018/8/20,,,,Czech Republic: Prasily na Sumave,Apis mellifera,49.11 N 13.38 E
+SRR16972419,SAMN23258800,23258800,2018/9/29,,,,Czech Republic: Lhotka u Telce,Apis mellifera,49.21 N 15.39 E
+SRR16972420,SAMN23258799,23258799,2018/9/29,,,,Czech Republic: Lhotka u Telce,Apis mellifera,49.21 N 15.39 E
+SRR16972421,SAMN23258798,23258798,2018/9/29,,,,Czech Republic: Lhotka u Telce,Apis mellifera,49.21 N 15.39 E
+SRR16972422,SAMN23258797,23258797,2018/9/29,,,,Czech Republic: Ivancice,Apis mellifera,49.10 N 16.38 E
+SRR16972423,SAMN23258796,23258796,2018/9/29,,,,Czech Republic: Ivancice,Apis mellifera,49.10 N 16.38 E
+SRR16972424,SAMN23258795,23258795,2018/9/29,,,,Czech Republic: Ivancice,Apis mellifera,49.10 N 16.38 E
+SRR5237156,SAMN06311295,6311295,2010/10/4,,,,"USA: Tucson, Arizona",Apis mellifera,32.253460 N 110.911789 W
+SRR5990910,SAMN07573345,7573345,15-Aug,,,,Kenya: Southeast,Apis mellifera,0.7547 S 36.4384 E
+SRR5990911,SAMN07573345,7573345,15-Aug,,,,Kenya: Southeast,Apis mellifera,0.7547 S 36.4384 E
+SRR5990912,SAMN07573345,7573345,15-Aug,,,,Kenya: Southeast,Apis mellifera,0.7547 S 36.4384 E
+SRR5990913,SAMN07573345,7573345,15-Aug,,,,Kenya: Southeast,Apis mellifera,0.7547 S 36.4384 E
+SRR5990914,SAMN07573345,7573345,15-Aug,,,,Kenya: Southeast,Apis mellifera,0.7547 S 36.4384 E
+SRR5990915,SAMN07573345,7573345,15-Aug,,,,Kenya: Southeast,Apis mellifera,0.7547 S 36.4384 E
+SRR5990916,SAMN07573345,7573345,15-Aug,,,,Kenya: Southeast,Apis mellifera,0.7547 S 36.4384 E
+SRR5990917,SAMN07573345,7573345,15-Aug,,,,Kenya: Southeast,Apis mellifera,0.7547 S 36.4384 E
+SRR5990918,SAMN07573345,7573345,15-Aug,,,,Kenya: Southeast,Apis mellifera,0.7547 S 36.4384 E
+SRR5990919,SAMN07573345,7573345,15-Aug,,,,Kenya: Southeast,Apis mellifera,0.7547 S 36.4384 E
+SRR5990920,SAMN07573345,7573345,15-Aug,,,,Kenya: Southeast,Apis mellifera,0.7547 S 36.4384 E
+SRR5990921,SAMN07573345,7573345,15-Aug,,,,Kenya: Southeast,Apis mellifera,0.7547 S 36.4384 E
+SRR6033660,SAMN07634955,7634955,2015/8/1,,,,Kenya: Kisii,Apis mellifera,0.7399 S 34.8895 E
+SRR6033662,SAMN07634953,7634953,2015/8/1,,,,Kenya: Naivasha,Apis mellifera,0.6616 S 36.3835 E
+SRR6033691,SAMN07634949,7634949,2015/8/1,,,,"USA: State College, PA",Apis mellifera,40.7106 N 77.9645 W
+SRR6033693,SAMN07634956,7634956,2015/8/1,,,,Kenya: Kakamega,Apis mellifera,0.2277 N 34.8459 E
+SRR7287194,SAMN09288314,9288314,2016/11/1,,,,Switzerland:Lausanne,Apis mellifera carnica,46.52 N 6.63 E
+SRR7287195,SAMN09288313,9288313,2016/11/1,,,,Switzerland:Lausanne,Apis mellifera carnica,46.52 N 6.63 E
+SRR7287196,SAMN09288316,9288316,2016/10/7,,,,Switzerland:Lausanne,Apis mellifera carnica,46.52 N 6.63 E
+SRR7287197,SAMN09288315,9288315,2016/10/7,,,,Switzerland:Lausanne,Apis mellifera carnica,46.52 N 6.63 E
+SRR7287198,SAMN09288310,9288310,2016/11/1,,,,Switzerland:Lausanne,Apis mellifera carnica,46.52 N 6.63 E
+SRR7287199,SAMN09288309,9288309,2016/11/1,,,,Switzerland:Lausanne,Apis mellifera carnica,46.52 N 6.63 E
+SRR7287200,SAMN09288298,9288298,2016/10/7,,,,Switzerland:Lausanne,Apis mellifera carnica,46.52 N 6.63 E
+SRR7287201,SAMN09288297,9288297,2016/10/7,,,,Switzerland:Lausanne,Apis mellifera carnica,46.52 N 6.63 E
+SRR7287202,SAMN09288296,9288296,2016/2/22,,,,Switzerland:Lausanne,Apis mellifera carnica,46.52 N 6.63 E
+SRR7287203,SAMN09288295,9288295,2016/2/22,,,,Switzerland:Lausanne,Apis mellifera carnica,46.52 N 6.63 E
+SRR7287204,SAMN09288294,9288294,2016/2/22,,,,Switzerland:Lausanne,Apis mellifera carnica,46.52 N 6.63 E
+SRR7287205,SAMN09288293,9288293,2016/2/22,,,,Switzerland:Lausanne,Apis mellifera carnica,46.52 N 6.63 E
+SRR7287206,SAMN09288292,9288292,2016/2/22,,,,Switzerland:Lausanne,Apis mellifera carnica,46.52 N 6.63 E
+SRR7287207,SAMN09288291,9288291,2016/2/22,,,,Switzerland:Lausanne,Apis mellifera carnica,46.52 N 6.63 E
+SRR7287208,SAMN09288290,9288290,2015/9/29,,,,Switzerland:Lausanne,Apis mellifera carnica,46.52 N 6.63 E
+SRR7287209,SAMN09288289,9288289,2015/9/29,,,,Switzerland:Lausanne,Apis mellifera carnica,46.52 N 6.63 E
+SRR7287210,SAMN09288330,9288330,2016/11/2,,,,Switzerland:Lausanne,Apis mellifera carnica,46.52 N 6.63 E
+SRR7287211,SAMN09288329,9288329,2016/11/2,,,,Switzerland:Lausanne,Apis mellifera carnica,46.52 N 6.63 E
+SRR7287212,SAMN09288312,9288312,2016/11/1,,,,Switzerland:Lausanne,Apis mellifera carnica,46.52 N 6.63 E
+SRR7287213,SAMN09288311,9288311,2016/11/1,,,,Switzerland:Lausanne,Apis mellifera carnica,46.52 N 6.63 E
+SRR7287214,SAMN09288327,9288327,2016/11/2,,,,Switzerland:Lausanne,Apis mellifera carnica,46.52 N 6.63 E
+SRR7287215,SAMN09288328,9288328,2016/11/2,,,,Switzerland:Lausanne,Apis mellifera carnica,46.52 N 6.63 E
+SRR7287216,SAMN09288323,9288323,2016/9/25,,,,Switzerland:Lausanne,Apis mellifera carnica,46.52 N 6.63 E
+SRR7287217,SAMN09288324,9288324,2016/9/25,,,,Switzerland:Lausanne,Apis mellifera carnica,46.52 N 6.63 E
+SRR7287218,SAMN09288325,9288325,2016/9/25,,,,Switzerland:Lausanne,Apis mellifera carnica,46.52 N 6.63 E
+SRR7287219,SAMN09288326,9288326,2016/9/25,,,,Switzerland:Lausanne,Apis mellifera carnica,46.52 N 6.63 E
+SRR7287220,SAMN09288319,9288319,2016/10/7,,,,Switzerland:Lausanne,Apis mellifera carnica,46.52 N 6.63 E
+SRR7287221,SAMN09288320,9288320,2016/10/7,,,,Switzerland:Lausanne,Apis mellifera carnica,46.52 N 6.63 E
+SRR7287222,SAMN09288321,9288321,2016/9/25,,,,Switzerland:Lausanne,Apis mellifera carnica,46.52 N 6.63 E
+SRR7287223,SAMN09288322,9288322,2016/9/25,,,,Switzerland:Lausanne,Apis mellifera carnica,46.52 N 6.63 E
+SRR7287224,SAMN09288305,9288305,2016/9/25,,,,Switzerland:Lausanne,Apis mellifera carnica,46.52 N 6.63 E
+SRR7287225,SAMN09288306,9288306,2016/9/25,,,,Switzerland:Lausanne,Apis mellifera carnica,46.52 N 6.63 E
+SRR7287226,SAMN09288303,9288303,2016/9/25,,,,Switzerland:Lausanne,Apis mellifera carnica,46.52 N 6.63 E
+SRR7287227,SAMN09288304,9288304,2016/9/25,,,,Switzerland:Lausanne,Apis mellifera carnica,46.52 N 6.63 E
+SRR7287228,SAMN09288301,9288301,2016/10/7,,,,Switzerland:Lausanne,Apis mellifera carnica,46.52 N 6.63 E
+SRR7287229,SAMN09288302,9288302,2016/10/7,,,,Switzerland:Lausanne,Apis mellifera carnica,46.52 N 6.63 E
+SRR7287230,SAMN09288299,9288299,2016/10/7,,,,Switzerland:Lausanne,Apis mellifera carnica,46.52 N 6.63 E
+SRR7287231,SAMN09288300,9288300,2016/10/7,,,,Switzerland:Lausanne,Apis mellifera carnica,46.52 N 6.63 E
+SRR7287232,SAMN09288331,9288331,2016/11/2,,,,Switzerland:Lausanne,Apis mellifera carnica,46.52 N 6.63 E
+SRR7287233,SAMN09288318,9288318,2016/10/7,,,,Switzerland:Lausanne,Apis mellifera carnica,46.52 N 6.63 E
+SRR7287234,SAMN09288307,9288307,2016/9/25,,,,Switzerland:Lausanne,Apis mellifera carnica,46.52 N 6.63 E
+SRR7287235,SAMN09288308,9288308,2016/9/25,,,,Switzerland:Lausanne,Apis mellifera carnica,46.52 N 6.63 E
+SRR7287236,SAMN09288317,9288317,2016/10/7,,,,Switzerland:Lausanne,Apis mellifera carnica,46.52 N 6.63 E
+SRR7287237,SAMN09288288,9288288,2015/9/29,,,,Switzerland:Lausanne,Apis mellifera carnica,46.52 N 6.63 E
+SRR7287238,SAMN09288287,9288287,2015/9/29,,,,Switzerland:Lausanne,Apis mellifera carnica,46.52 N 6.63 E
+SRR7287239,SAMN09288284,9288284,2015/10/12,,,,Switzerland:Lausanne,Apis mellifera carnica,46.52 N 6.63 E
+SRR7287240,SAMN09288283,9288283,2015/10/12,,,,Switzerland:Lausanne,Apis mellifera carnica,46.52 N 6.63 E
+SRR7287241,SAMN09288286,9288286,2015/9/29,,,,Switzerland:Lausanne,Apis mellifera carnica,46.52 N 6.63 E
+SRR7287242,SAMN09288285,9288285,2015/9/29,,,,Switzerland:Lausanne,Apis mellifera carnica,46.52 N 6.63 E
+SRR7287243,SAMN09288280,9288280,2015/10/12,,,,Switzerland:Lausanne,Apis mellifera carnica,46.52 N 6.63 E
+SRR7287244,SAMN09288279,9288279,2015/10/12,,,,Switzerland:Lausanne,Apis mellifera carnica,46.52 N 6.63 E
+SRR7287245,SAMN09288282,9288282,2015/10/12,,,,Switzerland:Lausanne,Apis mellifera carnica,46.52 N 6.63 E
+SRR7287246,SAMN09288281,9288281,2015/10/12,,,,Switzerland:Lausanne,Apis mellifera carnica,46.52 N 6.63 E
+SRR7287247,SAMN09288332,9288332,2016/11/2,,,,Switzerland:Lausanne,Apis mellifera carnica,46.52 N 6.63 E
+SRR7986789,SAMN10185839,10185839,15-Jul,,,,United Kingdom,Western honey bee,55.50 N 3.07 W
+SRR7986790,SAMN10185838,10185838,15-Sep,,,,United Kingdom,Western honey bee,56.38 N 4.10 W
+SRR7986791,SAMN10185831,10185831,2014,,,,United Kingdom,Western honey bee,52 N 1 W
+SRR7986792,SAMN10185830,10185830,15-Aug,,,,United Kingdom,Western honey bee,57.55 N 3.6 W
+SRR7986793,SAMN10185833,10185833,2014,,,,United Kingdom,Western honey bee,52 N 1 E
+SRR7986794,SAMN10185832,10185832,2014,,,,United Kingdom,Western honey bee,52 N 0 E
+SRR7986795,SAMN10185835,10185835,15-Aug,,,,United Kingdom,Western honey bee,57.64 N 2.55 W
+SRR7986796,SAMN10185834,10185834,15-Jun,,,,United Kingdom,Western honey bee,54.88 N 5.02 W
+SRR7986797,SAMN10185837,10185837,15-Sep,,,,United Kingdom,Western honey bee,57.56 N 4.26 W
+SRR7986798,SAMN10185836,10185836,15-Sep,,,,United Kingdom,Western honey bee,56.61 N 5.23 W
+SRR7986799,SAMN10185829,10185829,15-Aug,,,,United Kingdom,Western honey bee,55.7 N 4.83 W
+SRR7986800,SAMN10185828,10185828,15-Jul,,,,United Kingdom,Western honey bee,56.3 N 3.46 W
+SRR7986801,SAMN10185823,10185823,15-Aug,,,,United Kingdom,Western honey bee,57.55 N 3.56 W
+SRR7986802,SAMN10185822,10185822,15-Aug,,,,United Kingdom,Western honey bee,55.69 N 4.83 W
+SRR7986803,SAMN10185821,10185821,15-Jul,,,,United Kingdom,Western honey bee,56.27 N 3.46 W
+SRR7986804,SAMN10185820,10185820,15-Jul,,,,United Kingdom,Western honey bee,52.35 N 2.71 W
+SRR7986805,SAMN10185827,10185827,15-Jul,,,,United Kingdom,Western honey bee,52.4 N 2.71 W
+SRR7986806,SAMN10185826,10185826,15-Sep,,,,United Kingdom,Western honey bee,55.86 N 3.17 W
+SRR7986807,SAMN10185825,10185825,13-Oct,,,,United Kingdom,Western honey bee,55.90 N 3.67 W
+SRR7986808,SAMN10185824,10185824,13-Oct,,,,United Kingdom,Western honey bee,56.51 N 3.02 W
+SRR7986809,SAMN10185840,10185840,15-Jul,,,,United Kingdom,Western honey bee,56.47 N 3.54 W
+SRR7986810,SAMN10185841,10185841,15-Jul,,,,United Kingdom,Western honey bee,55.77 N 4.19 W
+SRR7986811,SAMN10185842,10185842,15-Sep,,,,United Kingdom,Western honey bee,57.03 N 5.65 W

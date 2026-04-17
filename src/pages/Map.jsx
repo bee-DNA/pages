@@ -1,0 +1,2160 @@
+import { useEffect, useRef, useState } from "react";
+import { Container, Box, Typography } from "@mui/material";
+import LayersIcon from "@mui/icons-material/Layers";
+import MapIcon from "@mui/icons-material/Map";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import mapboxgl from "mapbox-gl";
+import "mapbox-gl/dist/mapbox-gl.css";
+import { useTranslation } from "react-i18next";
+import TimeController from "../components/TimeController";
+import LayerControl from "../components/LayerControl";
+import DataModeSelector from "../components/DataModeSelector";
+import SampleSearchDialog from "../components/SampleSearchDialog";
+import DatePickerDialog from "../components/DatePickerDialog";
+import TimelineControls from "../components/TimelineControls";
+import useTimelineAnimation from "../hooks/useTimelineAnimation";
+import { api } from "../services/api";
+
+// Mapbox Access Token
+mapboxgl.accessToken =
+  "pk.eyJ1IjoiYmVlLWRuYSIsImEiOiJjbWZ5MTlhOTkwZnF3MmxvbjkwN2RtM2Z4In0.yFiY2MNpWqaDINuLaz1e0w";
+
+const Map = () => {
+  const { t, i18n } = useTranslation();
+  const mapContainer = useRef(null);
+  const map = useRef(null);
+  const [lng] = useState(120.5377);
+  const [lat] = useState(24.0513);
+  const [zoom] = useState(2);
+  const [mapStyle, setMapStyle] = useState("streets");
+  const [dataMode, setDataMode] = useState("live"); // 資料模式：live, search, date
+  const [selectedDate, setSelectedDate] = useState(null); // 選中的日期
+  const [searchDialogOpen, setSearchDialogOpen] = useState(false);
+  const [datePickerOpen, setDatePickerOpen] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [expanded, setExpanded] = useState(false); // For layer control
+  const layersRef = useRef(null);
+  const addWeatherLayersRef = useRef(null);
+  const layerPanelRef = useRef(null); // For click outside detection
+  const biosampleMarkersRef = useRef([]); // 儲存 biosample markers
+
+  // 後端配置
+  const [backendConfig, setBackendConfig] = useState(null);
+  const [availableDates, setAvailableDates] = useState([]);
+  const [timestampCount, setTimestampCount] = useState(48); // 預設值
+
+  // BioSample 資料
+  const [biosampleData, setBiosampleData] = useState([]);
+  const [countryStats, setCountryStats] = useState([]); // 國家統計資料
+
+  // 解析經緯度字串 (例如: "24.34 N 123.91 E")
+  const parseLatLon = (latLonStr) => {
+    if (!latLonStr) return null;
+
+    try {
+      const parts = latLonStr.trim().split(/\s+/);
+      if (parts.length < 4) return null;
+
+      let lat = parseFloat(parts[0]);
+      let lng = parseFloat(parts[2]);
+
+      // 處理南緯和西經
+      if (parts[1].toUpperCase() === "S") lat = -lat;
+      if (parts[3].toUpperCase() === "W") lng = -lng;
+
+      return { lat, lng };
+    } catch (error) {
+      return null;
+    }
+  };
+
+  // 處理國家統計資料
+  const processCountryStats = (data) => {
+    console.log("開始處理國家統計資料...", `總共 ${data.length} 筆資料`);
+    const countryMap = new Map();
+    let validCount = 0;
+    let invalidCount = 0;
+
+    data.forEach((item, index) => {
+      // 提取國家資訊
+      let country = null;
+      let coords = null;
+
+      // 從 geo_loc_name 提取國家
+      if (item.geo_loc_name) {
+        country = item.geo_loc_name.split(":")[0].trim();
+      } else if (item["geographic location (country and/or sea)"]) {
+        country = item["geographic location (country and/or sea)"].trim();
+      }
+
+      // 解析座標
+      if (item.lat_lon) {
+        coords = parseLatLon(item.lat_lon);
+      } else if (
+        item["geographic location (latitude)"] &&
+        item["geographic location (longitude)"]
+      ) {
+        coords = {
+          lat: parseFloat(item["geographic location (latitude)"]),
+          lng: parseFloat(item["geographic location (longitude)"]),
+        };
+      }
+
+      // Debug: 記錄前幾筆資料的處理情況
+      if (index < 5) {
+        console.log(`資料 ${index}:`, {
+          country,
+          coords,
+          hasGeoLocName: !!item.geo_loc_name,
+          hasLatLon: !!item.lat_lon,
+          hasLatitude: !!item["geographic location (latitude)"],
+          hasLongitude: !!item["geographic location (longitude)"],
+        });
+      }
+
+      // 只處理有國家和座標的資料
+      if (country && coords && !isNaN(coords.lat) && !isNaN(coords.lng)) {
+        validCount++;
+        if (!countryMap.has(country)) {
+          countryMap.set(country, {
+            country,
+            count: 0,
+            coords: coords,
+            samples: [],
+          });
+        }
+
+        const countryData = countryMap.get(country);
+        countryData.count += 1;
+        countryData.samples.push(item);
+      } else {
+        invalidCount++;
+        if (invalidCount <= 3) {
+          console.warn(`無效資料 ${index}:`, { country, coords, item: item });
+        }
+      }
+    });
+
+    const stats = Array.from(countryMap.values()).sort(
+      (a, b) => b.count - a.count
+    );
+    console.log(`處理完成: 找到 ${stats.length} 個國家的資料`);
+    console.log(`有效資料: ${validCount} 筆, 無效資料: ${invalidCount} 筆`);
+    console.log(
+      "前5個國家:",
+      stats.slice(0, 5).map((s) => `${s.country}: ${s.count}`)
+    );
+    setCountryStats(stats);
+  };
+
+  // 圖層狀態管理
+  const [layerStates, setLayerStates] = useState({
+    sst: {
+      enabled: false,
+      opacity: 70,
+      name: "全球溫度",
+      nameEn: "Temperature",
+    },
+    lst: {
+      enabled: false,
+      opacity: 60,
+      name: "降水分布",
+      nameEn: "Precipitation",
+    },
+    wind: {
+      enabled: false,
+      opacity: 70,
+      name: "風速風向",
+      nameEn: "Wind Speed",
+    },
+    waves: { enabled: false, opacity: 60, name: "雲層", nameEn: "Clouds" },
+    chlorophyll: {
+      enabled: false,
+      opacity: 70,
+      name: "氣壓",
+      nameEn: "Pressure",
+    },
+  });
+
+  // 載入後端配置
+  useEffect(() => {
+    const fetchConfig = async () => {
+      try {
+        const config = await api.getConfig();
+        setBackendConfig(config);
+
+        // 提取可用日期
+        const dates = config.features?.date_ranges || [];
+        setAvailableDates(dates);
+
+        // 提取時間戳數量
+        const count = config.features?.timestamp_count || 48;
+        setTimestampCount(count);
+
+        console.log("Backend config loaded:", {
+          dates,
+          timestampCount: count,
+          layers: config.layers,
+        });
+      } catch (error) {
+        console.error("Failed to fetch backend config:", error);
+        // 使用預設值
+        setAvailableDates(["2023-01-01", "2024-05-05"]);
+        setTimestampCount(48);
+      }
+    };
+
+    fetchConfig();
+  }, []);
+
+  // 載入 BioSample 資料
+  useEffect(() => {
+    const loadBiosampleData = async () => {
+      try {
+        console.log("開始載入 BioSample 資料...");
+        console.log(
+          "請求路徑:",
+          window.location.origin + "/biosample_enhanced.json"
+        );
+
+        const response = await fetch("/biosample_enhanced.json");
+        console.log("Response status:", response.status, response.statusText);
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log(`✅ 成功載入 ${data.length} 筆 BioSample 資料`);
+        console.log("前3筆資料樣本:", data.slice(0, 3));
+        setBiosampleData(data);
+
+        // 處理資料並按國家統計
+        processCountryStats(data);
+      } catch (error) {
+        console.error("❌ Error loading biosample data:", error);
+        console.error("Error details:", {
+          message: error.message,
+          stack: error.stack,
+        });
+      }
+    };
+
+    loadBiosampleData();
+  }, []);
+
+  // 根據樣本數量獲取顏色
+  const getColorByCount = (count, maxCount) => {
+    const percentage = (count / maxCount) * 100;
+
+    if (percentage >= 76) {
+      return { color: "#9c27b0", label: "Very High" }; // 紫色
+    } else if (percentage >= 51) {
+      return { color: "#f44336", label: "High" }; // 紅色
+    } else if (percentage >= 26) {
+      return { color: "#ff9800", label: "Medium" }; // 橙色
+    } else {
+      return { color: "#4caf50", label: "Low" }; // 綠色
+    }
+  };
+
+  // 顯示 BioSample 標記
+  const displayBiosampleMarkers = () => {
+    if (!map.current || countryStats.length === 0) {
+      console.log("Map or country stats not ready");
+      return;
+    }
+
+    // 清除舊的標記
+    biosampleMarkersRef.current.forEach((marker) => marker.remove());
+    biosampleMarkersRef.current = [];
+
+    console.log(`Displaying ${countryStats.length} country markers`);
+
+    // 找出最大樣本數
+    const maxCount = Math.max(...countryStats.map((c) => c.count));
+    console.log(`Max sample count: ${maxCount}`);
+
+    countryStats.forEach((countryData) => {
+      const { country, count, coords, samples } = countryData;
+
+      // 根據數量獲取顏色
+      const { color, label } = getColorByCount(count, maxCount);
+
+      // 根據數量調整大小
+      const percentage = (count / maxCount) * 100;
+      let size = 30;
+      if (percentage >= 76) size = 50;
+      else if (percentage >= 51) size = 45;
+      else if (percentage >= 26) size = 40;
+      else size = 35;
+
+      // 建立自訂標記
+      const el = document.createElement("div");
+      el.className = "biosample-marker";
+      el.style.cssText = `
+        width: ${size}px;
+        height: ${size}px;
+        background-color: ${color};
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 700;
+        font-size: ${size > 40 ? "16px" : "14px"};
+        border: 3px solid white;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        cursor: pointer;
+        transition: all 0.2s ease;
+      `;
+      el.textContent = count;
+
+      // 懸停效果
+      el.addEventListener("mouseenter", () => {
+        el.style.transform = "scale(1.15)";
+        el.style.boxShadow = "0 4px 16px rgba(0,0,0,0.4)";
+        el.style.zIndex = "1000";
+      });
+      el.addEventListener("mouseleave", () => {
+        el.style.transform = "scale(1)";
+        el.style.boxShadow = "0 2px 8px rgba(0,0,0,0.3)";
+        el.style.zIndex = "auto";
+      });
+
+      // 建立 Popup 內容
+      const popupContent = `
+        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 16px; min-width: 220px;">
+          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+            <div style="width: 48px; height: 48px; background: ${color}; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px; font-weight: 700;">
+              ${count}
+            </div>
+            <div>
+              <h3 style="margin: 0; font-size: 18px; font-weight: 700; color: #1a1a1a;">${country}</h3>
+              <p style="margin: 4px 0 0 0; font-size: 13px; color: #666;">BioSample Count</p>
+            </div>
+          </div>
+          <div style="background: #f5f5f5; padding: 8px 12px; border-radius: 6px; display: flex; align-items: center; justify-content: space-between;">
+            <span style="font-size: 12px; color: #666;">Level:</span>
+            <span style="font-size: 12px; font-weight: 600; color: ${color};">${label}</span>
+          </div>
+        </div>
+      `;
+
+      // 建立並加入標記
+      const marker = new mapboxgl.Marker({
+        element: el,
+        anchor: "center",
+      })
+        .setLngLat([coords.lng, coords.lat])
+        .setPopup(
+          new mapboxgl.Popup({
+            offset: 25,
+            closeButton: true,
+            closeOnClick: false,
+            maxWidth: "280px",
+          }).setHTML(popupContent)
+        )
+        .addTo(map.current);
+
+      biosampleMarkersRef.current.push(marker);
+    });
+
+    console.log(
+      `Added ${biosampleMarkersRef.current.length} biosample markers with dynamic colors`
+    );
+  };
+
+  // 當 countryStats 更新時顯示標記
+  useEffect(() => {
+    console.log(
+      `useEffect 觸發: isInitialized=${isInitialized}, countryStats.length=${countryStats.length}`
+    );
+    if (isInitialized && countryStats.length > 0) {
+      console.log("條件符合，開始顯示標記...");
+      displayBiosampleMarkers();
+    } else {
+      console.log("條件不符合，等待地圖初始化或資料載入");
+    }
+  }, [countryStats, isInitialized]);
+
+  // 時間軸動畫控制（僅在歷史資料模式使用）
+  const {
+    currentFrame,
+    totalFrames,
+    isPlaying,
+    timestamp,
+    play,
+    pause,
+    stop,
+    nextFrame,
+    previousFrame,
+    goToFrame,
+  } = useTimelineAnimation({
+    totalFrames: timestampCount, // 動態從後端配置獲取
+    duration: 5000, // 5秒完整循環
+    autoPlay: false,
+    loop: true,
+  });
+
+  // 處理模式切換
+  const handleModeChange = (mode) => {
+    if (mode === "search") {
+      setSearchDialogOpen(true);
+      // 不立即切換 dataMode,等用戶選擇後再切換
+    } else if (mode === "date") {
+      setDatePickerOpen(true);
+      // 不立即切換 dataMode,等用戶選擇後再切換
+    } else if (mode === "historical") {
+      // 直接切換到歷史模式,使用預設資料
+      setDataMode("historical");
+      setSelectedDate(null);
+      goToFrame(0); // 從第一幀開始
+      play(); // 自動播放動畫
+      // 載入歷史資料圖層
+      if (addWeatherLayersRef.current) {
+        addWeatherLayersRef.current();
+      }
+    } else if (mode === "live") {
+      setDataMode("live");
+      setSelectedDate(null);
+      stop(); // 停止動畫
+      // 切換回即時資料
+      if (addWeatherLayersRef.current) {
+        addWeatherLayersRef.current();
+      }
+    }
+  };
+
+  // 處理樣本搜尋
+  const handleSampleSearch = (date) => {
+    setSelectedDate(date);
+    setDataMode("historical");
+    setSearchDialogOpen(false);
+    // 載入該日期的歷史資料
+    loadHistoricalData(date);
+    // 自動播放
+    goToFrame(0);
+    play();
+  };
+
+  // 處理日期選擇
+  const handleDateSelect = (date) => {
+    setSelectedDate(date);
+    setDataMode("historical");
+    setDatePickerOpen(false);
+    // 載入該日期的歷史資料
+    loadHistoricalData(date);
+    // 自動播放
+    goToFrame(0);
+    play();
+  };
+
+  // 載入歷史資料
+  const loadHistoricalData = (date) => {
+    console.log("Loading historical data for:", date);
+
+    // 動態計算日期對應的起始幀
+    const dateIndex = availableDates.indexOf(date);
+
+    if (dateIndex === -1) {
+      console.warn("Selected date not found in available dates:", date);
+      goToFrame(0);
+      return;
+    }
+
+    // 假設每天 24 小時
+    const hoursPerDay = 24;
+    const startFrame = dateIndex * hoursPerDay;
+
+    console.log(
+      `Date ${date} -> Index ${dateIndex} -> Start frame ${startFrame}`
+    );
+    goToFrame(startFrame);
+
+    // 更新地圖圖層為 MBTiles
+    if (addWeatherLayersRef.current) {
+      addWeatherLayersRef.current();
+    }
+  };
+
+  // Auto-close layer panel when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        expanded &&
+        layerPanelRef.current &&
+        !layerPanelRef.current.contains(event.target) &&
+        !event.target.closest("[data-layer-toggle]")
+      ) {
+        setExpanded(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [expanded]);
+
+  // Add all weather layers
+  const addWeatherLayers = () => {
+    if (!map.current) {
+      console.log("map.current does not exist");
+      return;
+    }
+
+    // Wait for map style to fully load
+    if (!map.current.isStyleLoaded()) {
+      console.log("Waiting for map style to load...");
+      map.current.once("styledata", () => {
+        if (addWeatherLayersRef.current) {
+          addWeatherLayersRef.current();
+        }
+      });
+      return;
+    }
+
+    console.log("Starting to add weather layers...", "Mode:", dataMode);
+
+    // Remove old layers
+    const layerIds = [
+      "sst-layer",
+      "lst-layer",
+      "wind-layer",
+      "waves-layer",
+      "chlorophyll-layer",
+    ];
+    layerIds.forEach((id) => {
+      if (map.current.getLayer(id)) {
+        map.current.removeLayer(id);
+      }
+    });
+
+    // Remove old sources
+    const sourceIds = [
+      "openweather-temp",
+      "openweather-precipitation",
+      "openweather-wind",
+      "openweather-clouds",
+      "openweather-pressure",
+      "mbtiles-temp",
+      "mbtiles-precipitation",
+      "mbtiles-wind",
+      "mbtiles-clouds",
+      "mbtiles-pressure",
+    ];
+    sourceIds.forEach((id) => {
+      if (map.current.getSource(id)) {
+        map.current.removeSource(id);
+      }
+    });
+
+    // 根據模式選擇資料源
+    const isHistorical = dataMode === "historical";
+
+    if (isHistorical) {
+      // 使用 MBTiles 歷史資料
+      console.log("Loading historical MBTiles data...");
+      addHistoricalLayers();
+    } else {
+      // 使用即時 OpenWeather 資料
+      console.log("Loading live OpenWeather data...");
+      addLiveLayers();
+    }
+  };
+
+  // 添加即時圖層（OpenWeather）
+  const addLiveLayers = () => {
+    // Temperature layer - high saturation
+    try {
+      map.current.addSource("openweather-temp", {
+        type: "raster",
+        tiles: [
+          `https://tile.openweathermap.org/map/temp_new/{z}/{x}/{y}.png?appid=c3021b469b0ad866b2e96b3e5676347f`,
+        ],
+        tileSize: 256,
+      });
+
+      map.current.addLayer({
+        id: "sst-layer",
+        type: "raster",
+        source: "openweather-temp",
+        paint: {
+          "raster-opacity": 0.8,
+          "raster-brightness-min": 0.15,
+          "raster-brightness-max": 1.0, // 最大值為1
+          "raster-contrast": 1.0, // 最大對比度
+          "raster-saturation": 1.0, // 最大飽和度 (最大值為1)
+        },
+        layout: {
+          visibility: "none",
+        },
+      });
+      console.log("Temperature layer added (disabled by default)");
+    } catch (error) {
+      console.error("Failed to add temperature layer:", error);
+    }
+
+    // Precipitation layer - high saturation blue
+    try {
+      map.current.addSource("openweather-precipitation", {
+        type: "raster",
+        tiles: [
+          `https://tile.openweathermap.org/map/precipitation_new/{z}/{x}/{y}.png?appid=c3021b469b0ad866b2e96b3e5676347f`,
+        ],
+        tileSize: 256,
+      });
+
+      map.current.addLayer({
+        id: "lst-layer",
+        type: "raster",
+        source: "openweather-precipitation",
+        paint: {
+          "raster-opacity": 0.75,
+          "raster-brightness-min": 0.2,
+          "raster-brightness-max": 1.0, // 最大值為1
+          "raster-contrast": 1.0, // 最大對比度
+          "raster-saturation": 1.0, // 最大飽和度 (最大值為1)
+        },
+        layout: {
+          visibility: "none",
+        },
+      });
+      console.log("Precipitation layer added (disabled by default)");
+    } catch (error) {
+      console.error("Failed to add precipitation layer:", error);
+    }
+
+    // Wind layer (raster only, no arrows for now)
+    try {
+      map.current.addSource("openweather-wind", {
+        type: "raster",
+        tiles: [
+          `https://tile.openweathermap.org/map/wind_new/{z}/{x}/{y}.png?appid=c3021b469b0ad866b2e96b3e5676347f`,
+        ],
+        tileSize: 256,
+      });
+
+      map.current.addLayer({
+        id: "wind-layer",
+        type: "raster",
+        source: "openweather-wind",
+        paint: {
+          "raster-opacity": 0.85,
+          "raster-brightness-min": 0.1,
+          "raster-brightness-max": 1.0,
+          "raster-contrast": 0.8,
+          "raster-saturation": 1.0,
+        },
+        layout: {
+          visibility: layersRef.current?.wind?.enabled ? "visible" : "none",
+        },
+      });
+      console.log("Wind layer added (raster only)");
+    } catch (error) {
+      console.error("Failed to add wind layer:", error);
+    }
+
+    // Cloud layer
+    try {
+      map.current.addSource("openweather-clouds", {
+        type: "raster",
+        tiles: [
+          `https://tile.openweathermap.org/map/clouds_new/{z}/{x}/{y}.png?appid=c3021b469b0ad866b2e96b3e5676347f`,
+        ],
+        tileSize: 256,
+      });
+
+      map.current.addLayer({
+        id: "waves-layer",
+        type: "raster",
+        source: "openweather-clouds",
+        paint: {
+          "raster-opacity": 0.7,
+          "raster-brightness-min": 0.3,
+          "raster-brightness-max": 1.0,
+          "raster-contrast": 0.4,
+        },
+        layout: {
+          visibility: layersRef.current?.waves?.enabled ? "visible" : "none",
+        },
+      });
+      console.log("Cloud layer added");
+    } catch (error) {
+      console.error("Failed to add cloud layer:", error);
+    }
+
+    // Pressure layer
+    try {
+      map.current.addSource("openweather-pressure", {
+        type: "raster",
+        tiles: [
+          `https://tile.openweathermap.org/map/pressure_new/{z}/{x}/{y}.png?appid=c3021b469b0ad866b2e96b3e5676347f`,
+        ],
+        tileSize: 256,
+      });
+
+      map.current.addLayer({
+        id: "chlorophyll-layer",
+        type: "raster",
+        source: "openweather-pressure",
+        paint: {
+          "raster-opacity": 0.7,
+          "raster-contrast": 0.8,
+          "raster-saturation": 1.0,
+        },
+        layout: {
+          visibility: layersRef.current?.chlorophyll?.enabled
+            ? "visible"
+            : "none",
+        },
+      });
+      console.log("Pressure layer added");
+    } catch (error) {
+      console.error("Failed to add pressure layer:", error);
+    }
+
+    console.log("All weather layers loaded!");
+
+    // 同步圖層狀態到 UI
+    setTimeout(() => {
+      syncLayerStates();
+    }, 500);
+
+    // 初始化 layersRef（如果還沒設置）
+    if (!layersRef.current) {
+      layersRef.current = layerStates;
+      console.log("Initialized layersRef with current layerStates");
+    }
+
+    // Apply pending layer changes if any
+    if (layersRef.current) {
+      console.log(
+        "Applying layer state after layers loaded:",
+        layersRef.current
+      );
+      // Use multiple checks with increasing delays to ensure layers are ready
+      const applyLayerState = (attempt = 1) => {
+        const maxAttempts = 5;
+
+        setTimeout(() => {
+          const layerMapping = {
+            sst: "sst-layer",
+            lst: "lst-layer",
+            wind: "wind-layer",
+            waves: "waves-layer",
+            chlorophyll: "chlorophyll-layer",
+          };
+
+          let allLayersReady = true;
+
+          Object.keys(layerMapping).forEach((key) => {
+            const layerIds = Array.isArray(layerMapping[key])
+              ? layerMapping[key]
+              : [layerMapping[key]];
+
+            layerIds.forEach((layerId) => {
+              if (!map.current.getLayer(layerId)) {
+                allLayersReady = false;
+                console.log(
+                  `Layer ${layerId} not ready yet (attempt ${attempt})`
+                );
+              } else if (layersRef.current[key]) {
+                const visibility = layersRef.current[key].enabled
+                  ? "visible"
+                  : "none";
+                const opacity = layersRef.current[key].opacity / 100;
+
+                try {
+                  map.current.setLayoutProperty(
+                    layerId,
+                    "visibility",
+                    visibility
+                  );
+
+                  // Set opacity based on layer type
+                  const layerType = map.current.getLayer(layerId).type;
+                  if (layerType === "raster") {
+                    map.current.setPaintProperty(
+                      layerId,
+                      "raster-opacity",
+                      opacity
+                    );
+                  } else if (layerType === "symbol") {
+                    map.current.setPaintProperty(
+                      layerId,
+                      "icon-opacity",
+                      opacity
+                    );
+                  }
+
+                  console.log(
+                    `Applied ${layerId}: visibility=${visibility}, opacity=${opacity}`
+                  );
+                } catch (error) {
+                  console.error(`Error applying state to ${layerId}:`, error);
+                  allLayersReady = false;
+                }
+              }
+            });
+          });
+
+          // If not all layers ready and we haven't exceeded max attempts, try again
+          if (!allLayersReady && attempt < maxAttempts) {
+            console.log(
+              `Retrying layer state application (attempt ${
+                attempt + 1
+              }/${maxAttempts})`
+            );
+            applyLayerState(attempt + 1);
+          } else if (allLayersReady) {
+            console.log("All layer states applied successfully");
+          } else {
+            console.warn(
+              "Max attempts reached, some layers may not be configured"
+            );
+          }
+        }, attempt * 100); // Increase delay with each attempt
+      };
+
+      applyLayerState();
+    }
+  };
+
+  // 添加歷史圖層（MBTiles）
+  const addHistoricalLayers = () => {
+    console.log("Adding historical MBTiles layers with frame:", currentFrame);
+
+    try {
+      // Temperature (MBTiles)
+      map.current.addSource("mbtiles-temp", {
+        type: "raster",
+        tiles: [api.getTileUrl("temperature", currentFrame)],
+        tileSize: 256,
+      });
+
+      map.current.addLayer({
+        id: "sst-layer",
+        type: "raster",
+        source: "mbtiles-temp",
+        paint: {
+          "raster-opacity": (layerStates.sst?.opacity || 70) / 100,
+        },
+        layout: {
+          visibility: layerStates.sst?.enabled ? "visible" : "none",
+        },
+      });
+      console.log("MBTiles temperature layer added");
+    } catch (error) {
+      console.error("Failed to add MBTiles temperature layer:", error);
+    }
+
+    try {
+      // Precipitation (MBTiles)
+      map.current.addSource("mbtiles-precipitation", {
+        type: "raster",
+        tiles: [api.getTileUrl("precipitation", currentFrame)],
+        tileSize: 256,
+      });
+
+      map.current.addLayer({
+        id: "lst-layer",
+        type: "raster",
+        source: "mbtiles-precipitation",
+        paint: {
+          "raster-opacity": (layerStates.lst?.opacity || 60) / 100,
+        },
+        layout: {
+          visibility: layerStates.lst?.enabled ? "visible" : "none",
+        },
+      });
+      console.log("MBTiles precipitation layer added");
+    } catch (error) {
+      console.error("Failed to add MBTiles precipitation layer:", error);
+    }
+
+    try {
+      // Wind (MBTiles)
+      map.current.addSource("mbtiles-wind", {
+        type: "raster",
+        tiles: [api.getTileUrl("wind", currentFrame)],
+        tileSize: 256,
+      });
+
+      map.current.addLayer({
+        id: "wind-layer",
+        type: "raster",
+        source: "mbtiles-wind",
+        paint: {
+          "raster-opacity": (layerStates.wind?.opacity || 70) / 100,
+        },
+        layout: {
+          visibility: layerStates.wind?.enabled ? "visible" : "none",
+        },
+      });
+      console.log("MBTiles wind layer added");
+    } catch (error) {
+      console.error("Failed to add MBTiles wind layer:", error);
+    }
+
+    try {
+      // Clouds (MBTiles)
+      map.current.addSource("mbtiles-clouds", {
+        type: "raster",
+        tiles: [api.getTileUrl("clouds", currentFrame)],
+        tileSize: 256,
+      });
+
+      map.current.addLayer({
+        id: "waves-layer",
+        type: "raster",
+        source: "mbtiles-clouds",
+        paint: {
+          "raster-opacity": (layerStates.waves?.opacity || 60) / 100,
+        },
+        layout: {
+          visibility: layerStates.waves?.enabled ? "visible" : "none",
+        },
+      });
+      console.log("MBTiles clouds layer added");
+    } catch (error) {
+      console.error("Failed to add MBTiles clouds layer:", error);
+    }
+
+    try {
+      // Pressure (MBTiles)
+      map.current.addSource("mbtiles-pressure", {
+        type: "raster",
+        tiles: [api.getTileUrl("pressure", currentFrame)],
+        tileSize: 256,
+      });
+
+      map.current.addLayer({
+        id: "chlorophyll-layer",
+        type: "raster",
+        source: "mbtiles-pressure",
+        paint: {
+          "raster-opacity": (layerStates.chlorophyll?.opacity || 70) / 100,
+        },
+        layout: {
+          visibility: layerStates.chlorophyll?.enabled ? "visible" : "none",
+        },
+      });
+      console.log("MBTiles pressure layer added");
+    } catch (error) {
+      console.error("Failed to add MBTiles pressure layer:", error);
+    }
+
+    console.log("All MBTiles layers loaded!");
+
+    // 同步圖層狀態到 UI
+    setTimeout(() => {
+      syncLayerStates();
+    }, 500);
+
+    // 初始化 layersRef（如果還沒設置）
+    if (!layersRef.current) {
+      layersRef.current = layerStates;
+      console.log(
+        "Initialized layersRef with current layerStates (historical mode)"
+      );
+    }
+  };
+
+  // Save function reference
+  addWeatherLayersRef.current = addWeatherLayers;
+
+  // 監聽 currentFrame 變化，在歷史模式下更新圖層
+  useEffect(() => {
+    if (
+      !map.current ||
+      !map.current.isStyleLoaded() ||
+      dataMode !== "historical"
+    ) {
+      return;
+    }
+
+    console.log(
+      "CurrentFrame changed to:",
+      currentFrame,
+      "Updating tile sources..."
+    );
+
+    // 更新所有 MBTiles 圖層的 tiles URL
+    const layers = [
+      { source: "mbtiles-temp", layer: "temperature" },
+      { source: "mbtiles-precipitation", layer: "precipitation" },
+      { source: "mbtiles-wind", layer: "wind" },
+      { source: "mbtiles-clouds", layer: "clouds" },
+      { source: "mbtiles-pressure", layer: "pressure" },
+    ];
+
+    layers.forEach(({ source, layer }) => {
+      const sourceObj = map.current.getSource(source);
+      if (sourceObj) {
+        // 更新 source 的 tiles URL
+        sourceObj.setTiles([api.getTileUrl(layer, currentFrame)]);
+        console.log(`Updated ${source} to frame ${currentFrame}`);
+      }
+    });
+  }, [currentFrame, dataMode]);
+
+  // 監聽 dataMode 變化,自動切換圖層
+  useEffect(() => {
+    if (!map.current || !map.current.isStyleLoaded() || !isInitialized) {
+      return;
+    }
+
+    console.log("DataMode changed to:", dataMode);
+
+    // 切換圖層
+    if (addWeatherLayersRef.current) {
+      addWeatherLayersRef.current();
+    }
+  }, [dataMode, isInitialized]);
+
+  // 監聽地圖樣式切換 (只在初始化後才執行)
+  useEffect(() => {
+    if (!map.current || !isInitialized) return;
+
+    const currentStyle =
+      mapStyle === "satellite"
+        ? "mapbox://styles/mapbox/satellite-streets-v12"
+        : "mapbox://styles/mapbox/streets-v12";
+
+    console.log(`Switching to ${mapStyle} style...`);
+
+    // Remove existing event listeners to prevent duplicates
+    map.current.off("style.load");
+
+    map.current.setStyle(currentStyle);
+
+    // Wait for style to fully load - using idle event for better reliability
+    const onStyleLoad = () => {
+      console.log(`${mapStyle} style loaded, waiting for idle state...`);
+
+      map.current.once("idle", () => {
+        console.log("Map is idle, re-adding layers...");
+
+        // Re-add weather layers
+        if (addWeatherLayersRef.current) {
+          addWeatherLayersRef.current();
+        }
+
+        // Re-add custom marker
+        const createCustomMarker = (number, color) => {
+          const el = document.createElement("div");
+          el.className = "custom-marker";
+          el.style.cssText = `
+            width: 36px;
+            height: 36px;
+            background-color: ${color};
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 16px;
+            border: 3px solid white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            cursor: pointer;
+            transition: box-shadow 0.2s ease, border-width 0.2s ease;
+          `;
+          el.textContent = number;
+
+          // Hover effect
+          el.addEventListener("mouseenter", () => {
+            el.style.boxShadow = "0 4px 12px rgba(0,0,0,0.4)";
+            el.style.borderWidth = "4px";
+          });
+          el.addEventListener("mouseleave", () => {
+            el.style.boxShadow = "0 2px 8px rgba(0,0,0,0.3)";
+            el.style.borderWidth = "3px";
+          });
+
+          return el;
+        };
+
+        const markerElement = createCustomMarker("1", "#1976d2");
+        const marker = new mapboxgl.Marker({
+          element: markerElement,
+          anchor: "center",
+        })
+          .setLngLat([120.5377, 24.0513])
+          .setPopup(
+            new mapboxgl.Popup({
+              offset: 25,
+              closeButton: true,
+              closeOnClick: false,
+              maxWidth: "320px",
+            }).setHTML(
+              `<style>
+                .modern-popup {
+                  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+                  padding: 16px;
+                }
+                
+                .popup-header {
+                  display: flex;
+                  align-items: center;
+                  gap: 10px;
+                  margin-bottom: 14px;
+                  padding-bottom: 12px;
+                  border-bottom: 1px solid #eee;
+                }
+                
+                .popup-icon {
+                  width: 36px;
+                  height: 36px;
+                  background: #1976d2;
+                  border-radius: 8px;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  color: white;
+                  font-size: 16px;
+                  font-weight: 700;
+                }
+                
+                .popup-title {
+                  flex: 1;
+                }
+                
+                .popup-title h3 {
+                  margin: 0;
+                  font-size: 15px;
+                  font-weight: 600;
+                  color: #1a1a1a;
+                  line-height: 1.2;
+                }
+                
+                .popup-title p {
+                  margin: 2px 0 0 0;
+                  font-size: 11px;
+                  color: #999;
+                  font-weight: 400;
+                }
+                
+                .chart-section {
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                }
+                
+                .chart-title {
+                  display: none;
+                }
+                
+                .pie-chart-container {
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  gap: 14px;
+                  width: 100%;
+                }
+                
+                .pie-chart {
+                  position: relative;
+                  width: 140px;
+                  height: 140px;
+                  flex-shrink: 0;
+                }
+                
+                .pie-chart svg {
+                  transform: rotate(-90deg);
+                }
+                
+                .pie-chart circle {
+                  fill: none;
+                  stroke-width: 12;
+                  transition: opacity 0.2s ease;
+                }
+                
+                .pie-bg {
+                  stroke: #f0f0f0;
+                }
+                
+                .pie-slice {
+                  cursor: pointer;
+                }
+                
+                .pie-slice:hover {
+                  opacity: 0.85;
+                }
+                
+                .pie-slice-1 {
+                  stroke: #1976d2;
+                }
+                
+                .pie-slice-2 {
+                  stroke: #ff9800;
+                }
+                .chart-center {
+                  position: absolute;
+                  top: 50%;
+                  left: 50%;
+                  transform: translate(-50%, -50%);
+                  text-align: center;
+                  pointer-events: none;
+                }
+                
+                .chart-percent {
+                  font-size: 28px;
+                  font-weight: 700;
+                  color: #1976d2;
+                  line-height: 1;
+                }
+                
+                .chart-label {
+                  font-size: 10px;
+                  color: #999;
+                  margin-top: 4px;
+                  font-weight: 500;
+                }
+                
+                .legend {
+                  width: 100%;
+                  display: flex;
+                  flex-direction: column;
+                  gap: 8px;
+                }
+                
+                .legend-item {
+                  display: flex;
+                  align-items: center;
+                  gap: 10px;
+                  padding: 8px 10px;
+                  background: #fafafa;
+                  border-radius: 6px;
+                  cursor: pointer;
+                  border: 1px solid transparent;
+                  transition: all 0.2s ease;
+                }
+                
+                .legend-item:hover,
+                .legend-item.active {
+                  background: #f0f7ff;
+                  border-color: #1976d2;
+                }
+                
+                .legend-color {
+                  width: 14px;
+                  height: 14px;
+                  border-radius: 3px;
+                  flex-shrink: 0;
+                }
+                
+                .legend-text {
+                  flex: 1;
+                  font-size: 12px;
+                  color: #1a1a1a;
+                  font-weight: 500;
+                }
+                
+                .legend-percent {
+                  font-size: 13px;
+                  font-weight: 700;
+                  color: #1976d2;
+                  flex-shrink: 0;
+                }
+              </style>
+              
+              <div class="modern-popup">
+                <div class="popup-header">
+                  <div class="popup-icon">1</div>
+                  <div class="popup-title">
+                    <h3>NCUE</h3>
+                    <p>Sampling Point</p>
+                  </div>
+                </div>
+                
+                <div class="chart-section">
+                  <div class="chart-title">Species Distribution</div>
+                  <div class="pie-chart-container">
+                    <div class="pie-chart" id="pie-chart-1">
+                      <svg viewBox="0 0 36 36">
+                        <circle class="pie-bg" cx="18" cy="18" r="15.915"/>
+                        <circle class="pie-slice pie-slice-1" cx="18" cy="18" r="15.915" 
+                          data-species="Acinetobacter" data-percent="97.06" data-color="#1976d2"
+                          style="stroke-dasharray: 97.06 100; stroke-dashoffset: 0;"/>
+                        <circle class="pie-slice pie-slice-2" cx="18" cy="18" r="15.915"
+                          data-species="Staphylococcus" data-percent="2.94" data-color="#ff9800"
+                          style="stroke-dasharray: 2.94 100; stroke-dashoffset: -97.06;"/>
+                      </svg>
+                      <div class="chart-center" id="chart-center-1">
+                        <div class="chart-percent">100%</div>
+                        <div class="chart-label">Total</div>
+                      </div>
+                    </div>
+                    <div class="legend">
+                      <div class="legend-item" data-index="0">
+                        <div class="legend-color" style="background: #1976d2;"></div>
+                        <div class="legend-text">Acinetobacter</div>
+                        <div class="legend-percent">97.06%</div>
+                      </div>
+                      <div class="legend-item" data-index="1">
+                        <div class="legend-color" style="background: #ff9800;"></div>
+                        <div class="legend-text">Staphylococcus</div>
+                        <div class="legend-percent">2.94%</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              `
+            )
+          )
+          .addTo(map.current);
+        // Attach interactions for first marker popup
+        marker.getPopup().on("open", () => {
+          try {
+            const popupEl = marker.getPopup().getElement();
+            if (!popupEl) return;
+            if (popupEl.dataset.pieListenersAttached === "true") return;
+            popupEl.dataset.pieListenersAttached = "true";
+            const pie = popupEl.querySelector("#pie-chart-1");
+            if (!pie) return;
+            const pieSlices = pie.querySelectorAll(".pie-slice");
+            const legendItems = popupEl.querySelectorAll(".legend-item");
+            const chartCenter = popupEl.querySelector("#chart-center-1");
+            const defaultContent = chartCenter?.innerHTML || "";
+            pieSlices.forEach((slice, index) => {
+              slice.addEventListener("mouseenter", function () {
+                const species = this.getAttribute("data-species");
+                const percent = this.getAttribute("data-percent");
+                const color = this.getAttribute("data-color");
+                chartCenter.innerHTML =
+                  '<div class="chart-percent" style="color: ' +
+                  color +
+                  ';">' +
+                  percent +
+                  "%</div>" +
+                  '<div class="chart-label">' +
+                  species +
+                  "</div>";
+                legendItems[index].classList.add("active");
+              });
+              slice.addEventListener("mouseleave", function () {
+                chartCenter.innerHTML = defaultContent;
+                legendItems.forEach((item) => item.classList.remove("active"));
+              });
+            });
+            legendItems.forEach((item, index) => {
+              item.addEventListener("mouseenter", function () {
+                const slice = pieSlices[index];
+                const species = slice.getAttribute("data-species");
+                const percent = slice.getAttribute("data-percent");
+                const color = slice.getAttribute("data-color");
+                chartCenter.innerHTML =
+                  '<div class="chart-percent" style="color: ' +
+                  color +
+                  ';">' +
+                  percent +
+                  "%</div>" +
+                  '<div class="chart-label">' +
+                  species +
+                  "</div>";
+                item.classList.add("active");
+                slice.style.filter = "brightness(1.1)";
+                slice.style.strokeWidth = "12";
+              });
+              item.addEventListener("mouseleave", function () {
+                chartCenter.innerHTML = defaultContent;
+                item.classList.remove("active");
+                pieSlices[index].style.filter = "";
+                pieSlices[index].style.strokeWidth = "";
+              });
+            });
+          } catch (err) {
+            console.error("Failed to attach popup interactions (1):", err);
+          }
+        });
+      });
+    };
+
+    map.current.once("style.load", onStyleLoad);
+  }, [mapStyle, isInitialized]);
+
+  // 處理圖層變更
+  const handleLayerChange = (layers) => {
+    console.log("handleLayerChange called with:", layers);
+
+    // 更新 state
+    setLayerStates(layers);
+    // 保存圖層狀態到 ref
+    layersRef.current = layers;
+
+    if (!map.current) {
+      console.log("Map not initialized");
+      return;
+    }
+
+    // 定義更新圖層的函數
+    const updateLayers = () => {
+      // 圖層ID映射
+      const layerMapping = {
+        sst: "sst-layer", // 溫度
+        lst: "lst-layer", // 降水
+        wind: "wind-layer", // 風速
+        waves: "waves-layer", // 雲層
+        chlorophyll: "chlorophyll-layer", // 氣壓
+      };
+
+      // 遍歷所有圖層並更新
+      Object.keys(layerMapping).forEach((key) => {
+        const layerIds = Array.isArray(layerMapping[key])
+          ? layerMapping[key]
+          : [layerMapping[key]];
+
+        layerIds.forEach((layerId) => {
+          const layerExists = map.current.getLayer(layerId);
+
+          if (layerExists && layers[key]) {
+            const visibility = layers[key].enabled ? "visible" : "none";
+            console.log(`Setting ${layerId} visibility to ${visibility}`);
+
+            try {
+              // 設置可見性
+              map.current.setLayoutProperty(layerId, "visibility", visibility);
+
+              // 設置透明度 (僅對 raster 圖層)
+              if (map.current.getLayer(layerId).type === "raster") {
+                map.current.setPaintProperty(
+                  layerId,
+                  "raster-opacity",
+                  layers[key].opacity / 100
+                );
+              }
+
+              // 設置箭頭透明度 (symbol 圖層)
+              if (map.current.getLayer(layerId).type === "symbol") {
+                map.current.setPaintProperty(
+                  layerId,
+                  "icon-opacity",
+                  layers[key].opacity / 100
+                );
+              }
+            } catch (error) {
+              console.error(`Error updating layer ${layerId}:`, error);
+            }
+          }
+        });
+      });
+
+      console.log("Layer status updated:", layers);
+    };
+
+    // 立即嘗試更新
+    if (map.current.isStyleLoaded()) {
+      updateLayers();
+    } else {
+      // 如果樣式還在加載,等待加載完成後更新
+      console.log("Map style not loaded yet, waiting...");
+      map.current.once("idle", updateLayers);
+    }
+  };
+
+  // 同步地圖圖層實際狀態到 state
+  const syncLayerStates = () => {
+    if (!map.current || !map.current.isStyleLoaded()) {
+      return;
+    }
+
+    const layerMapping = {
+      sst: "sst-layer",
+      lst: "lst-layer",
+      wind: "wind-layer",
+      waves: "waves-layer",
+      chlorophyll: "chlorophyll-layer",
+    };
+
+    const updatedStates = { ...layerStates };
+    let hasChanges = false;
+
+    Object.keys(layerMapping).forEach((key) => {
+      const layerId = layerMapping[key];
+      const layer = map.current.getLayer(layerId);
+
+      if (layer) {
+        const visibility = map.current.getLayoutProperty(layerId, "visibility");
+        const isVisible = visibility === "visible";
+
+        if (updatedStates[key].enabled !== isVisible) {
+          updatedStates[key] = {
+            ...updatedStates[key],
+            enabled: isVisible,
+          };
+          hasChanges = true;
+        }
+      }
+    });
+
+    if (hasChanges) {
+      setLayerStates(updatedStates);
+      console.log("Layer states synchronized from map:", updatedStates);
+    }
+  };
+
+  useEffect(() => {
+    if (map.current) return; // Avoid duplicate initialization
+
+    // 初始化地圖 - 使用亮色底圖
+    const initialStyle = "mapbox://styles/mapbox/streets-v12";
+
+    map.current = new mapboxgl.Map({
+      container: mapContainer.current,
+      style: initialStyle,
+      center: [lng, lat],
+      zoom: zoom,
+      minZoom: 1.5,
+      locale: { language: "zh-Hans" },
+      attributionControl: false, // 先移除預設的版權控制
+    });
+
+    // 添加自訂的緊湊版權控制器
+    map.current.addControl(
+      new mapboxgl.AttributionControl({
+        compact: true, // 緊湊模式:只顯示圖示
+      }),
+      "bottom-right"
+    );
+
+    // 添加導航控制器 (只顯示縮放按鈕,隱藏指南針)
+    map.current.addControl(
+      new mapboxgl.NavigationControl({ showCompass: false }),
+      "top-right"
+    );
+
+    // 自定義導航控制器樣式
+    const styleSheet = document.createElement("style");
+    styleSheet.textContent = `
+      /* 美化 Mapbox 縮放按鈕 */
+      .mapboxgl-ctrl-group {
+        background: white !important;
+        border-radius: 8px !important;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15) !important;
+        border: none !important;
+      }
+      
+      .mapboxgl-ctrl-group button {
+        width: 32px !important;
+        height: 32px !important;
+        border: none !important;
+        background-color: white !important;
+        transition: all 0.2s ease !important;
+      }
+      
+      .mapboxgl-ctrl-group button:hover {
+        background-color: #f5f5f5 !important;
+      }
+      
+      .mapboxgl-ctrl-group button:active {
+        background-color: #e0e0e0 !important;
+      }
+      
+      .mapboxgl-ctrl-group button + button {
+        border-top: 1px solid #e0e0e0 !important;
+      }
+      
+      .mapboxgl-ctrl-group button:first-child {
+        border-radius: 8px 8px 0 0 !important;
+      }
+      
+      .mapboxgl-ctrl-group button:last-child {
+        border-radius: 0 0 8px 8px !important;
+      }
+      
+      .mapboxgl-ctrl-icon {
+        opacity: 0.7 !important;
+      }
+      
+      .mapboxgl-ctrl-group button:hover .mapboxgl-ctrl-icon {
+        opacity: 1 !important;
+      }
+      
+      /* 版權資訊 - 緊湊模式樣式 */
+      .mapboxgl-ctrl-attrib {
+        font-size: 10px !important;
+        background-color: rgba(255, 255, 255, 0.8) !important;
+        border-radius: 4px !important;
+      }
+      
+      /* 緊湊模式 - 未展開狀態 */
+      .mapboxgl-ctrl-attrib.mapboxgl-compact {
+        min-height: 24px !important;
+        padding: 0 !important;
+        background-color: rgba(255, 255, 255, 0.8) !important;
+        border-radius: 4px !important;
+      }
+      
+      /* 緊湊模式 - 展開狀態 */
+      .mapboxgl-ctrl-attrib.mapboxgl-compact-show {
+        padding: 4px 28px 4px 8px !important;
+        background-color: rgba(255, 255, 255, 0.95) !important;
+      }
+      
+      .mapboxgl-ctrl-attrib-button {
+        width: 24px !important;
+        height: 24px !important;
+        background-color: transparent !important;
+        border-radius: 4px !important;
+        cursor: pointer !important;
+      }
+      
+      .mapboxgl-ctrl-attrib-button:hover {
+        background-color: rgba(0, 0, 0, 0.05) !important;
+      }
+      
+      .mapboxgl-ctrl-attrib-inner {
+        font-size: 10px !important;
+        line-height: 1.4 !important;
+      }
+      
+      .mapboxgl-ctrl-attrib a {
+        font-size: 10px !important;
+        color: rgba(0, 0, 0, 0.75) !important;
+        text-decoration: none !important;
+      }
+      
+      .mapboxgl-ctrl-attrib a:hover {
+        color: rgba(0, 0, 0, 0.9) !important;
+        text-decoration: underline !important;
+      }
+      
+      /* 現代化彈出視窗樣式 */
+      .mapboxgl-popup {
+        z-index: 10;
+      }
+      
+      .mapboxgl-popup-content {
+        padding: 0 !important;
+        border-radius: 12px !important;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.15) !important;
+        overflow: hidden;
+      }
+      
+      .mapboxgl-popup-close-button {
+        width: 28px !important;
+        height: 28px !important;
+        font-size: 20px !important;
+        color: #999 !important;
+        padding: 0 !important;
+        right: 8px !important;
+        top: 8px !important;
+        border-radius: 6px !important;
+        transition: all 0.2s ease !important;
+      }
+      
+      .mapboxgl-popup-close-button:hover {
+        background-color: #f5f5f5 !important;
+        color: #333 !important;
+      }
+      
+      .mapboxgl-popup-tip {
+        border-top-color: white !important;
+        border-bottom-color: white !important;
+      }
+    `;
+    document.head.appendChild(styleSheet);
+
+    // 添加比例尺
+    map.current.addControl(
+      new mapboxgl.ScaleControl({
+        maxWidth: 100,
+        unit: "metric",
+      }),
+      "bottom-left"
+    );
+
+    // Add layers and markers when map is loaded
+    map.current.on("load", () => {
+      console.log("🗺️ Map loaded, waiting for idle...");
+
+      // Wait for map to be fully idle before adding layers
+      map.current.once("idle", () => {
+        console.log("Map is idle, checking style load status...");
+        console.log("Style loaded?", map.current.isStyleLoaded());
+
+        // Force wait a bit more for style to be fully ready
+        setTimeout(() => {
+          console.log("Adding initial layers now...");
+          console.log(
+            "Style loaded after timeout?",
+            map.current.isStyleLoaded()
+          );
+
+          // Add weather layers (all disabled by default)
+          // Layer state will be automatically applied inside addWeatherLayers()
+          addWeatherLayers();
+
+          // Mark as initialized
+          setIsInitialized(true);
+          console.log(
+            "Initial setup complete - BioSample markers will be added when data is loaded"
+          );
+        }, 500);
+      });
+    });
+
+    // Cleanup function
+    return () => {
+      if (map.current) {
+        map.current.remove();
+        map.current = null;
+      }
+    };
+  }, []);
+
+  return (
+    <Container maxWidth={false} disableGutters sx={{ py: 4, px: 3 }}>
+      <Box sx={{ width: "100%" }}>
+        {/* Modern Control Bar */}
+        <Box
+          sx={{
+            mb: 3,
+            backgroundColor: "white",
+            borderRadius: "12px",
+            padding: "16px 20px",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 2,
+          }}
+        >
+          {/* Left: Title */}
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+            <Box
+              sx={{
+                width: "28px",
+                height: "28px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <MapIcon sx={{ fontSize: 28, color: "#1976d2" }} />
+            </Box>
+            <Box>
+              <Typography
+                variant="h5"
+                sx={{
+                  fontWeight: 700,
+                  color: "#1976d2",
+                  lineHeight: 1.2,
+                }}
+              >
+                {t("map.title")}
+              </Typography>
+              <Typography
+                variant="caption"
+                sx={{ color: "#999", fontSize: "11px" }}
+              >
+                {t("map.subtitle")}
+              </Typography>
+            </Box>
+          </Box>
+
+          {/* Center: Time Display - HIDDEN */}
+          <Box
+            sx={{
+              display: "none",
+              alignItems: "center",
+              gap: 1,
+              px: 2,
+              py: 1,
+              backgroundColor: "#f5f5f5",
+              borderRadius: "8px",
+            }}
+          >
+            <AccessTimeIcon sx={{ fontSize: 18, color: "#666" }} />
+            <Box>
+              <Typography
+                variant="caption"
+                sx={{ fontSize: "10px", color: "#999" }}
+              >
+                {dataMode === "live"
+                  ? t("map.todayData")
+                  : t("map.historicalData")}
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{ fontSize: "12px", fontWeight: 600, color: "#333" }}
+              >
+                {dataMode === "live"
+                  ? new Date().toLocaleString(
+                      i18n.language === "zh" ? "zh-TW" : "en-US",
+                      {
+                        year: "numeric",
+                        month: "2-digit",
+                        day: "2-digit",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hour12: false,
+                      }
+                    )
+                  : selectedDate
+                  ? new Date(selectedDate).toLocaleDateString(
+                      i18n.language === "zh" ? "zh-TW" : "en-US",
+                      {
+                        year: "numeric",
+                        month: "2-digit",
+                        day: "2-digit",
+                      }
+                    )
+                  : t("map.noDateSelected")}
+              </Typography>
+            </Box>
+          </Box>
+
+          {/* Data Mode Selector: 即時 | 搜尋 | 日期 - HIDDEN */}
+          <Box sx={{ display: "none" }}>
+            <DataModeSelector
+              currentMode={dataMode}
+              onModeChange={handleModeChange}
+            />
+          </Box>
+
+          {/* Right: Map Style Toggle & Layer Control */}
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            {/* Map Style Toggle Switch */}
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                backgroundColor: "#f0f0f0",
+                borderRadius: "20px",
+                padding: "3px",
+                position: "relative",
+              }}
+            >
+              <Box
+                onClick={() => setMapStyle("streets")}
+                sx={{
+                  position: "relative",
+                  zIndex: 1,
+                  padding: "6px 14px",
+                  borderRadius: "17px",
+                  cursor: "pointer",
+                  fontSize: "12px",
+                  fontWeight: 600,
+                  color: mapStyle === "streets" ? "white" : "#666",
+                  transition: "color 0.2s",
+                  userSelect: "none",
+                }}
+              >
+                {t("map.mapStyle.street")}
+              </Box>
+              <Box
+                onClick={() => setMapStyle("satellite")}
+                sx={{
+                  position: "relative",
+                  zIndex: 1,
+                  padding: "6px 14px",
+                  borderRadius: "17px",
+                  cursor: "pointer",
+                  fontSize: "12px",
+                  fontWeight: 600,
+                  color: mapStyle === "satellite" ? "white" : "#666",
+                  transition: "color 0.2s",
+                  userSelect: "none",
+                }}
+              >
+                {t("map.mapStyle.satellite")}
+              </Box>
+              {/* Sliding background */}
+              <Box
+                sx={{
+                  position: "absolute",
+                  top: "3px",
+                  left: mapStyle === "streets" ? "3px" : "50%",
+                  width: "calc(50% - 3px)",
+                  height: "calc(100% - 6px)",
+                  backgroundColor: "#1976d2",
+                  borderRadius: "17px",
+                  transition: "left 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                  zIndex: 0,
+                }}
+              />
+            </Box>
+
+            {/* Layer Control Button - HIDDEN */}
+            <Box
+              data-layer-toggle
+              onClick={() => setExpanded(!expanded)}
+              sx={{
+                display: "none",
+                alignItems: "center",
+                gap: 1,
+                px: 2,
+                py: 1,
+                backgroundColor: expanded ? "#1976d2" : "#f5f5f5",
+                color: expanded ? "white" : "#666",
+                borderRadius: "8px",
+                cursor: "pointer",
+                transition: "all 0.2s",
+                userSelect: "none",
+                "&:hover": {
+                  backgroundColor: expanded ? "#1565c0" : "#e0e0e0",
+                },
+              }}
+            >
+              <LayersIcon sx={{ fontSize: 18 }} />
+              <Typography sx={{ fontSize: "12px", fontWeight: 600 }}>
+                {t("map.layers")}
+              </Typography>
+              {expanded ? (
+                <ChevronLeftIcon sx={{ fontSize: 18 }} />
+              ) : (
+                <ChevronRightIcon sx={{ fontSize: 18 }} />
+              )}
+            </Box>
+          </Box>
+        </Box>
+
+        {/* Map Container & Controls */}
+        <Box sx={{ position: "relative", width: "100%" }}>
+          {/* 地圖 */}
+          <Box
+            ref={mapContainer}
+            sx={{
+              width: "100%",
+              height: "calc(100vh - 250px)",
+              borderRadius: "8px",
+              overflow: "hidden",
+              boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+              border: "2px solid #e0e0e0",
+            }}
+          />
+
+          {/* 圖例 - 左上角 */}
+          <Box
+            sx={{
+              position: "absolute",
+              top: "16px",
+              left: "16px",
+              backgroundColor: "white",
+              borderRadius: "8px",
+              padding: "12px 14px",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+              minWidth: "140px",
+              zIndex: 1,
+            }}
+          >
+            <Typography
+              variant="subtitle2"
+              sx={{
+                fontWeight: 700,
+                color: "#333",
+                marginBottom: "10px",
+                fontSize: "13px",
+              }}
+            >
+              BioSample Count
+            </Typography>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+              {/* 很多 (76-100%) */}
+              <Box sx={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <Box
+                  sx={{
+                    width: "18px",
+                    height: "18px",
+                    backgroundColor: "#9c27b0",
+                    borderRadius: "50%",
+                    flexShrink: 0,
+                    border: "2px solid white",
+                    boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
+                  }}
+                />
+                <Typography
+                  sx={{ fontSize: "11px", color: "#666", fontWeight: 500 }}
+                >
+                  Very High
+                </Typography>
+              </Box>
+
+              {/* 多 (51-75%) */}
+              <Box sx={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <Box
+                  sx={{
+                    width: "18px",
+                    height: "18px",
+                    backgroundColor: "#f44336",
+                    borderRadius: "50%",
+                    flexShrink: 0,
+                    border: "2px solid white",
+                    boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
+                  }}
+                />
+                <Typography
+                  sx={{ fontSize: "11px", color: "#666", fontWeight: 500 }}
+                >
+                  High
+                </Typography>
+              </Box>
+
+              {/* 中 (26-50%) */}
+              <Box sx={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <Box
+                  sx={{
+                    width: "18px",
+                    height: "18px",
+                    backgroundColor: "#ff9800",
+                    borderRadius: "50%",
+                    flexShrink: 0,
+                    border: "2px solid white",
+                    boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
+                  }}
+                />
+                <Typography
+                  sx={{ fontSize: "11px", color: "#666", fontWeight: 500 }}
+                >
+                  Medium
+                </Typography>
+              </Box>
+
+              {/* 少 (0-25%) */}
+              <Box sx={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <Box
+                  sx={{
+                    width: "18px",
+                    height: "18px",
+                    backgroundColor: "#4caf50",
+                    borderRadius: "50%",
+                    flexShrink: 0,
+                    border: "2px solid white",
+                    boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
+                  }}
+                />
+                <Typography
+                  sx={{ fontSize: "11px", color: "#666", fontWeight: 500 }}
+                >
+                  Low
+                </Typography>
+              </Box>
+            </Box>
+          </Box>
+
+          {/* Integrated Layer Control Panel (Right Side) */}
+          {expanded && (
+            <Box
+              ref={layerPanelRef}
+              sx={{
+                position: "absolute",
+                top: 0,
+                right: 0,
+                width: "320px",
+                maxHeight: "100%",
+                backgroundColor: "white",
+                borderRadius: "8px",
+                boxShadow: "0 4px 16px rgba(0,0,0,0.15)",
+                overflow: "hidden",
+                zIndex: 1000,
+                animation: "slideIn 0.3s ease-out",
+                "@keyframes slideIn": {
+                  from: {
+                    opacity: 0,
+                    transform: "translateX(20px)",
+                  },
+                  to: {
+                    opacity: 1,
+                    transform: "translateX(0)",
+                  },
+                },
+              }}
+            >
+              <LayerControl
+                layers={layerStates}
+                onLayerChange={handleLayerChange}
+              />
+            </Box>
+          )}
+
+          {/* Temperature Legend (Top Left) - HIDDEN */}
+          <Box
+            sx={{
+              display: "none",
+              position: "absolute",
+              top: 10,
+              left: 10,
+              backgroundColor: "rgba(255, 255, 255, 0.9)",
+              padding: "8px 12px",
+              borderRadius: "6px",
+              fontSize: "10px",
+              zIndex: 1000,
+              boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+            }}
+          >
+            {/* Temperature Scale */}
+            <div
+              style={{
+                background:
+                  "linear-gradient(to right, #0000FF, #00FFFF, #00FF00, #FFFF00, #FF0000)",
+                height: "6px",
+                width: "100px",
+                borderRadius: "3px",
+                marginBottom: "3px",
+              }}
+            ></div>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                fontSize: "8px",
+                color: "#666",
+              }}
+            >
+              <span>{t("map.legend.cold")}</span>
+              <span>{t("map.legend.hot")}</span>
+            </div>
+          </Box>
+        </Box>
+
+        {/* Timeline Controls (僅在歷史資料模式顯示) */}
+        {dataMode === "historical" && (
+          <TimelineControls
+            currentFrame={currentFrame}
+            totalFrames={totalFrames}
+            isPlaying={isPlaying}
+            timestamp={timestamp}
+            onPlay={play}
+            onPause={pause}
+            onStop={stop}
+            onNext={nextFrame}
+            onPrevious={previousFrame}
+            onFrameChange={goToFrame}
+            dateRange={
+              availableDates.length > 0
+                ? {
+                    start: availableDates[0],
+                    end: availableDates[availableDates.length - 1],
+                  }
+                : null
+            }
+          />
+        )}
+
+        {/* Sample Search Dialog */}
+        <SampleSearchDialog
+          open={searchDialogOpen}
+          onClose={() => setSearchDialogOpen(false)}
+          onSearch={handleSampleSearch}
+        />
+
+        {/* Date Picker Dialog */}
+        <DatePickerDialog
+          open={datePickerOpen}
+          onClose={() => setDatePickerOpen(false)}
+          onDateSelect={handleDateSelect}
+        />
+      </Box>
+    </Container>
+  );
+};
+
+export default Map;
