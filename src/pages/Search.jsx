@@ -100,7 +100,7 @@ const Search = () => {
           item.files.some(
             (f) =>
               f.完整檔名 &&
-              f.完整檔名.toLowerCase().includes(searchQuery.toLowerCase()),
+              f.完整檔名.toLowerCase().includes(searchQuery.toLowerCase())
           ));
 
       const matchesOrganization =
@@ -112,7 +112,7 @@ const Search = () => {
         (item.geo_loc_name && item.geo_loc_name.includes(filterCountry)) ||
         (item["geographic location (country and/or sea)"] &&
           item["geographic location (country and/or sea)"].includes(
-            filterCountry,
+            filterCountry
           ));
 
       return matchesSearch && matchesOrganization && matchesCountry;
@@ -122,7 +122,7 @@ const Search = () => {
   // 獲取所有唯一的組織
   const organizations = useMemo(() => {
     const orgs = new Set(
-      groupedData.map((s) => s.organization).filter(Boolean),
+      groupedData.map((s) => s.organization).filter(Boolean)
     );
     return Array.from(orgs).sort();
   }, [groupedData]);
@@ -416,7 +416,7 @@ const Search = () => {
                                     >
                                       {file.檔案大小
                                         ? parseFloat(
-                                            file.檔案大小,
+                                            file.檔案大小
                                           ).toLocaleString()
                                         : "-"}
                                     </Typography>
