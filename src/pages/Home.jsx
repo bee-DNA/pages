@@ -97,13 +97,13 @@ const Home = () => {
           Bioinformatics Analysis Platform
         </Typography>
 
-        {/* Chat Input Section */}
+        {/* Chat Input Section - HIDDEN */}
         <Paper
           component="form"
           onSubmit={handleChatSubmit}
           sx={{
             p: "2px 4px",
-            display: "flex",
+            display: "none",
             alignItems: "center",
             width: "100%",
             maxWidth: 600,

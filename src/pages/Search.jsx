@@ -51,7 +51,8 @@ const Search = () => {
         }
 
         const csvText = await response.text();
-        const workbook = XLSX.read(csvText, { type: "string" });
+        // raw: 保留 CSV 原始文字，避免日期被轉成 Excel 序號（如 2017/9/1 → 42979）
+        const workbook = XLSX.read(csvText, { type: "string", raw: true });
         const firstSheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[firstSheetName];
         const csvData = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
